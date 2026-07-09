@@ -1,36 +1,44 @@
 #!/usr/bin/env python3
-# /// script
-# dependencies = ["ddgs"]
-# ///
 """
-统一政策检索入口，零 API Key。内部自动编排两层检索，调用方无需关心分层：
+统一政策检索入口，纯标准库、零 API Key、无境外出网。两层检索并行编排：
 
-  官网直连  抓 departments.py 里核实过的服务端渲染列表页，正则提取候选文档，最快最准。
-  网页检索  官网直连候选不足、或该部委未维护抓取规则时触发，ddgs 多引擎聚合，
-            用 site: 限定域名保证来源权威。
+  政策文件库  国务院政策文件库检索接口，覆盖全部部委，支持关键词检索，附带发文机关与文号。
+  官网列表页  部委官网最新文件列表，无关键词检索能力，但能捞到政策文件库不收录的
+              征求意见稿与通报。仅 ndrc / miit / mem 配置了抓取规则。
+
+两层各自最多返回 max_results 条，互不挤占。任一层失败都不会中断另一层。
 
 CLI:
   uv run scripts/search.py --dept ndrc,miit,mem --keywords "节能减排" --max-results 5
   uv run scripts/search.py --dept mee --keywords "碳排放 交易" --timelimit m
 
-输出 JSON: [{dept, dept_name, title, url, date, source_tier}]
-source_tier 取值 official_site 或 web_search。
+输出 JSON: {"results": [...], "errors": [...]}
+  results[] 含 dept, dept_name, title, url, date, puborg, pcode, source_tier
+            source_tier 取值 policy_library 或 official_site
+  errors[]  含 dept, tier, kind, detail, site_domain
+            kind 取值 no_match（该层无匹配）、network_unreachable、http_error、invalid_response
+            除 no_match 外均表示该层不可用，调用方应改用外部网页搜索工具。
 """
 
 import argparse
 import concurrent.futures
+import datetime
 import json
-import re
 import sys
-from urllib.parse import urljoin, urlparse
+import urllib.error
+import urllib.parse
+from urllib.parse import urljoin
 
-from departments import ASSOCIATED_DOMAINS, DEPARTMENTS, resolve_display_name, resolve_site_domain
-from fetch import fetch_raw
+from departments import DEPARTMENTS, POLICY_LIBRARY_URL, resolve_display_name, resolve_site_domain
+from fetch import fetch_raw, strip_tags
 
-# 政务网站文档 URL 普遍自带 tYYYYMMDD_编号，可反推发布日期
-_URL_DATE_RE = re.compile(r"t(\d{8})_\d+\.s?html")
+# 默认 all：现行有效的政策不因发布年限而失效，按发布时间硬筛会丢掉仍在执行的旧文件。
+# 结果本就按发布时间倒序，只在用户明确限定时间范围时才收窄。
+TIMELIMIT_CHOICES = ("d", "w", "m", "y", "all")
+_TIMELIMIT_DAYS = {"d": 1, "w": 7, "m": 31, "y": 366}
 
-TIMELIMIT_CHOICES = ("d", "w", "m", "y")
+# 接口不支持按发文机关过滤，只能多取一页再在客户端筛
+_LIBRARY_PAGE_SIZE = 50
 
 
 def _normalize_date(date_hint: str | None) -> str | None:
@@ -43,127 +51,188 @@ def _normalize_date(date_hint: str | None) -> str | None:
     return None
 
 
-def official_site_candidates(dept_code: str, keywords: list[str]) -> list[dict]:
-    """抓部委官网列表页，正则提取候选文档，按关键词过滤标题。"""
-    source = DEPARTMENTS.get(dept_code)
-    if source is None:
-        return []
+def _classify(exc: Exception) -> tuple[str, str]:
+    """把异常归类为 errors[].kind，供调用方决定是重试关键词还是改用外部搜索。"""
+    if isinstance(exc, urllib.error.HTTPError):
+        return "http_error", f"HTTP {exc.code}"
+    if isinstance(exc, OSError):  # URLError / socket.timeout / ConnectionError 均在此
+        return "network_unreachable", str(getattr(exc, "reason", exc))
+    return "invalid_response", f"{type(exc).__name__}: {exc}"
 
-    try:
-        html_text = fetch_raw(source.listing_url)
-    except Exception as e:
-        print(f"  [{dept_code}] 官网列表页抓取失败，转网页检索: {e}", file=sys.stderr)
-        return []
 
+def _error(dept_code: str, tier: str, kind: str, detail: str) -> dict:
+    return {
+        "dept": dept_code,
+        "tier": tier,
+        "kind": kind,
+        "detail": detail,
+        "site_domain": resolve_site_domain(dept_code),
+    }
+
+
+def policy_library_candidates(dept_code: str, keywords: list[str], max_results: int, timelimit: str) -> list[dict]:
+    """检索国务院政策文件库。searchfield=title 限定标题匹配，否则全文检索会淹没在无关结果里。"""
+    dept = DEPARTMENTS[dept_code]
+    query = urllib.parse.urlencode({
+        "t": dept.library_type,
+        "q": " ".join(keywords),
+        "p": 1,
+        "n": _LIBRARY_PAGE_SIZE,
+        "timetype": "timeqb",
+        "searchfield": "title",
+        "sort": "pubtime",
+    })
+    payload = json.loads(fetch_raw(f"{POLICY_LIBRARY_URL}?{query}"))
+    items = (payload.get("searchVO") or {}).get("listVO") or []
+
+    days = _TIMELIMIT_DAYS.get(timelimit)
+    earliest = datetime.date.today() - datetime.timedelta(days=days) if days else None
     candidates = []
-    for href, date_hint, title in source.link_pattern.findall(html_text):
+    for item in items:
+        url = item.get("url") or ""
+        pubtime = item.get("pubtime")
+        if not url or not pubtime:
+            continue
+
+        published = datetime.date.fromtimestamp(pubtime / 1000)
+        if earliest and published < earliest:
+            continue
+
+        puborg = item.get("puborg") or ""
+        if dept.puborg_keys and not any(key in puborg for key in dept.puborg_keys):
+            continue
+
+        candidates.append({
+            "dept": dept_code,
+            "dept_name": dept.name,
+            "title": strip_tags(item.get("title") or ""),
+            "url": url,
+            "date": published.isoformat(),
+            "puborg": puborg,
+            "pcode": item.get("pcode") or "",
+            "source_tier": "policy_library",
+        })
+        if len(candidates) >= max_results:
+            break
+    return candidates
+
+
+def official_site_candidates(dept_code: str, keywords: list[str], max_results: int) -> list[dict]:
+    """抓部委官网列表页，正则提取候选文档，按关键词过滤标题。"""
+    dept = DEPARTMENTS[dept_code]
+    if dept.listing is None:
+        return []
+
+    html_text = fetch_raw(dept.listing.url)
+    candidates = []
+    for href, date_hint, title in dept.listing.link_pattern.findall(html_text):
         title = title.strip()
         if keywords and not any(kw in title for kw in keywords):
             continue
         candidates.append({
             "dept": dept_code,
-            "dept_name": source.name,
+            "dept_name": dept.name,
             "title": title,
-            "url": urljoin(source.listing_url, href),
+            "url": urljoin(dept.listing.url, href),
             "date": _normalize_date(date_hint),
+            "puborg": "",
+            "pcode": "",
             "source_tier": "official_site",
         })
+        if len(candidates) >= max_results:
+            break
     return candidates
 
 
-def web_search_candidates(dept_code: str, keywords: list[str], max_results: int, timelimit: str) -> list[dict]:
-    """ddgs 多引擎兜底检索，用 site: 限定域名保证来源权威。"""
-    from ddgs import DDGS
-
-    domain = resolve_site_domain(dept_code)
-    query = " ".join(keywords)
-    if domain:
-        query = f"{query} site:{domain}"
-
+def _run_tier(dept_code: str, tier: str, runner, errors: list[dict]) -> list[dict]:
     try:
-        results = DDGS().text(query, backend="auto", timelimit=timelimit, max_results=max_results)
-    except Exception as e:
-        print(f"  [{dept_code}] 网页检索失败: {e}", file=sys.stderr)
+        found = runner()
+    except Exception as exc:
+        kind, detail = _classify(exc)
+        errors.append(_error(dept_code, tier, kind, detail))
+        print(f"  [{dept_code}] {tier} 失败（{kind}）: {detail}", file=sys.stderr)
         return []
 
-    candidates = []
-    for r in results:
-        href = r.get("href", "")
-        title = r.get("title", "").strip()
-        # 部分聚合引擎会返回埋点跳转链接、绕过 site: 的站外结果，或直接落到首页，逐一过滤
-        if not href.startswith("http") or not title:
-            continue
-        if domain and domain not in href:
-            continue
-        if urlparse(href).path in ("", "/"):
-            continue
-        candidates.append({
-            "dept": dept_code,
-            "dept_name": resolve_display_name(dept_code),
-            "title": title,
-            "url": href,
-            "date": _normalize_date(m.group(1)) if (m := _URL_DATE_RE.search(href)) else None,
-            "source_tier": "web_search",
-        })
-    return candidates
+    if not found:
+        errors.append(_error(dept_code, tier, "no_match", "该层无匹配结果"))
+    return found
 
 
-def search_department(dept_code: str, keywords: list[str], max_results: int, timelimit: str) -> list[dict]:
+def search_department(dept_code: str, keywords: list[str], max_results: int, timelimit: str) -> tuple[list[dict], list[dict]]:
     print(f"[{dept_code}] {resolve_display_name(dept_code)}...", file=sys.stderr)
+    errors: list[dict] = []
 
-    candidates = official_site_candidates(dept_code, keywords)
-    if len(candidates) < max_results:
-        candidates += web_search_candidates(dept_code, keywords, max_results - len(candidates), timelimit)
+    candidates = _run_tier(
+        dept_code, "policy_library", errors=errors,
+        runner=lambda: policy_library_candidates(dept_code, keywords, max_results, timelimit),
+    )
+    if DEPARTMENTS[dept_code].listing is not None:
+        candidates += _run_tier(
+            dept_code, "official_site", errors=errors,
+            runner=lambda: official_site_candidates(dept_code, keywords, max_results),
+        )
 
     print(f"[{dept_code}] {len(candidates)} 条候选", file=sys.stderr)
-    return candidates[:max_results]
+    return candidates, errors
 
 
-def parallel_search(dept_codes: list[str], keywords: list[str], max_results: int, timelimit: str, max_workers: int) -> list[dict]:
+def parallel_search(dept_codes: list[str], keywords: list[str], max_results: int, timelimit: str, max_workers: int) -> dict:
     print(f"并行检索 {len(dept_codes)} 个部委（max_workers={max_workers}）...", file=sys.stderr)
+    all_results: list[dict] = []
+    all_errors: list[dict] = []
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
             executor.submit(search_department, code, keywords, max_results, timelimit): code
             for code in dept_codes
         }
-        all_results: list[dict] = []
         for future in concurrent.futures.as_completed(futures):
             code = futures[future]
             try:
-                all_results.extend(future.result())
-            except Exception as e:
-                print(f"[{code}] 检索异常: {e}", file=sys.stderr)
+                results, errors = future.result()
+            except Exception as exc:
+                kind, detail = _classify(exc)
+                all_errors.append(_error(code, "search", kind, detail))
+                print(f"[{code}] 检索异常: {detail}", file=sys.stderr)
+                continue
+            all_results.extend(results)
+            all_errors.extend(errors)
 
     deduped: dict[str, dict] = {}
     for item in all_results:
         deduped.setdefault(item["url"], item)
-    return list(deduped.values())
+    return {"results": list(deduped.values()), "errors": all_errors}
 
 
 def main() -> None:
-    known_codes = ", ".join(sorted({*DEPARTMENTS, *ASSOCIATED_DOMAINS}))
-    parser = argparse.ArgumentParser(description="统一政策检索，官网直连优先，网页检索兜底")
-    parser.add_argument(
-        "--dept", "-d", required=True,
-        help=f"逗号分隔的部委代码。已知代码: {known_codes}；未知代码仍可用，仅走网页检索",
-    )
+    known_codes = ", ".join(sorted(DEPARTMENTS))
+    parser = argparse.ArgumentParser(description="统一政策检索，政策文件库 + 部委官网列表页")
+    parser.add_argument("--dept", "-d", required=True, help=f"逗号分隔的部委代码，可选: {known_codes}")
     parser.add_argument("--keywords", "-k", default="", help="检索关键词，空格分隔多个词")
-    parser.add_argument("--max-results", "-n", type=int, default=5, help="每个部委返回的最大候选数")
+    parser.add_argument("--max-results", "-n", type=int, default=5, help="每个部委每层返回的最大候选数")
     parser.add_argument(
-        "--timelimit", "-t", default="y", choices=TIMELIMIT_CHOICES,
-        help="网页检索的时间范围: d 天 / w 周 / m 月 / y 年",
+        "--timelimit", "-t", default="all", choices=TIMELIMIT_CHOICES,
+        help="政策文件库的发布时间范围: d 天 / w 周 / m 月 / y 年 / all 不限（默认，含仍现行的旧政策）",
     )
     parser.add_argument("--max-workers", "-w", type=int, default=5)
     args = parser.parse_args()
 
     dept_codes = [c.strip() for c in args.dept.split(",") if c.strip()]
-    keywords = args.keywords.split()
+    unknown = [c for c in dept_codes if c not in DEPARTMENTS]
+    if unknown:
+        parser.error(f"未知部委代码 {', '.join(unknown)}；可选: {known_codes}")
 
-    results = parallel_search(dept_codes, keywords, args.max_results, args.timelimit, args.max_workers)
+    payload = parallel_search(dept_codes, args.keywords.split(), args.max_results, args.timelimit, args.max_workers)
 
-    official = sum(1 for r in results if r["source_tier"] == "official_site")
-    print(f"共 {len(results)} 条候选（官网直连 {official} / 网页搜索 {len(results) - official}）", file=sys.stderr)
-    print(json.dumps(results, ensure_ascii=False, indent=2))
+    results = payload["results"]
+    library = sum(1 for r in results if r["source_tier"] == "policy_library")
+    blocked = sum(1 for e in payload["errors"] if e["kind"] != "no_match")
+    print(
+        f"共 {len(results)} 条候选（政策文件库 {library} / 官网列表页 {len(results) - library}），"
+        f"{blocked} 层检索不可用",
+        file=sys.stderr,
+    )
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
