@@ -2,9 +2,10 @@
 """
 抓取政务网页并清洗为正文文本。纯标准库，零外部依赖。
 
-对外暴露两层能力：
-  fetch_raw(url)  返回解码后的原始 HTML（search.py 用它正则提取列表页链接）
-  fetch_one(url)  抓取 + 清洗为正文（供政策分析使用）
+对外暴露三层能力：
+  fetch_raw(url)   返回解码后的原始响应体（search.py 用它取列表页 HTML 与检索接口 JSON）
+  strip_tags(s)    去掉标签，保留纯文本
+  fetch_one(url)   抓取 + 清洗为正文（供政策分析使用）
 
 CLI:
   uv run scripts/fetch.py --urls '["https://...", "https://..."]'
@@ -74,8 +75,13 @@ def _decode_text(data: bytes, content_type: str) -> str:
     return data.decode("utf-8", errors="replace")
 
 
+def strip_tags(text: str) -> str:
+    """去掉标签并反转义实体，用于清洗标题与检索接口返回的 <em> 高亮片段。"""
+    return html.unescape(_TAG_RE.sub("", text)).strip()
+
+
 def fetch_raw(url: str, timeout: int = 15) -> str:
-    """抓取并返回解码后的原始 HTML（保留标签），TLS 证书始终校验。"""
+    """抓取并返回解码后的原始响应体（保留标签），TLS 证书始终校验。"""
     req = urllib.request.Request(url, headers={
         "User-Agent": USER_AGENT,
         "Accept": "text/html,application/xhtml+xml,*/*",
@@ -117,12 +123,10 @@ def clean_html(html_text: str) -> str:
 
 
 def extract_title(html_text: str) -> str:
-    match = _TITLE_RE.search(html_text)
-    if match:
-        return _TAG_RE.sub("", match.group(1)).strip()
-    match = _H1_RE.search(html_text)
-    if match:
-        return _TAG_RE.sub("", match.group(1)).strip()
+    for pattern in (_TITLE_RE, _H1_RE):
+        match = pattern.search(html_text)
+        if match:
+            return strip_tags(match.group(1))
     return ""
 
 
