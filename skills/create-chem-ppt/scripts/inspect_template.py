@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
+# /// script
+# dependencies = ["python-pptx>=1.0"]
+# ///
 """检查 .pptx 模板：列出母版、版式、占位符、主题色与字体。
 
 用法：
-    python scripts/inspect_template.py ppt/中石化PPT模板-1.pptx
+    uv run scripts/inspect_template.py ppt/中石化PPT模板-1.pptx
 """
 from __future__ import annotations
 

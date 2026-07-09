@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""按「主题 + 总页数」自动分配章节，生成大纲骨架 JSON。
+"""按「主题 + 总页数」自动分配章节，生成大纲骨架 JSON。纯标准库，零外部依赖。
 
 用法：
-    python scripts/make_outline.py --template 安全生产培训 --pages 12 \
+    uv run scripts/make_outline.py --template 安全生产培训 --pages 12 \
         --title "动火作业安全" --sections "风险辨识,作业票证,监护要求,应急处置" > outline.json
 
 生成的骨架含封面/目录/分隔/要点/封底占位，由模型/人工填充正文，再交给 build_pptx.py。

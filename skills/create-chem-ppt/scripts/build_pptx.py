@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
+# /// script
+# dependencies = ["python-pptx>=1.0"]
+# ///
 """化工行业 PPT 渲染器：JSON 大纲 -> 可编辑 .pptx。
 
 用法：
-    python scripts/build_pptx.py --outline outline.json --out 输出.pptx
-    python scripts/build_pptx.py --outline outline.json            # 自动按主题命名
+    uv run scripts/build_pptx.py --outline outline.json --out 输出.pptx
+    uv run scripts/build_pptx.py --outline outline.json            # 自动按主题命名
 
 大纲 schema 见 references/outline-schema.md。模板色系见 templates/themes.json。
 所有页面均用 python-pptx 程序化绘制，输出为标准 OOXML，可在 PowerPoint/WPS 二次编辑。

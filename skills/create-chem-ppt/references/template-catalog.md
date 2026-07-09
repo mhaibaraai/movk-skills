@@ -25,7 +25,7 @@
 - `assets/logos/` — 放企业 logo（png/jpg），用 `--logo` 或大纲 `logo` 引用。
 
 ```bash
-python scripts/build_pptx.py --outline outline.json \
+uv run scripts/build_pptx.py --outline outline.json \
   --base assets/sinopec-base.pptx --logo assets/logos/sinopec.png
 ```
 
