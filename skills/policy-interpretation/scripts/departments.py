@@ -16,8 +16,14 @@
               8 位 YYYYMMDD 或 4 位 YYYY。
 
 site_domain 不参与脚本检索，在检索失败时回传给调用方，供其构造 site: 限定的网页搜索。
+
+CLI:
+  uv run scripts/departments.py --list          打印全部部委
+  uv run scripts/departments.py --show ndrc     打印单个部委详情
 """
 
+import argparse
+import json
 import re
 from dataclasses import dataclass
 
@@ -118,3 +124,34 @@ def resolve_display_name(dept_code: str) -> str:
     """返回中文显示名，未知代码原样返回代码本身。"""
     dept = DEPARTMENTS.get(dept_code)
     return dept.name if dept else dept_code
+
+
+def describe(dept_code: str) -> dict:
+    dept = DEPARTMENTS[dept_code]
+    return {
+        "code": dept_code,
+        "name": dept.name,
+        "site_domain": dept.site_domain,
+        "puborg_keys": list(dept.puborg_keys),
+        "library_type": dept.library_type,
+        "listing_url": dept.listing.url if dept.listing else None,
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="部委检索元数据")
+    parser.add_argument("--list", action="store_true", help="打印全部部委")
+    parser.add_argument("--show", help="打印单个部委详情，传部委代码")
+    args = parser.parse_args()
+
+    if args.show:
+        if args.show not in DEPARTMENTS:
+            parser.error(f"未知部委代码 {args.show}；可选: {', '.join(sorted(DEPARTMENTS))}")
+        print(json.dumps(describe(args.show), ensure_ascii=False, indent=2))
+        return
+
+    print(json.dumps([describe(code) for code in DEPARTMENTS], ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

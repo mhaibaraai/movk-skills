@@ -64,6 +64,14 @@ uv run scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
 
 参数：`--max-chars`（单篇正文最大字符数，默认 8000）、`--max-pages`（PDF 最多读取页数，默认 30）、`--engine`（`auto`/`urllib`/`curl_cffi`/`playwright`，强制指定某一层）、`--max-workers`（并发数，默认 5）。
 
+### 原始响应体（`--raw`）
+
+```bash
+uv run scripts/fetch.py --urls '["https://.../api?q=..."]' --raw
+```
+
+跳过正文清洗与截断，返回解码后的原始响应体（`raw` 字段，附 `status`/`content_type`），供调用方自行 `json.loads` 或正则提取链接——清洗会抹掉 `href`，截断会破坏 JSON。适用于 JSON 接口与需要提链接的列表页，不支持 PDF（二进制）。
+
 ## 质量要求
 
 - 如实反馈：抓取失败直接引用 `error` 原文，不猜测或美化失败原因
@@ -84,6 +92,7 @@ uv run scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
 ```bash
 uv run ../web-fetch/scripts/search.py --query "..." --site "..."
 uv run ../web-fetch/scripts/fetch.py --urls '[...]'
+uv run ../web-fetch/scripts/fetch.py --urls '[...]' --raw   # 调用方自己解析 JSON 接口/列表页
 ```
 
 部署时需与调用方技能同级放在 `skills/` 目录下。
