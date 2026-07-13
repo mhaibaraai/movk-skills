@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-统一政策检索入口，纯标准库、零 API Key、无境外出网。两层检索并行编排：
+统一政策检索入口。两层检索来源：
 
   政策文件库  国务院政策文件库检索接口，覆盖全部部委，支持关键词检索，附带发文机关与文号。
   官网列表页  部委官网最新文件列表，无关键词检索能力，但能捞到政策文件库不收录的
               征求意见稿与通报。仅 ndrc / miit / mem 配置了抓取规则。
+
+本脚本只负责「构造检索 URL + 解析响应」，网络抓取全部委托 web-fetch 基座技能的
+`fetch.py --raw`（一次批量取回全部部委的原始响应体，并发与三层引擎降级由基座负责）。
+部署时 web-fetch 需与本技能同级放在 skills/ 下。
 
 两层各自最多返回 max_results 条，互不挤占。任一层失败都不会中断另一层。
 
@@ -16,21 +20,25 @@ CLI:
   results[] 含 dept, dept_name, title, url, date, puborg, pcode, source_tier
             source_tier 取值 policy_library 或 official_site
   errors[]  含 dept, tier, kind, detail, site_domain
-            kind 取值 no_match（该层无匹配）、network_unreachable、http_error、invalid_response
-            除 no_match 外均表示该层不可用，调用方应改用外部网页搜索工具。
+            kind 取值 no_match（该层无匹配）、network_unreachable、http_error、
+                      blocked（三层引擎均命中反爬/验证页）、invalid_response
+            除 no_match 外均表示该层不可用，调用方应改用 web-fetch 的 360 检索兜底。
 """
 
 import argparse
-import concurrent.futures
 import datetime
+import html
 import json
+import re
+import subprocess
 import sys
-import urllib.error
 import urllib.parse
+from pathlib import Path
 from urllib.parse import urljoin
 
 from departments import DEPARTMENTS, POLICY_LIBRARY_URL, resolve_display_name, resolve_site_domain
-from fetch import fetch_raw, strip_tags
+
+WEB_FETCH = Path(__file__).resolve().parents[2] / "web-fetch" / "scripts" / "fetch.py"
 
 # 默认 all：现行有效的政策不因发布年限而失效，按发布时间硬筛会丢掉仍在执行的旧文件。
 # 结果本就按发布时间倒序，只在用户明确限定时间范围时才收窄。
@@ -40,24 +48,38 @@ _TIMELIMIT_DAYS = {"d": 1, "w": 7, "m": 31, "y": 366}
 # 接口不支持按发文机关过滤，只能多取一页再在客户端筛
 _LIBRARY_PAGE_SIZE = 50
 
-
-def _normalize_date(date_hint: str | None) -> str | None:
-    if not date_hint:
-        return None
-    if len(date_hint) == 8:
-        return f"{date_hint[0:4]}-{date_hint[4:6]}-{date_hint[6:8]}"
-    if len(date_hint) == 4:
-        return date_hint
-    return None
+_TAG_RE = re.compile(r"<[^>]+>")
 
 
-def _classify(exc: Exception) -> tuple[str, str]:
-    """把异常归类为 errors[].kind，供调用方决定是重试关键词还是改用外部搜索。"""
-    if isinstance(exc, urllib.error.HTTPError):
-        return "http_error", f"HTTP {exc.code}"
-    if isinstance(exc, OSError):  # URLError / socket.timeout / ConnectionError 均在此
-        return "network_unreachable", str(getattr(exc, "reason", exc))
-    return "invalid_response", f"{type(exc).__name__}: {exc}"
+def strip_tags(text: str) -> str:
+    """去掉标签并反转义实体，用于清洗检索接口返回标题里的 <em> 高亮片段。"""
+    return html.unescape(_TAG_RE.sub("", text)).strip()
+
+
+def _library_url(dept_code: str, keywords: list[str]) -> str:
+    """政策文件库检索 URL。searchfield=title 限定标题匹配，否则全文检索会淹没在无关结果里。"""
+    query = urllib.parse.urlencode({
+        "t": DEPARTMENTS[dept_code].library_type,
+        "q": " ".join(keywords),
+        "p": 1,
+        "n": _LIBRARY_PAGE_SIZE,
+        "timetype": "timeqb",
+        "searchfield": "title",
+        "sort": "pubtime",
+    })
+    return f"{POLICY_LIBRARY_URL}?{query}"
+
+
+def _classify(error: str) -> str:
+    """把基座返回的 error 串归类为 errors[].kind，供调用方决定是重试关键词还是改用 360 检索。"""
+    if "疑似反爬" in error or "验证" in error:
+        return "blocked"
+    if any(k in error for k in ("URLError", "TimeoutError", "ConnectionError", "OSError",
+                                "SSLError", "CertificateVerifyError")):
+        return "network_unreachable"
+    if "HTTPError" in error or error.startswith("HTTP "):
+        return "http_error"
+    return "invalid_response"
 
 
 def _error(dept_code: str, tier: str, kind: str, detail: str) -> dict:
@@ -70,19 +92,33 @@ def _error(dept_code: str, tier: str, kind: str, detail: str) -> dict:
     }
 
 
-def policy_library_candidates(dept_code: str, keywords: list[str], max_results: int, timelimit: str) -> list[dict]:
-    """检索国务院政策文件库。searchfield=title 限定标题匹配，否则全文检索会淹没在无关结果里。"""
+def batch_raw_fetch(urls: list[str], max_workers: int) -> dict[str, dict]:
+    """调 web-fetch 基座批量抓原始响应体，返回 {url: 基座结果}。"""
+    if not WEB_FETCH.exists():
+        sys.exit(
+            f"未找到 web-fetch 基座技能（期望路径 {WEB_FETCH}）。"
+            "本技能的网络抓取依赖 web-fetch，请将其与本技能同级部署在 skills/ 目录下。"
+        )
+
+    proc = subprocess.run(
+        ["uv", "run", str(WEB_FETCH), "--urls", json.dumps(urls), "--raw",
+         "--max-workers", str(max_workers)],
+        capture_output=True, text=True,
+    )
+    if proc.returncode != 0:
+        sys.exit(f"web-fetch 调用失败（exit {proc.returncode}）: {proc.stderr.strip()}")
+
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError as exc:
+        sys.exit(f"web-fetch 输出解析失败: {exc}")
+
+    return {item["url"]: item for item in payload}
+
+
+def policy_library_candidates(dept_code: str, raw: str, max_results: int, timelimit: str) -> list[dict]:
     dept = DEPARTMENTS[dept_code]
-    query = urllib.parse.urlencode({
-        "t": dept.library_type,
-        "q": " ".join(keywords),
-        "p": 1,
-        "n": _LIBRARY_PAGE_SIZE,
-        "timetype": "timeqb",
-        "searchfield": "title",
-        "sort": "pubtime",
-    })
-    payload = json.loads(fetch_raw(f"{POLICY_LIBRARY_URL}?{query}"))
+    payload = json.loads(raw)
     items = (payload.get("searchVO") or {}).get("listVO") or []
 
     days = _TIMELIMIT_DAYS.get(timelimit)
@@ -117,15 +153,22 @@ def policy_library_candidates(dept_code: str, keywords: list[str], max_results: 
     return candidates
 
 
-def official_site_candidates(dept_code: str, keywords: list[str], max_results: int) -> list[dict]:
-    """抓部委官网列表页，正则提取候选文档，按关键词过滤标题。"""
-    dept = DEPARTMENTS[dept_code]
-    if dept.listing is None:
-        return []
+def _normalize_date(date_hint: str | None) -> str | None:
+    if not date_hint:
+        return None
+    if len(date_hint) == 8:
+        return f"{date_hint[0:4]}-{date_hint[4:6]}-{date_hint[6:8]}"
+    if len(date_hint) == 4:
+        return date_hint
+    return None
 
-    html_text = fetch_raw(dept.listing.url)
+
+def official_site_candidates(dept_code: str, raw: str, keywords: list[str], max_results: int) -> list[dict]:
+    """从部委官网列表页正则提取候选文档，按关键词过滤标题。"""
+    dept = DEPARTMENTS[dept_code]
+    listing = dept.listing
     candidates = []
-    for href, date_hint, title in dept.listing.link_pattern.findall(html_text):
+    for href, date_hint, title in listing.link_pattern.findall(raw):
         title = title.strip()
         if keywords and not any(kw in title for kw in keywords):
             continue
@@ -133,7 +176,7 @@ def official_site_candidates(dept_code: str, keywords: list[str], max_results: i
             "dept": dept_code,
             "dept_name": dept.name,
             "title": title,
-            "url": urljoin(dept.listing.url, href),
+            "url": urljoin(listing.url, href),
             "date": _normalize_date(date_hint),
             "puborg": "",
             "pcode": "",
@@ -144,13 +187,22 @@ def official_site_candidates(dept_code: str, keywords: list[str], max_results: i
     return candidates
 
 
-def _run_tier(dept_code: str, tier: str, runner, errors: list[dict]) -> list[dict]:
+def _parse_tier(dept_code: str, tier: str, fetched: dict | None, parser, errors: list[dict]) -> list[dict]:
+    if fetched is None:
+        errors.append(_error(dept_code, tier, "invalid_response", "web-fetch 未返回该 URL 的结果"))
+        return []
+    if "error" in fetched:
+        kind = _classify(fetched["error"])
+        errors.append(_error(dept_code, tier, kind, fetched["error"]))
+        print(f"  [{dept_code}] {tier} 失败（{kind}）: {fetched['error']}", file=sys.stderr)
+        return []
+
     try:
-        found = runner()
+        found = parser(fetched["raw"])
     except Exception as exc:
-        kind, detail = _classify(exc)
-        errors.append(_error(dept_code, tier, kind, detail))
-        print(f"  [{dept_code}] {tier} 失败（{kind}）: {detail}", file=sys.stderr)
+        detail = f"{type(exc).__name__}: {exc}"
+        errors.append(_error(dept_code, tier, "invalid_response", detail))
+        print(f"  [{dept_code}] {tier} 解析失败: {detail}", file=sys.stderr)
         return []
 
     if not found:
@@ -158,50 +210,34 @@ def _run_tier(dept_code: str, tier: str, runner, errors: list[dict]) -> list[dic
     return found
 
 
-def search_department(dept_code: str, keywords: list[str], max_results: int, timelimit: str) -> tuple[list[dict], list[dict]]:
-    print(f"[{dept_code}] {resolve_display_name(dept_code)}...", file=sys.stderr)
+def search(dept_codes: list[str], keywords: list[str], max_results: int, timelimit: str,
+           max_workers: int) -> dict:
+    plan: list[tuple[str, str, str]] = []  # (dept_code, tier, url)
+    for code in dept_codes:
+        plan.append((code, "policy_library", _library_url(code, keywords)))
+        listing = DEPARTMENTS[code].listing
+        if listing is not None:
+            plan.append((code, "official_site", listing.url))
+
+    print(f"检索 {len(dept_codes)} 个部委 / {len(plan)} 层，抓取交给 web-fetch...", file=sys.stderr)
+    fetched_by_url = batch_raw_fetch([url for _, _, url in plan], max_workers)
+
+    results: list[dict] = []
     errors: list[dict] = []
-
-    candidates = _run_tier(
-        dept_code, "policy_library", errors=errors,
-        runner=lambda: policy_library_candidates(dept_code, keywords, max_results, timelimit),
-    )
-    if DEPARTMENTS[dept_code].listing is not None:
-        candidates += _run_tier(
-            dept_code, "official_site", errors=errors,
-            runner=lambda: official_site_candidates(dept_code, keywords, max_results),
+    for code, tier, url in plan:
+        parser = (
+            (lambda raw, c=code: policy_library_candidates(c, raw, max_results, timelimit))
+            if tier == "policy_library"
+            else (lambda raw, c=code: official_site_candidates(c, raw, keywords, max_results))
         )
-
-    print(f"[{dept_code}] {len(candidates)} 条候选", file=sys.stderr)
-    return candidates, errors
-
-
-def parallel_search(dept_codes: list[str], keywords: list[str], max_results: int, timelimit: str, max_workers: int) -> dict:
-    print(f"并行检索 {len(dept_codes)} 个部委（max_workers={max_workers}）...", file=sys.stderr)
-    all_results: list[dict] = []
-    all_errors: list[dict] = []
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = {
-            executor.submit(search_department, code, keywords, max_results, timelimit): code
-            for code in dept_codes
-        }
-        for future in concurrent.futures.as_completed(futures):
-            code = futures[future]
-            try:
-                results, errors = future.result()
-            except Exception as exc:
-                kind, detail = _classify(exc)
-                all_errors.append(_error(code, "search", kind, detail))
-                print(f"[{code}] 检索异常: {detail}", file=sys.stderr)
-                continue
-            all_results.extend(results)
-            all_errors.extend(errors)
+        found = _parse_tier(code, tier, fetched_by_url.get(url), parser, errors)
+        results.extend(found)
+        print(f"[{code}] {resolve_display_name(code)} {tier}: {len(found)} 条", file=sys.stderr)
 
     deduped: dict[str, dict] = {}
-    for item in all_results:
+    for item in results:
         deduped.setdefault(item["url"], item)
-    return {"results": list(deduped.values()), "errors": all_errors}
+    return {"results": list(deduped.values()), "errors": errors}
 
 
 def main() -> None:
@@ -222,7 +258,7 @@ def main() -> None:
     if unknown:
         parser.error(f"未知部委代码 {', '.join(unknown)}；可选: {known_codes}")
 
-    payload = parallel_search(dept_codes, args.keywords.split(), args.max_results, args.timelimit, args.max_workers)
+    payload = search(dept_codes, args.keywords.split(), args.max_results, args.timelimit, args.max_workers)
 
     results = payload["results"]
     library = sum(1 for r in results if r["source_tier"] == "policy_library")
