@@ -16,8 +16,9 @@
 消失"判定通过——瑞数把页面清空后特征也随之消失，会把空壳当成功。同理，渲染出正文只能洗白
 「挑战类」状态码（CHALLENGE_STATUS），不能洗白 404——站点错误页跳转首页后照样满屏正文。
 
-能力边界：瑞数一类的 JS 挑战本地浏览器未必过得去（www.cnpc.com.cn 实测过不去），此时如实
-报错，不返回空壳正文让调用方拿去分析。
+能力边界：瑞数一类的 JS 挑战本地浏览器未必过得去，过不去时如实报错，不返回空壳正文让调用方
+拿去分析。www.cnpc.com.cn 的入口页反倒是过得去的实测案例（http 层 412，browser 层等到
+正文渲染出来即可，耗时数秒），瑞数对首页的挑战强度明显低于深层内容页。
 
 环境变量：
   WEB_FETCH_NO_AUTO_INSTALL   置 1 禁止自动安装 playwright/chromium
@@ -28,7 +29,8 @@
   fetch_one(url, ...)           抓取 + 清洗，HTML 走正文提取、PDF 走文本抽取，附带 attachments
   fetch_raw(url, ...)           抓取 + 解码，不清洗不截断，供调用方自行解析结构
   fetch_many(urls, ...)         批量抓取，http 层并发试完后，剩下的共用一个浏览器实例
-  extract_attachments(s, base)  提取页内附件链接（pdf/doc/xls/ofd），绝对化去重
+  extract_links(s, base)        提取页内附件与同域页面链接，均带锚文本，绝对化去重
+  extract_attachments(s, base)  extract_links 的薄包装，只要附件（pdf/doc/xls/ofd）时用
   strip_tags(s) / clean_html(s) 供 search.py 复用的清洗工具
 """
 from __future__ import annotations
@@ -93,10 +95,11 @@ _CHALLENGE_RE = re.compile(
 _DOWNLOAD_RE = re.compile(r"Download is starting|ERR_ABORTED", re.I)
 # 政策/报告的核心条款几乎总在附件里，正文页往往只有一句「现将《XX》印发给你们」。
 # ofd 是政务版式文件，pypdf 读不了，但同名 pdf 通常并存——列出来让调用方选，不要替它过滤。
-_ATTACHMENT_RE = re.compile(r"""href=["']([^"']+\.(pdf|docx?|xlsx?|ofd|wps))["']""", re.I)
+_ATTACHMENT_EXT_RE = re.compile(r"""\.(pdf|docx?|xlsx?|ofd|wps)$""", re.I)
 _PDF_MAGIC = b"%PDF-"
 
 _SKIP_TAGS = frozenset({"script", "style", "nav", "footer", "header", "noscript"})
+_SKIP_LINK_SCHEMES = ("#", "javascript:", "mailto:", "tel:")
 
 
 class ContentTooLarge(Exception):
@@ -187,17 +190,111 @@ def extract_title(html_text: str) -> str:
     return ""
 
 
-def extract_attachments(html_text: str, base_url: str) -> list[dict]:
-    """提取页面里的附件链接（绝对化、去重、保留出现顺序）。
+class _LinkExtractor(html.parser.HTMLParser):
+    """抽取每个 <a> 的 href 与锚文本。
 
-    正文清洗会抹掉所有 href，附件链接随之消失——调用方于是只能按 URL 命名规律去猜，
-    猜错就撞上站点错误页。把链接原样交还，猜测就没有存在的理由。
+    不能用正则。页面里的 <a> 常嵌套或未闭合，`href=["']([^"']+\\.(pdf|...))["']` 这类
+    正则只能抓 href，抓不到锚文本；若改用 `.*?` 跨标签抓锚文本，会在遇到未闭合 <a> 时
+    跨越锚点边界，把甲的锚文本绑到乙的 href 上——CNPC 首页实测复现过一次，把「集团公司
+    2025年社会责任报告」错配给了一份完全无关的 2021 年合规手册。这种错误看起来完全正确，
+    调用方会拿着一个自信的标签去抓错文件，与"正文判据必须是正向的"是同一类事故。
+
+    解析器按标签流走，遇到新的 <a> 自动闭合上一个（浏览器对未闭合标签也是这样处理的），
+    锚文本无从串台。<a><img></a> 这类图片链接锚文本为空，回落到 img 的 alt/title；
+    仍为空就留空，不编造。
     """
-    found: dict[str, dict] = {}
-    for href, ext in _ATTACHMENT_RE.findall(html_text):
-        url = urllib.parse.urljoin(base_url, html.unescape(href))
-        found.setdefault(url, {"url": url, "ext": ext.lower()})
-    return list(found.values())
+
+    _SKIP = frozenset({"script", "style"})  # 保留 nav/footer/header：目标兜底链接常年就在这里
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[tuple[str, str]] = []
+        self._href: str | None = None
+        self._parts: list[str] = []
+        self._skip = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self._SKIP:
+            self._skip += 1
+            return
+        attr = dict(attrs)
+        if tag == "a":
+            self._flush()
+            self._href = attr.get("href")
+        elif tag == "img" and self._href is not None and not self._parts:
+            alt = (attr.get("alt") or attr.get("title") or "").strip()
+            if alt:
+                self._parts.append(alt)
+
+    def handle_endtag(self, tag):
+        if tag in self._SKIP:
+            self._skip = max(0, self._skip - 1)
+        elif tag == "a":
+            self._flush()
+
+    def handle_data(self, data):
+        if self._skip or self._href is None:
+            return
+        text = data.strip()
+        if text:
+            self._parts.append(text)
+
+    def _flush(self) -> None:
+        if self._href is not None:
+            self.links.append((self._href, " ".join(" ".join(self._parts).split())))
+        self._href, self._parts = None, []
+
+    def close(self) -> None:
+        super().close()
+        self._flush()
+
+
+def extract_links(html_text: str, base_url: str) -> tuple[list[dict], list[dict]]:
+    """提取页面里的附件链接与同域页面链接，均带锚文本、绝对化、去重、保留出现顺序。
+
+    返回 (attachments, pages)：
+      attachments  {url, ext, text}，不限域名——政策/报告的核心条款几乎总在附件里，
+                   正文清洗会抹掉所有 href，附件链接随之消失，调用方本会被逼着按 URL
+                   命名规律去猜（猜错就撞上站点错误页），锚文本让猜测没有存在的理由。
+      pages        {url, text}，限同域（含子域名）——两个发现通道（sitemap/search）都
+                   失效时，靠锚文本从入口页跳到栏目页是唯一还走得通的兜底路径；无锚文本
+                   的链接（导航图标一类）丢弃，对调用方没有判别价值。
+    """
+    site = urllib.parse.urlsplit(base_url).netloc.lower().split(":")[0].removeprefix("www.")
+
+    parser = _LinkExtractor()
+    parser.feed(html_text)
+    parser.close()
+
+    attachments: dict[str, dict] = {}
+    pages: dict[str, dict] = {}
+    for href, text in parser.links:
+        if not href:
+            continue
+        href = html.unescape(href.strip())
+        if not href or href.startswith(_SKIP_LINK_SCHEMES):
+            continue
+        url = urllib.parse.urljoin(base_url, href)
+        if not url.startswith(("http://", "https://")):
+            continue
+
+        ext = _ATTACHMENT_EXT_RE.search(urllib.parse.urlsplit(url).path)
+        if ext:
+            entry = attachments.setdefault(url, {"url": url, "ext": ext.group(1).lower(), "text": ""})
+        else:
+            host = urllib.parse.urlsplit(url).netloc.lower().split(":")[0]
+            if not (host == site or host.endswith("." + site)):
+                continue
+            entry = pages.setdefault(url, {"url": url, "text": ""})
+        if text and not entry["text"]:
+            entry["text"] = text
+
+    return list(attachments.values()), [p for p in pages.values() if p["text"]]
+
+
+def extract_attachments(html_text: str, base_url: str) -> list[dict]:
+    """提取页面里的附件链接，向后兼容包装：只要附件时用这个，同域页面链接见 extract_links。"""
+    return extract_links(html_text, base_url)[0]
 
 
 def _is_pdf(data: bytes, content_type: str) -> bool:
@@ -622,7 +719,7 @@ def _failure(fetched: dict) -> dict:
             "engines_available": fetched.get("engines_available", {})}
 
 
-def _clean_one(fetched: dict, max_chars: int, max_pages: int) -> dict:
+def _clean_one(fetched: dict, max_chars: int, max_pages: int, include_links: bool = False) -> dict:
     if fetched.get("data") is None:
         return _failure(fetched)
 
@@ -639,7 +736,7 @@ def _clean_one(fetched: dict, max_chars: int, max_pages: int) -> dict:
 
     html_text = _decode_text(data, content_type)
     text = clean_html(html_text)
-    attachments = extract_attachments(html_text, url)
+    attachments, pages = extract_links(html_text, url)
     # 抓到一具空壳（挑战未通过、JS 未渲染）时宁可报错，绝不返回只剩标题的"成功"让调用方拿去分析
     if len(text) < MIN_TEXT_CHARS:
         return {
@@ -657,9 +754,11 @@ def _clean_one(fetched: dict, max_chars: int, max_pages: int) -> dict:
         "length": len(text),
         "degraded": degraded,
     }
-    # 无附件时不给空数组：那会让调用方以为「找过了、确实没有」，缺席才是诚实的表达
+    # 无附件/链接时不给空数组：那会让调用方以为「找过了、确实没有」，缺席才是诚实的表达
     if attachments:
         result["attachments"] = attachments
+    if include_links and pages:
+        result["links"] = pages
     if len(text) > max_chars:
         text = text[:max_chars] + f"\n\n[... 截断，原文共 {len(text)} 字符 ...]"
         result["truncated"] = True
@@ -691,8 +790,8 @@ def _raw_one(fetched: dict) -> dict:
 
 
 def fetch_one(url: str, max_chars: int = 8000, max_pages: int = 30, engine: str = "auto",
-              timeout: int = 20) -> dict:
-    return _clean_one(fetch_bytes(url, engine=engine, timeout=timeout), max_chars, max_pages)
+              timeout: int = 20, include_links: bool = False) -> dict:
+    return _clean_one(fetch_bytes(url, engine=engine, timeout=timeout), max_chars, max_pages, include_links)
 
 
 def fetch_raw(url: str, engine: str = "auto", timeout: int = 20) -> dict:
@@ -705,10 +804,10 @@ def fetch_raw(url: str, engine: str = "auto", timeout: int = 20) -> dict:
 
 
 def fetch_many(urls: list[str], max_chars: int = 8000, max_pages: int = 30, engine: str = "auto",
-               timeout: int = 20, raw: bool = False,
+               timeout: int = 20, raw: bool = False, include_links: bool = False,
                max_workers: int = DEFAULT_CONCURRENCY) -> list[dict]:
     """批量抓取 + 清洗。需要浏览器的 URL 共用同一个浏览器实例。"""
     fetched = fetch_many_bytes(urls, engine=engine, timeout=timeout, max_workers=max_workers)
     if raw:
         return [_raw_one(f) for f in fetched]
-    return [_clean_one(f, max_chars, max_pages) for f in fetched]
+    return [_clean_one(f, max_chars, max_pages, include_links) for f in fetched]
