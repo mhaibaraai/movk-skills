@@ -7,7 +7,7 @@
               征求意见稿与通报。仅 ndrc / miit / mem 配置了抓取规则。
 
 本脚本只负责「构造检索 URL + 解析响应」，网络抓取全部委托 web-fetch 基座技能的
-`fetch.py --raw`（一次批量取回全部部委的原始响应体，并发与三层引擎降级由基座负责）。
+`fetch.py --raw`（一次批量取回全部部委的原始响应体，并发与四层引擎降级由基座负责）。
 部署时 web-fetch 需与本技能同级放在 skills/ 下。
 
 两层各自最多返回 max_results 条，互不挤占。任一层失败都不会中断另一层。
@@ -20,9 +20,11 @@ CLI:
   results[] 含 dept, dept_name, title, url, date, puborg, pcode, source_tier
             source_tier 取值 policy_library 或 official_site
   errors[]  含 dept, tier, kind, detail, site_domain
-            kind 取值 no_match（该层无匹配）、network_unreachable、http_error、
-                      blocked（三层引擎均命中反爬/验证页）、invalid_response
-            除 no_match 外均表示该层不可用，调用方应改用 web-fetch 的 360 检索兜底。
+            kind 取值 no_match（该层确实无匹配政策）、network_unreachable、http_error、
+                      blocked（各层引擎均命中反爬/验证页）、invalid_response（该层取到了页面
+                      但解析不出东西：JSON 变了，或官网改版让 link_pattern 失效）
+            除 no_match 外均表示该层不可用，调用方应改用 web-fetch 的 360 检索兜底，
+            不得当作"该部委没有这类政策"。
 """
 
 import argparse
@@ -72,7 +74,7 @@ def _library_url(dept_code: str, keywords: list[str]) -> str:
 
 def _classify(error: str) -> str:
     """把基座返回的 error 串归类为 errors[].kind，供调用方决定是重试关键词还是改用 360 检索。"""
-    if "疑似反爬" in error or "验证" in error:
+    if "疑似反爬" in error or "验证" in error or "访问异常" in error:
         return "blocked"
     if any(k in error for k in ("URLError", "TimeoutError", "ConnectionError", "OSError",
                                 "SSLError", "CertificateVerifyError")):
@@ -163,12 +165,29 @@ def _normalize_date(date_hint: str | None) -> str | None:
     return None
 
 
+class ListingPatternStale(Exception):
+    """列表页取到了，但 link_pattern 一条链接都没提出来。"""
+
+
 def official_site_candidates(dept_code: str, raw: str, keywords: list[str], max_results: int) -> list[dict]:
-    """从部委官网列表页正则提取候选文档，按关键词过滤标题。"""
+    """从部委官网列表页正则提取候选文档，按关键词过滤标题。
+
+    "一条链接都没提到"与"提到了但没有关键词命中"必须区分：前者说明页面改版让 link_pattern
+    失效、或抓到的是反爬页，属于该层不可用；后者才是真的没有匹配的政策。两者都返回空列表的话，
+    抓取器坏掉会被伪装成"该部委没有这类政策"，直接污染解读结论。
+    """
     dept = DEPARTMENTS[dept_code]
     listing = dept.listing
+    links = listing.link_pattern.findall(raw)
+    if not links:
+        raise ListingPatternStale(
+            f"官网列表页未提取到任何链接（页面 {len(raw)} 字符）。"
+            f"该页可能已改版导致 departments.py 里 {dept_code} 的 link_pattern 失效，"
+            f"或抓到的是反爬页；请核对 {listing.url}"
+        )
+
     candidates = []
-    for href, date_hint, title in listing.link_pattern.findall(raw):
+    for href, date_hint, title in links:
         title = title.strip()
         if keywords and not any(kw in title for kw in keywords):
             continue
@@ -199,6 +218,11 @@ def _parse_tier(dept_code: str, tier: str, fetched: dict | None, parser, errors:
 
     try:
         found = parser(fetched["raw"])
+    except ListingPatternStale as exc:
+        # 抓取器坏了，不是"没有政策"——必须报为该层不可用，让调用方走 360 兜底
+        errors.append(_error(dept_code, tier, "invalid_response", str(exc)))
+        print(f"  [{dept_code}] {tier} 抓取规则失效: {exc}", file=sys.stderr)
+        return []
     except Exception as exc:
         detail = f"{type(exc).__name__}: {exc}"
         errors.append(_error(dept_code, tier, "invalid_response", detail))
