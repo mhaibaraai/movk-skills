@@ -32,9 +32,10 @@ metadata:
     3. 抓取正文：uv run ../web-fetch/scripts/fetch.py --urls '["...", "..."]' --max-chars 8000
        每条含 type(html|pdf)/engine_used/degraded/text。政策附件多为 PDF，type=pdf 且
        low_confidence=true 表示疑似加密或扫描件，抽取不可靠，如实告知用户而非当正文解读。
-       engine_used=reader_proxy 表示正文经远端渲染代理转交、非原站直出，须在信息来源注明；
-       法条原文、文号、日期、处罚幅度这类关键表述建议对照原文链接复核后再引用。
-       抓取普遍受阻时先跑 uv run ../web-fetch/scripts/fetch.py --check-env 确认环境缺哪层引擎。
+       degraded=true 表示该 URL 必须靠浏览器渲染才拿得到；法条原文、文号、日期、处罚幅度
+       这类关键表述建议对照原文链接复核后再引用。失败结果带 attempts（逐层 kind/detail），
+       报错时直接引用它。抓取普遍受阻时先跑 uv run ../web-fetch/scripts/fetch.py --check-env
+       确认环境缺哪层引擎。
     4. 分析六个维度：政策层级(法律/行政法规/部门规章/规范性文件)、核心条款、适用范围、
        时间节点(实施日期/过渡期/整改期限)、处罚条款、企业影响。
     5. 读 references/report-formats.md，按解读深度选格式 A(深度解读)/B(要点速览)/C(多政策对比) 输出。
@@ -81,7 +82,7 @@ uv run scripts/departments.py --show ndrc     # 打印单个部委详情
 uv run scripts/search.py --dept ndrc,miit,mem --keywords "节能减排" --max-results 5
 ```
 
-脚本构造政策文件库检索接口与官网列表页的 URL，交给 `web-fetch` 一次批量抓原始响应体（并发与四层引擎降级由基座负责），再解析成候选。`--raw` 拿到的响应体可能来自 `reader_proxy` 层（远端渲染代理输出的渲染后 HTML，而非原站字节），JSON 接口与列表页的解析不受影响，但引用正文时须注明来源。
+脚本构造政策文件库检索接口与官网列表页的 URL，交给 `web-fetch` 一次批量抓原始响应体（并发与两层引擎降级由基座负责），再解析成候选。`--raw` 拿到的响应体可能来自 `browser` 层（浏览器渲染后的 HTML，而非原站字节），JSON 接口与列表页的解析不受影响。
 
 输出为 `{"results": [...], "errors": [...]}` 对象：
 
