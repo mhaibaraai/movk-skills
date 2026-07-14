@@ -85,15 +85,23 @@ def _fetch_xml(url: str, engine: str) -> tuple[str, dict | None]:
 
 
 def _roots(site: str) -> list[str]:
-    """站点根 URL 候选。裸顶级域未必对外服务（如 ndrc.gov.cn 连不上、www.ndrc.gov.cn 才是本体），
-    所以顶级域要补一个 www. 变体。"""
+    """站点根 URL 候选。裸域名未必对外服务（如 ndrc.gov.cn 连不上、www.ndrc.gov.cn 才是本体），
+    所以要补一个 www. 变体。
+
+    曾经只对 host.count(".") == 1 的单段后缀（example.com）补 www，两段式后缀（.com.cn/
+    .gov.cn/.org.cn 一类，中国政务/央企站点极常见）被漏判——cnpc.com.cn 实测裸域直接
+    DNS 解析失败，www.cnpc.com.cn 才是真正服务内容的主机，但因为有 2 个点，www 变体
+    从未被尝试，最终把"问都没问对主机"误报成"站点没有 sitemap"。现在不按点数判断，
+    只要不是已经带 www. 前缀就补一个变体，对子域名站点（news.cnpc.com.cn）虽会多探测
+    一个通常不存在的 www.news.cnpc.com.cn，但探测失败代价很低，换来的是不会再漏判。
+    """
     base = site if "://" in site else f"https://{site}"
     parsed = urllib.parse.urlsplit(base)
     scheme = parsed.scheme or "https"
     host = parsed.netloc or parsed.path
 
     roots = [f"{scheme}://{host}"]
-    if host.count(".") == 1:  # 顶级域（example.com），补 www
+    if not host.startswith("www."):
         roots.append(f"{scheme}://www.{host}")
     return roots
 
@@ -107,7 +115,9 @@ def discover(site: str, engine: str) -> tuple[list[str], dict | None]:
     blocked: dict | None = None
 
     for root in _roots(site):
-        robots, _ = _fetch_xml(f"{root}/robots.txt", engine)
+        robots, robots_error = _fetch_xml(f"{root}/robots.txt", engine)
+        if robots_error and robots_error["kind"] == "blocked":
+            blocked = robots_error  # robots.txt 本身被拦截也是"被拦截"，不能悄悄吞掉
         declared = _ROBOTS_SITEMAP_RE.findall(robots) if robots else []
         if declared:
             return declared, None
