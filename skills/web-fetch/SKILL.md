@@ -1,6 +1,6 @@
 ---
 name: web-fetch
-description: 通用网页抓取与检索基座。给 URL 批量返回清洗后的正文（HTML 自动提取正文、PDF 自动抽取文本），给关键词返回候选 URL（360 搜索，零 API Key）。内置三层抓取引擎按需自动降级：urllib（零依赖）→ curl_cffi（TLS 指纹伪装，解握手层反爬）→ playwright（真实浏览器，解 JS 空壳与 Cloudflare 验证）。用于宿主平台不提供内置 WebSearch/WebFetch 的部署环境，也可被其他技能作为抓取底座调用。当用户提到网页抓取、网页正文提取、PDF 文本提取、反爬绕过、Cloudflare 验证、无 API Key 搜索、检查抓取引擎可用性时触发。
+description: 网页抓取与检索基座。给 URL 返回清洗正文（HTML 提正文、PDF 抽文本），给关键词返回候选 URL（360 搜索，无需 Key）。四层引擎降级：urllib → curl_cffi → reader_proxy（远端渲染代理）→ playwright，本地无浏览器也能过 JS 挑战。宿主无 WebSearch/WebFetch 时可用，也是其他技能的抓取底座。当用户提到网页抓取、PDF 文本提取、反爬绕过、瑞数/Cloudflare 验证、无 API Key 搜索、抓取引擎可用性时触发。
 metadata:
   title: 网页抓取基座
   opening: |
@@ -18,11 +18,13 @@ metadata:
     1. 先判断任务类型：已有 URL 直接 fetch；只有关键词/主题先 search 再 fetch。
     2. 检索：uv run scripts/search.py --query "<关键词>" --site <域名，可选> --max-results 10
        输出 {"results":[{title,url,rank}],"errors":[{kind,detail}]}。
-       kind=no_match 换关键词重试；kind=blocked/network_unreachable 说明三层引擎都没能过关，
-       先跑一次 --check-env 确认部署环境是否缺 curl_cffi/playwright，缺了就如实告知用户环境限制。
+       kind=no_match 换关键词重试；kind=blocked/network_unreachable 说明各层引擎都没能过关，
+       先跑一次 --check-env 确认部署环境缺哪层，缺了就如实告知用户环境限制。
     3. 抓取：uv run scripts/fetch.py --urls '["url1","url2"]' --max-chars 8000
        输出数组，每条含 engine_used/type(html|pdf)/title/length/degraded/text，失败则含 error/tried。
-       degraded=true 表示该 URL 需要 curl_cffi 或 playwright 才抓到内容，若环境缺该层这条会直接失败。
+       degraded=true 表示该 URL 需要增强引擎才抓到内容，若环境缺该层这条会直接失败。
+       engine_used=reader_proxy 表示正文由远端渲染代理（默认 r.jina.ai）渲染后转交、不是原站直出，
+       引用时须注明这一来源；不希望 URL 外发给第三方就加 --no-reader-proxy。
        PDF 结果里 low_confidence=true 表示疑似加密或扫描件，抽取不可靠，如实告知用户而非当作正文使用。
     4. 遇到列表页/索引页状态码非 200 但仍需要具体条目时，不要固定抓该列表页，改用 search.py
        检索更精确的条目 URL（见 references/engine-notes.md 的 IEA 案例）。
@@ -34,13 +36,15 @@ metadata:
 
 # 网页抓取基座
 
-给 URL 批量返回清洗后的正文（HTML/PDF），给关键词返回候选 URL。三层引擎自动降级，尽量在任意部署环境下都能工作，环境能力越强覆盖面越全。设计动机：技能可能部署在不提供内置 WebSearch/WebFetch 的自建智能体平台上，抓取与检索能力必须内化进脚本本身。
+给 URL 批量返回清洗后的正文（HTML/PDF），给关键词返回候选 URL。四层引擎自动降级，尽量在任意部署环境下都能工作。设计动机：技能可能部署在不提供内置 WebSearch/WebFetch、也装不了浏览器的沙箱上，抓取与检索能力必须内化进脚本本身。
 
 运行约定：所有 `uv run` 命令都不要加 timeout 参数，沙箱后端不支持 per-command timeout override，加了必定报错。
 
-## 三层引擎
+## 四层引擎
 
-`urllib`（标准库，零依赖）→ `curl_cffi`（可选，伪装 Chrome TLS 指纹，解握手层拦截）→ `playwright`（可选，真实浏览器，解 JS 空壳与 Cloudflare）。`engine=auto` 自动按序尝试并升级，缺失的可选依赖会被跳过而不是报错。三层能力边界、实测结论与降级细节见 [references/engine-notes.md](references/engine-notes.md)。
+`urllib`（标准库，零依赖）→ `curl_cffi`（伪装 Chrome TLS 指纹，解握手层拦截）→ `reader_proxy`（远端渲染代理执行 JS，本地只发一个 GET，解瑞数/加速乐/Cloudflare 这类 JS 挑战）→ `playwright`（本地真实浏览器，链尾兜底，缺 chromium 时按需下载安装）。
+
+`engine=auto` 自动按序尝试并升级。关键取舍：**JS 挑战站点 `curl_cffi` 一定过不了**（TLS 指纹伪装解决不了"必须执行 JS"），沙箱里也装不动浏览器，所以主力手段是把渲染搬到远端的 `reader_proxy`。代价是目标 URL 会外发给第三方，且正文是代理转换后的结果而非原站直出——内网地址本层直接拒绝，不想外发就 `--no-reader-proxy`。能力边界与实测结论见 [references/engine-notes.md](references/engine-notes.md)。
 
 先跑一次 `uv run scripts/fetch.py --check-env` 了解当前部署环境的能力上限。
 
