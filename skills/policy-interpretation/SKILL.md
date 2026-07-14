@@ -24,12 +24,16 @@ metadata:
     2. 检索候选：uv run scripts/search.py --dept <代码> --keywords "<关键词>" --max-results 5
        输出 {"results":[...],"errors":[...]}；results 每条带 source_tier(policy_library/official_site)，
        policy_library 来源还带 puborg 发文机关与 pcode 文号。
-       errors[].kind 全部为 no_match 时换关键词重试一次；出现 network_unreachable/http_error/
-       blocked 说明该层出网受限，改用 uv run ../web-fetch/scripts/search.py --query "<关键词>"
-       --site <errors[].site_domain> 兜底，仍无结果再回落宿主内置 WebSearch/WebFetch。
+       errors[].kind 只有 no_match 能理解为"该部委确实没有这类政策"，此时换关键词重试一次；
+       network_unreachable/http_error/blocked（出网受限）与 invalid_response（页面取到了但
+       解析不出，多为官网改版让抓取规则失效）都是工具故障，换词救不了，须改用
+       uv run ../web-fetch/scripts/search.py --query "<关键词>" --site <errors[].site_domain>
+       兜底，仍无结果再回落宿主内置 WebSearch/WebFetch；绝不可当作"没有政策"写进结论。
     3. 抓取正文：uv run ../web-fetch/scripts/fetch.py --urls '["...", "..."]' --max-chars 8000
        每条含 type(html|pdf)/engine_used/degraded/text。政策附件多为 PDF，type=pdf 且
        low_confidence=true 表示疑似加密或扫描件，抽取不可靠，如实告知用户而非当正文解读。
+       engine_used=reader_proxy 表示正文经远端渲染代理转交、非原站直出，须在信息来源注明；
+       法条原文、文号、日期、处罚幅度这类关键表述建议对照原文链接复核后再引用。
        抓取普遍受阻时先跑 uv run ../web-fetch/scripts/fetch.py --check-env 确认环境缺哪层引擎。
     4. 分析六个维度：政策层级(法律/行政法规/部门规章/规范性文件)、核心条款、适用范围、
        时间节点(实施日期/过渡期/整改期限)、处罚条款、企业影响。
@@ -77,14 +81,16 @@ uv run scripts/departments.py --show ndrc     # 打印单个部委详情
 uv run scripts/search.py --dept ndrc,miit,mem --keywords "节能减排" --max-results 5
 ```
 
-脚本构造政策文件库检索接口与官网列表页的 URL，交给 `web-fetch` 一次批量抓原始响应体（并发与三层引擎降级由基座负责），再解析成候选。
+脚本构造政策文件库检索接口与官网列表页的 URL，交给 `web-fetch` 一次批量抓原始响应体（并发与四层引擎降级由基座负责），再解析成候选。`--raw` 拿到的响应体可能来自 `reader_proxy` 层（远端渲染代理输出的渲染后 HTML，而非原站字节），JSON 接口与列表页的解析不受影响，但引用正文时须注明来源。
 
 输出为 `{"results": [...], "errors": [...]}` 对象：
 
 - `results` 每条带 `source_tier`（`policy_library` / `official_site`），`policy_library` 来源还带 `puborg`（发文机关）与 `pcode`（文号），可直接填入报告。
-- `errors` 每条带 `kind`。`no_match` 表示该层检索成功但无匹配；`network_unreachable` / `http_error` / `blocked` 表示该层出网受限。
+- `errors` 每条带 `kind`。`no_match` 表示该层检索成功、页面结构正常、但确实没有匹配的政策；`network_unreachable` / `http_error` / `blocked` 表示该层出网受限；`invalid_response` 表示页面取到了却解析不出东西（接口字段变了，或部委官网改版让 `link_pattern` 失效）。
 
-兜底顺序：全部为 `no_match` 时换更宽泛或更具体的关键词重试一次；出现 `network_unreachable` / `http_error` / `blocked` 时不要空转重试关键词，改用 360 检索，用 `errors[].site_domain` 限定域名：
+**只有 `no_match` 才能理解为"该部委没有这类政策"**，其余各类都是抓取器/网络的问题，绝不能当作"没有政策"写进解读结论——那会把工具故障伪装成事实判断。
+
+兜底顺序：全部为 `no_match` 时换更宽泛或更具体的关键词重试一次；出现 `network_unreachable` / `http_error` / `blocked` / `invalid_response` 时不要空转重试关键词（换词救不了坏掉的抓取器），改用 360 检索，用 `errors[].site_domain` 限定域名：
 
 ```bash
 uv run ../web-fetch/scripts/search.py --query "节能减排" --site ndrc.gov.cn --max-results 5
