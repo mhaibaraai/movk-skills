@@ -1,15 +1,29 @@
-# 四层引擎能力边界与降级规则
+# 两层引擎能力边界与降级规则
 
-## 四层引擎
+## 两层引擎
 
 | 引擎 | 依赖 | 解决什么 | 解决不了什么 |
 |------|------|----------|--------------|
-| `urllib` | 无（标准库） | 服务端渲染的普通站点 | TLS 指纹拦截、JS 空壳、验证挑战页 |
-| `curl_cffi` | PEP 723 硬依赖，`uv run` 自动装 | 伪装 Chrome 的 TLS/JA3 指纹，解决"握手层"拦截（`urllib` 表现为 `URLError`/TLS 握手失败） | JS 挑战（瑞数/加速乐）、Cloudflare 挑战页、纯前端渲染页面 |
-| `reader_proxy` | 无（标准库发一个 GET） | 远端渲染代理（默认 `r.jina.ai`）在它那边跑无头浏览器执行 JS，把结果吐回来。本地装不了浏览器的沙箱靠这层过 JS 挑战 | 需要登录态/付费墙的内容；内网地址（本层主动拒绝） |
-| `playwright` | 按需自动安装（约 150MB） | 本地真实浏览器渲染，链尾兜底。代理不可用/不可信时的最后手段 | 需要登录态/付费墙的内容 |
+| `http` | `curl_cffi`，PEP 723 硬依赖，`uv run` 自动装 | 直发请求并伪装 Chrome 的 TLS/JA3 指纹。服务端渲染的站点一个请求拿到；**所有非 HTML 资源（PDF / sitemap.xml / robots.txt / JSON）只能走这层** | JS 挑战（瑞数/加速乐）、Cloudflare 挑战页、纯前端渲染的空壳页 |
+| `browser` | 按需自动安装 playwright + headless shell | 真实 Chromium 渲染并执行 JS：JS 空壳、瑞数挑战、搜索引擎结果页 | 需要登录态/付费墙的内容；被出口 IP 拉黑的站点（换浏览器也没用） |
 
-`engine=auto` 时按 `urllib → curl_cffi → reader_proxy → playwright` 顺序尝试，命中以下任一情况判定"未过关"从而升级到下一层：HTTP 状态码 ≥ 400、响应体小于 500 字节（JS 空壳特征）、命中挑战页特征（`Just a moment`/`请稍候`/`安全验证`/`访问异常`/`$_ts`/`__jsluid` 等）、**调用方传入的 `expect` 哨兵不匹配**。
+`engine=auto` 时先试 `http`，未过关才升级到 `browser`。判定「未过关」：HTTP ≥ 400、响应体小于 500 字节（JS 空壳特征）、命中挑战页特征（`Just a moment`/`请稍候`/`安全验证`/`访问异常`/`$_ts`/`__jsluid`）、**调用方传入的 `expect` 哨兵不匹配**。
+
+为什么不是「只留 playwright」：浏览器是获取字节的**错误工具**。`page.goto()` 打开一个 PDF 会直接抛 `Download is starting`（Chromium 把它当下载而非导航），XML 会被渲染成 Chrome 自己的树视图 DOM 从而毁掉 `<loc>` 解析。而石化年报、可持续发展报告绝大多数是 PDF。`http` 层还顺带是快路径——海外机构官网 0.3s 直出，起浏览器要 3–16s。
+
+为什么不是「保留 urllib」：`curl_cffi` 是它的严格超集（普通请求照发，还多了指纹伪装），且已是硬依赖。两层做同一件事，删掉冗余的那层。
+
+### 正文判据必须是正向的
+
+**这是本模块最容易踩的坑，踩过一次，代价是把失败伪装成了成功。**
+
+曾经用「挑战特征消失」来反向判定通过。瑞数挑战失败时会把页面**清空**——特征随之消失，于是空壳被判为通过，返回一条只剩 `<title>` 的「成功」（`length: 20`），下游技能拿着 20 个字符去写深度分析。
+
+现在的判据是正向的：渲染后必须出现 `MIN_TEXT_CHARS`（200）以上的实质正文才算过关，`_wait_for_body` 会一直轮询到正文出现或超时。`fetch_one` 再加一道兜底——清洗后正文短于阈值一律判失败。**宁可报错，不可返回空壳。**
+
+同一个坑还有第二种形态：**渲染出正文只能洗白「挑战类」状态码，不能洗白 404**。瑞数首跳返回 412 + 混淆脚本，脚本跑完重载才有真内容，此时 412 不代表最终结果、洗成 200 是对的。但曾经这个洗白无差别地作用于所有 4xx——`gov.cn` 对任何不存在的路径返回 404 加一个 JS 跳首页的错误页，浏览器导航后跳到首页、渲染出 2781 字符正文，于是 404 被洗成 200，**中国政府网首页被当作「政策 PDF 正文」交给下游解读**。现在只有 `CHALLENGE_STATUS`（403/412/429/503）允许洗白，404/410 这类「资源不存在」的确定信号一律保留原状态码（`_resolve_browser_status`）。
+
+顺带一提，这条修复还意外地把瑞数站点抓通了：旧逻辑在页面被清空的瞬间就返回，新逻辑继续等，瑞数脚本得以跑完并重载出真内容（见下）。
 
 ### `expect` 结构哨兵
 
@@ -21,12 +35,17 @@
 
 以下结论来自真实网络实测，不是理论推断：
 
-- **国际油气巨头官网**（exxonmobil / shell / bp / totalenergies / chevron）多为服务端渲染，`urllib` 层即可命中，不会白白升级到代理层。
-- **部分国内站点是 TLS 指纹层拦截**（`curl` 表现为 exit 35 握手失败），`curl_cffi` 层可解，无需浏览器。例如中石化上市公司站 `http://www.sinopec.com/listco/`（注意用 `http://` 而非 `https://`，https 证书链握手失败）。
-- **JS 挑战站点 `curl_cffi` 一定解决不了**：中国石油官网返回 HTTP 412，响应体是瑞数的 `$_ts` 混淆脚本加 `__jsluid_s` cookie。实测补齐 Sec-Fetch 等请求头无效，`curl_cffi` 带 `impersonate=chrome124` 打过去**依然 412** —— 这类防护要求真正执行 JS，TLS 指纹伪装天然过不去。只有 `reader_proxy` 或 `playwright` 能拿到正文（实测 `reader_proxy` 可稳定取回该页正文与标题）。中国海油官网（JS 空壳）、OPEC 官网（Cloudflare）同属此类。
-- **`reader_proxy` 也能救 TLS/网络层失败**：`news.cnpc.com.cn` 在本地表现为 SSL 握手超时，经代理照样取回渲染后 HTML。
-- **状态码非 200 不等于"抓不到有用内容"**：例如 IEA 的 `iea.org/reports` 列表页返回 404 但响应体里仍含真实报告链接——这类"入口 URL 不是最终形态"的情况，本模块会按 `_looks_blocked` 规则视为异常并尝试升级引擎，但升级也解决不了非拦截性质的 404。**遇到这种情况不要固定抓取该列表页作为入口，改用 `sitemap.py` 或 `search.py` 拿具体报告的真实 URL**（大概率是 200）。
-- **360 搜索是 IP 层拦截**：可疑 IP 会拿到「访问异常页面」——HTTP **200**、约 10KB、0 个结果块。补 Referer/Sec-Fetch 请求头无效，`curl_cffi` 的 TLS 指纹伪装也过不去，只有 `reader_proxy`（从远端 IP 发起）能拿到真结果。这意味着 **`search.py` 在常见部署环境下会常态化经 `reader_proxy`**，查询词与目标域名会外发第三方并受其配额限制；`WEB_FETCH_NO_READER_PROXY=1` 的部署将**基本失去关键词检索能力**（此时应改用 `sitemap.py`，它直连原站）。
+- **国际油气巨头官网**（exxonmobil / shell / bp / totalenergies / chevron）与 IEA 多为服务端渲染，`http` 层即可命中（约 0.3s），不会白白起浏览器。
+- **JS 挑战站点 `http` 层一定解决不了**：中国石油官网返回 HTTP 412，响应体是瑞数的 `$_ts` 混淆脚本加 `__jsluid_s` cookie。实测补齐 Sec-Fetch 等请求头无效，`curl_cffi` 带 `impersonate=chrome` 打过去**依然 412**——这类防护要求真正执行 JS，TLS 指纹伪装天然过不去。
+- **瑞数站点浏览器能过，但必须有耐心**：`www.cnpc.com.cn` 首跳 412 + 混淆脚本，脚本执行后写 cookie 再**自行重载**，重载期间取内容会抛异常（不等于已通过）。全程实测约需 30–45 秒，20 秒的超时必然误杀。等到正文出来后可稳定取回全文（实测 2762 字）。`news.cnpc.com.cn` 实测 31.6 秒、中国海油（JS 空壳）2.3 秒。挑战强度按页面深度分层：同一站点的**入口页**明显更松，`www.cnpc.com.cn` 首页在目标环境实测只要 1.7–4.6 秒就渲染出 6160 字正文——但超时下限仍按最慢的深层内容页取，别按首页的手感调低。
+- **两段式后缀域名的裸域未必对外服务**：`cnpc.com.cn` 在目标环境直接 DNS 解析失败（`Could not resolve host`），`www.cnpc.com.cn` 才是真正服务内容的主机。`.com.cn`/`.gov.cn`/`.org.cn` 这类两段式后缀在中国政务与央企站点里极常见，而 `sitemap.py::_roots()` 曾经只对 `host.count(".") == 1` 的单段后缀补 `www.` 变体，于是这些站点的 `www.` 主机**从未被尝试过**，最终把「问都没问对主机」误报成 `no_sitemap`。现在只要 host 不以 `www.` 开头就补一个变体，不按点数判断。**「站点没有 X」这种结论，先确认自己问的是不是对的主机。**
+- **PDF 走浏览器必须绕开导航**：`page.goto(pdf)` 抛 `Download is starting`。改用 `context.request.get()`（APIRequestContext）取字节——它共享浏览器上下文已通过挑战的 cookie，且不触发下载行为。实测可正常抽出 14 页、8 万字。
+- **状态码非 200 不等于「抓不到有用内容」**：例如 IEA 的 `iea.org/reports` 列表页返回 404 但响应体里仍含真实报告链接。**遇到这种情况不要固定抓取该列表页作为入口，改用 `sitemap.py` 或 `search.py` 拿具体报告的真实 URL**（大概率是 200）。
+- **附件 URL 只能取自页面，不能靠猜**：政策与报告的核心条款几乎总在附件 PDF 里，正文通知页往往只有一句「现将《XX》印发给你们」。发改委通知 `t20260615_1405852.html` 的附件 `P020260615375309063825.pdf`（7 页三年行动计划全文）就明明白白挂在 HTML 的 `href` 里，`fetch.py` 已把它提进 `attachments` 字段。曾经 clean 模式抹掉全部 href，调用方只能照 gov.cn 的 URL 规律硬编一个 `.../files/7072084.pdf`——它不存在，撞上 404 错误页，最终把首页当政策原文。**要附件就读 `attachments`，绝不推测 URL。**
+- **PDF 认魔数不认后缀**：政府站常把 PDF 标成 `application/octet-stream`，只信 Content-Type 会让 PDF 二进制走进 HTML 分支被解码成乱码。现按 `%PDF-` 魔数兜底判定。反过来，请求 `.pdf` 却拿回 HTML（链接失效/被重定向）会报 `wrong_content_type`，不会把错误页 HTML 当正文返回。
+- **360 搜索是 IP 层拦截，结论随出口 IP 变**：可疑 IP 会拿到「访问异常页面」——HTTP **200**、约 10KB、0 个结果块。补请求头无效，TLS 指纹伪装也无效。干净 IP 下 `browser` 层能拿到真结果；**被拉黑的 IP 连真实浏览器也过不去**（本机实测即如此）。目标环境的同一次诊断里，`http` 层拿到的是拦截页、`browser` 层却过关拿到 7 条结果——**出口 IP 是按会话判定的，不是环境的固定属性**。所以 `search.py` 报 `blocked` 时，要如实告知用户这是当前环境出口 IP 的问题，**不是「该查询没有结果」**，也不要反过来把「这里能过」当成稳定能力去依赖——不要把这条结论写死成某个固定答案。
+- **锚文本必须用 HTML 解析器抽，正则会串位**：同一页面里十余份 PDF 的 URL 常是拼音缩写（`qyshzrbg`/`ndbg`/`hsebg`），单看 URL 分不出哪份是目标，锚文本是唯一的判别依据——但页面里的 `<a>` 大量未闭合，用 `.*?` 跨标签抓锚文本会越过锚点边界，把甲的锚文本绑到乙的 `href` 上。CNPC 首页实测复现过一次：把「集团公司2025年社会责任报告」错配给了一份完全无关的 2021 年合规手册。这种错误**看起来完全正确**——调用方会拿着一个自信的标签去抓错文件，与上面「正文判据必须是正向的」属于同一类事故（把失败伪装成成功）。现在用 `html.parser` 按标签流走，遇到新 `<a>` 自动闭合上一个（浏览器也是这样处理未闭合标签的），锚文本无从串台；图片链接回落 `alt`/`title`，仍为空就留空，**不编造**。
+- **两个发现通道都失效时，入口页锚文本是可靠的兜底**：`cnpc.com.cn` 没有 sitemap、360 又可能被拦——此时抓首页 `fetch.py --urls '["https://www.cnpc.com.cn/"]' --links` 依然走得通：`attachments` 里的锚文本直接标出「集团公司2025年社会责任报告」（端到端确认：该 PDF 96 页，首段「2025 企业社会责任报告…连续第二十年发布」），`links` 里另有「集团公司社会责任报告」通往二级栏目页 `gywm_list.shtml`。两条路都在目标环境验证过。**发现通道失效 ≠ 内容不存在。**
 - **搜索引擎的覆盖率是倾斜的，别把它当唯一发现通道**：360 对国内站点覆盖不错（`site:cnpc.com.cn` 能直接命中年度社会责任报告，含 `news.` 子域），但对海外机构基本没有——`site:iea.org` 只返回 1 条首页，`site:opec.org` 返回的标题是「请稍候…」（360 自己也没抓穿 OPEC 的挑战页）。而 IEA 自己的 `sitemap.xml` 直连 200、含 2926 条报告且每条带 `lastmod`。**枚举类与时间范围类需求应首选 `sitemap.py`**，见下节。
 
 ## 两个发现通道怎么选
@@ -35,26 +54,29 @@
 |---|---|---|
 | 擅长 | 枚举全站某类内容、取最新一期、按时间段筛（带 `lastmod`） | 模糊关键词匹配、跨站找线索 |
 | 覆盖 | 站点自己声明的全量条目 | 取决于搜索引擎索引了什么（海外站几乎为零） |
-| 链路 | 直连原站，不外发第三方，不吃代理配额 | 常态化经 `reader_proxy`，查询词外发 |
-| 失效场景 | 站点没有 sitemap（如 OPEC，报 `no_sitemap`） | 引擎没索引该站；`--no-reader-proxy` 时基本不可用 |
+| 链路 | 固定 `http` 层，一个请求拿到，不必起浏览器 | 常态化经 `browser` 层，且成败取决于出口 IP |
+| 失效场景 | 站点没有 sitemap（如 OPEC，报 `no_sitemap`） | 出口 IP 被搜索引擎拉黑；引擎没索引该站 |
 
 **默认先 `sitemap.py`，不可用再回落 `search.py`。** 两者输出同构（`{"results":[...],"errors":[...]}`），调用方可以统一处理。
 
-关于"再加一个搜索引擎"：实测否决。Bing 即使经 `reader_proxy` 渲染仍返回 0 个结果块，DuckDuckGo html/lite 返回反爬挑战页，百度跳验证码——360 仍是唯一可脚本化的无 Key 搜索端点。检索源的多样性要靠 sitemap 这类**结构化索引源**去补，不是靠堆搜索引擎。
+关于「再加一个搜索引擎」：实测否决。Bing 即使经浏览器渲染仍返回 0 个结果块，DuckDuckGo html/lite 返回反爬挑战页，百度跳验证码——360 仍是唯一可脚本化的无 Key 搜索端点。检索源的多样性要靠 sitemap 这类**结构化索引源**去补，不是靠堆搜索引擎。
 
-## `reader_proxy` 的代价与边界
+## 浏览器的按需安装
 
-这一层把目标 URL 发给第三方服务（默认 `r.jina.ai`）代为渲染，用之前要清楚三件事：
+`http` 层不过关时才触发，一个进程只尝试一次：先 `uv pip install --python <当前解释器> playwright`（`uv run` 建的临时环境默认不带 pip，所以不走 `python -m pip`；失败会退回 pip），**装完立刻重新探测一次**——包缺失时探不到浏览器，不重探就会把已缓存的浏览器又下一遍。确实缺浏览器时才执行 `playwright install chromium --only-shell`。
 
-- **URL 会外发**。内网地址（`localhost`/私有网段/`.local`）由 `_is_private_target` 主动拦截，绝不外发；但公网 URL 本身会暴露给代理方。不希望外发时用 `--no-reader-proxy` 或 `WEB_FETCH_NO_READER_PROXY=1` 关掉这一层。
-- **正文不是原站直出**，而是代理渲染并转换过的结果。`engine_used` 会标成 `reader_proxy`，业务技能引用这类内容时应注明来源差异。
-- **无 Key 有速率限制**。配置 `JINA_API_KEY` 环境变量可提升配额，不配也能用。`WEB_FETCH_READER_ENDPOINT` 可整体换成自建或其他供应商的端点。
+`--only-shell` 不是可选优化：`playwright install chromium` 会**同时**装完整 chromium（约 344MB）和 headless shell（约 192MB），而本模块全程 `headless=True`，那 344MB 一次都用不到。
 
-## `playwright` 的按需安装
+`chromium` 探测是真实启动一次浏览器再关闭（不是仅检查文件是否存在），且优先复用系统已装的 Chrome（`channel="chrome"`），命中就完全免下载。`--no-auto-install` 或 `WEB_FETCH_NO_AUTO_INSTALL=1` 可禁止安装（CI、离线、按流量计费的环境）。
 
-前三层都不过关时才触发，一个进程只尝试一次：先 `uv pip install --python <当前解释器> playwright`（`uv run` 建的临时环境默认不带 pip，所以不走 `python -m pip`；失败会退回 pip），再 `playwright install chromium`。下载约 150MB，进度打在 stderr，装不上会如实报错并给出手动命令，不静默吞掉。`--no-auto-install` 或 `WEB_FETCH_NO_AUTO_INSTALL=1` 可禁止（CI、离线、按流量计费的环境）。
+**一个浏览器实例服务整批 URL**：`fetch_many` 把需要渲染的 URL 收拢到同一个 browser + context 下，多个 page 经 `asyncio.gather` 并发（`BROWSER_CONCURRENCY` 上限）。曾经是每个 URL 起一个 chromium，5 并发就是 5 个浏览器进程。实测 launch 只要 0.3s，瓶颈在页面加载而非启动。
 
-`chromium` 探测是真实启动一次浏览器再关闭（不是仅检查文件是否存在），且优先复用系统已装的 Chrome（`channel="chrome"`），能省掉这次下载。
+### 关于用 MCP 或 npm 装浏览器
+
+都试过，都否决：
+
+- **MCP 不可行**：`engines.py` 是 `uv run` 拉起的独立 Python 子进程，MCP 工具只存在于宿主 agent 的工具层，子进程拿不到。而本技能的立身前提正是「宿主什么都不提供也能跑」，依赖 MCP 等于推翻它。`@playwright/mcp` 自己也要下同一份浏览器。
+- **npm 无收益**：node 版与 Python 版 playwright 共用同一个浏览器缓存目录（`~/.cache/ms-playwright`），但下载量相同、Python 侧仍需 playwright 包来驱动，且浏览器 build revision 按 playwright 版本 pin 死，版本错配反而会各下一份。
 
 ## `--check-env`
 
@@ -62,8 +84,34 @@
 uv run scripts/fetch.py --check-env
 ```
 
-输出各层可用性 JSON（`urllib`/`curl_cffi`/`reader_proxy`/`playwright`/`chromium`）以及代理端点与是否配置了 Key，结果按进程缓存一次。业务技能在解读 `fetch.py`/`search.py` 输出里的 `degraded: true` 或 `engines_available` 字段时，应先跑一次 `--check-env` 确认当前部署环境的能力上限，而不是假设各层都可用。
+输出各层可用性 JSON（`http`/`browser`/`chromium`），结果按进程缓存一次。业务技能在解读 `fetch.py`/`search.py` 输出里的 `degraded: true` 或 `engines_available` 字段时，应先跑一次 `--check-env` 确认当前部署环境的能力上限，而不是假设两层都可用。
+
+## `diagnose.py`：单站全链路诊断
+
+```bash
+uv run scripts/diagnose.py --site cnpc.com.cn --query "2025 社会责任报告" --match "社会责任报告"
+```
+
+与 `--check-env` 的分工：`--check-env` 只答「引擎装没装」，`diagnose.py` 答「**这个站在这个环境里到底卡在哪一层、卡的是什么**」。一条命令跑完 sitemap 发现、360 检索、入口页 http/browser 双层抓取、页内链接与目标附件端到端抓取七个步骤，输出一份可直接粘回的报告（人读报告走 stderr、JSON 走 stdout）。
+
+关键设计是**绕开判定层、直取原始事实**：`fetch_bytes` 的降级链会把失败压成 `{kind, detail}`，丢掉诊断最需要的东西（响应字节数、页面标题、耗时、命中了哪条挑战特征）。所以它直接调 `_fetch_http`/`_browser_fetch` 逐层单跑单计时拿原始响应，再单独调 `_blocked_reason` 报告「判定层会怎么判」。报告里因此并排两行：原始事实与判定结论。**二者不一致，缺陷在判定层；一致，缺陷在别处。** 上面两段式后缀域名的 DNS 失败与锚文本串位，都是这么揪出来的——抓取成败高度依赖部署环境，**任何结论都必须在目标环境里取，本机跑出来的不算数**。
+
+## 失败要说清是哪一层、为什么
+
+失败结果带 `attempts: [{engine, kind, detail}]`，逐层记录。`kind` 取值：
+
+| kind | 含义 |
+|------|------|
+| `http_error` | HTTP ≥ 400（`detail` 带状态码） |
+| `challenge` | 命中反爬/JS 挑战页特征 |
+| `empty_body` | 响应体过小，疑似 JS 空壳或挑战未通过 |
+| `unexpected_structure` | HTTP 200 但不符合 `expect` 哨兵，疑似拦截页或站点改版 |
+| `wrong_content_type` | 请求 `.pdf` 却拿回非 PDF 内容，多为链接失效或被重定向到错误页 |
+| `timeout` / `network` | 超时 / 其他网络层异常 |
+| `too_large` | 超过 30MB 上限，已跳过下载 |
+
+把所有失败压成一句「所有引擎均失败」会让人无从判断到底是站点拦截、网络超时还是环境缺层——`attempts` 就是为此存在的，调用方报错时应直接引用它，不要自己猜原因。
 
 ## 依赖
 
-`pypdf` 与 `curl_cffi` 通过 PEP 723 内联声明，`uv run` 首次执行自动安装（体积小，秒级）。`reader_proxy` 只用标准库。`playwright` 不进依赖块（包 40MB + 浏览器 150MB），改为链尾兜底时按需安装，避免拖慢每一次普通抓取。
+`pypdf` 与 `curl_cffi` 通过 PEP 723 内联声明，`uv run` 首次执行自动安装（体积小，秒级）。`playwright` 不进依赖块（包 40MB + 浏览器 192MB），改为 `http` 层不过关时按需安装，避免拖慢每一次普通抓取。
