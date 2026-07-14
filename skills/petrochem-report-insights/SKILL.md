@@ -32,12 +32,13 @@ metadata:
           --max-results 5
           用于模糊关键词匹配，国内机构（cnpc.com.cn/sinopec.com）是它的强项。
        kind=no_match 才是真无结果，可换关键词重试；kind=blocked/network_unreachable 说明该
-       机构当前环境下抓不到，如实告知用户，不要编造内容替代。
+       机构当前部署环境下抓不到（360 是 IP 层拦截，成败取决于出口 IP），如实告知用户，
+       不要当成「该机构没发这份报告」，更不要编造内容替代。
     3. 抓取正文：uv run ../web-fetch/scripts/fetch.py --urls '["...", "..."]' --max-chars 8000
        type=pdf 且 low_confidence=true 时该条不可靠，如实告知而非当正文分析；
-       degraded=true 说明该 URL 依赖增强引擎，环境缺层会导致下次不可用；
-       engine_used=reader_proxy 说明正文经远端渲染代理转交、非原站直出（国内企业官网多属此类），
-       报告的信息来源一栏须注明这一点。
+       degraded=true 说明该 URL 必须靠浏览器渲染才拿得到（国内企业官网多属此类），
+       部署环境装不了浏览器时这类会失败；
+       失败结果带 attempts（逐层 kind/detail），报错时直接引用它，不要自己猜原因。
     4. 按六维度分析：核心数据摘录、关键结论与观点（区分机构预测 vs 已发生事实）、市场趋势与
        技术方向、投资与项目动态、风险与不确定性、产业链影响（上游/中游/下游）。
     5. 读 references/report-formats.md，按场景选格式 A（深度分析）/ B（速览）/ C（多机构对比）。
@@ -69,7 +70,7 @@ uv run scripts/sources.py --show iea      # 打印单条机构详情
 
 发现候选统一走 `web-fetch` 的两个通道（都用机构的 `site_domain`），不针对单个机构维护官网抓取正则——各家官网改版频繁，维护一堆正则性价比太低。sitemap 是标准协议、靠 robots.txt 自动发现，一次实现全域通用，不违反这条决策。
 
-抓取侧：国际油气巨头官网多为服务端渲染，`urllib` 层直接拿到；国内企业官网普遍有反爬——中国石油官网是瑞数 JS 挑战（HTTP 412，`curl_cffi` 也过不去）、中国海油是 JS 空壳，这类站点由 `web-fetch` 的 `reader_proxy` 层（远端渲染代理）或 `playwright` 兜底拿到正文，实测可稳定取回。
+抓取侧：国际油气巨头官网与 IEA 多为服务端渲染，`http` 层直接拿到（约 0.3s）；国内企业官网普遍有反爬——中国石油官网是瑞数 JS 挑战（HTTP 412，TLS 指纹伪装过不去）、中国海油是 JS 空壳，这类站点由 `web-fetch` 的 `browser` 层渲染拿到正文，实测可稳定取回（瑞数需 30–45 秒等页面自行重载，属正常耗时）。
 
 ## 工作流程
 
@@ -88,9 +89,9 @@ uv run ../web-fetch/scripts/search.py --query "energy transition" --site shell.c
 
 `sitemap.py` 直连原站枚举站点条目，结果带 `lastmod` 且最新在前。**"最新一期""某年以来的"这类需求必走这条；海外机构（IEA/Shell 等）也必须走这条**——实测 360 对 `site:iea.org` 只返回 1 条首页，而 IEA 自己的 sitemap 里有 2926 条报告。
 
-`search.py` 用于模糊关键词匹配，或站点没有 sitemap 时（如 `opec.org`）。国内机构（`cnpc.com.cn`、`sinopec.com`）是它的强项——实测 `site:cnpc.com.cn` 能直接命中年度社会责任报告，`news.` 子域也在覆盖内。注意这条路会经 `reader_proxy` 把查询词外发第三方。
+`search.py` 用于模糊关键词匹配，或站点没有 sitemap 时（如 `opec.org`）。国内机构（`cnpc.com.cn`、`sinopec.com`）是它的强项——实测 `site:cnpc.com.cn` 能直接命中年度社会责任报告，`news.` 子域也在覆盖内。
 
-`errors[].kind`：`no_sitemap` 回落 search；`no_match` 才是真无结果（可换关键词重试）；`blocked`/`network_unreachable` 说明该机构当前部署环境下抓不到（先跑 `uv run ../web-fetch/scripts/fetch.py --check-env` 确认缺哪层引擎），如实告知用户，不要编造内容替代。
+`errors[].kind`：`no_sitemap` 回落 search；`no_match` 才是真无结果（可换关键词重试）；`blocked`/`network_unreachable` 说明该机构当前部署环境下抓不到（先跑 `uv run ../web-fetch/scripts/fetch.py --check-env` 确认引擎是否齐全；360 是 IP 层拦截，换个出口 IP 结论就变），如实告知用户，不要编造内容替代。
 
 ### Step 3：抓取正文
 
@@ -119,9 +120,9 @@ uv run ../web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]' --m
 - 数据口径不一致（如 IEA 用 mb/d、企业年报用吨）：并列展示并注明单位，不强行换算统一
 - 预测数据：必须注明发布时点（"截至 2026 年 X 月的预测"），不与已发生事实混淆
 - PDF 抽取低置信度：如实告知，建议用户直接查阅原文链接
-- 检索/抓取受阻：区分是"该机构无匹配结果"（`no_match`，罕见）还是"当前环境各层引擎都过不了该站点"（`blocked`），后者需如实告知环境限制，不得当作"没有这份报告"
+- 检索/抓取受阻：区分是"该机构无匹配结果"（`no_match`，罕见）还是"当前环境两层引擎都过不了该站点"（`blocked`），后者需如实告知环境限制，不得当作"没有这份报告"；失败结果里的 `attempts` 已逐层写明原因，直接引用
 - 海外机构用 `search.py` 搜不到东西：这是 360 的索引覆盖问题，不是"该机构没发报告"——改走 `sitemap.py`
-- 正文经远端渲染代理获取（`engine_used=reader_proxy`）：内容不是原站直出，须在信息来源中注明，关键数字建议对照原文链接复核
+- 抓取耗时较长（国内企业官网 30–45 秒）：这是瑞数挑战需要浏览器等页面自行重载，属正常现象，不要中途改用其他来源替代
 
 ## 使用示例
 

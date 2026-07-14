@@ -13,12 +13,12 @@ Bing/cn.bing 是 JS 空壳（0 个结果块）、百度跳验证码——唯 360
 真实结果块结构（已用样本核实，导航/反馈等站内链接不在此结构内，天然被排除）：
   <h3 class="res-title ..."><a href="..." data-mdurl="真实外链" ...>标题(含 <em> 高亮)</a></h3>
 
-底层抓取复用 engines.fetch_bytes，命中验证码/反爬时会按四层引擎自动升级。
+底层抓取复用 engines.fetch_bytes，http 层拿不到时自动升级到 browser 层。
 
-360 会对可疑 IP 直接返回「访问异常页面」（HTTP 200、约 10KB、0 个结果块）。实测这是
-IP 层拦截：补 Referer/Sec-Fetch 等请求头无效，curl_cffi 的 TLS 指纹伪装也过不去，只有
-reader_proxy（从远端 IP 发起）能拿到真结果——所以本模块在常见部署环境下会常态化经
-reader_proxy，查询词与目标域名会外发给渲染代理，且受其配额限制。
+360 会对可疑 IP 返回「访问异常页面」（HTTP 200、约 10KB、0 个结果块）。这是 IP 层拦截：
+补 Referer/Sec-Fetch 等请求头无效，curl_cffi 的 TLS 指纹伪装也过不去。真实浏览器能否过关
+取决于出口 IP——干净 IP 下 browser 层可拿到真结果，被拉黑的 IP 连浏览器也过不去。所以
+blocked 要如实告知用户是环境的出口 IP 问题，不是"该查询没有结果"。
 
 拦截页与真 SERP 靠 _SERP_RE 哨兵区分，不能靠"解析出 0 条结果"来判断：360 对胡乱查询
 也会返回模糊结果（实测 7 条），真正的零结果几乎不出现，所以"0 条"在现实中基本等同于
@@ -61,16 +61,28 @@ def _is_own_domain(url: str) -> bool:
     return any(host == d or host.endswith("." + d) for d in _OWN_DOMAINS)
 
 
+# engines 的逐层失败 kind -> 本模块对外的 errors[].kind
+_KIND_MAP = {
+    "challenge": "blocked",
+    "unexpected_structure": "blocked",  # 拿到 200 但不是 SERP，即 360 的「访问异常页面」
+    "empty_body": "blocked",
+    "timeout": "network_unreachable",
+    "network": "network_unreachable",
+    "http_error": "http_error",
+    "too_large": "invalid_response",
+}
+
+
 def _classify_fetch_error(fetched: dict) -> tuple[str, str]:
-    """把 fetch_bytes 的失败结果归类为 errors[].kind。"""
-    error = fetched.get("error", "")
-    if "疑似反爬" in error or "验证" in error or "访问异常" in error:
-        return "blocked", error
-    if any(k in error for k in ("URLError", "TimeoutError", "ConnectionError", "OSError", "SSLError", "CertificateVerifyError")):
-        return "network_unreachable", error
-    if "HTTPError" in error or error.startswith("HTTP "):
-        return "http_error", error
-    return "invalid_response", error
+    """把 fetch_bytes 的失败结果归类为 errors[].kind。
+
+    以最后一层引擎的失败原因为准——它代表了能力上限的那一层的结论。
+    """
+    attempts = fetched.get("attempts") or []
+    detail = fetched.get("error", "")
+    if not attempts:
+        return "invalid_response", detail
+    return _KIND_MAP.get(attempts[-1]["kind"], "invalid_response"), detail
 
 
 def search(query: str, site: str, max_results: int, engine: str) -> dict:

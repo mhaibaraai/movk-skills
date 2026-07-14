@@ -30,11 +30,19 @@ metadata:
        uv run ../web-fetch/scripts/search.py --query "<关键词>" --site <errors[].site_domain>
        兜底，仍无结果再回落宿主内置 WebSearch/WebFetch；绝不可当作"没有政策"写进结论。
     3. 抓取正文：uv run ../web-fetch/scripts/fetch.py --urls '["...", "..."]' --max-chars 8000
-       每条含 type(html|pdf)/engine_used/degraded/text。政策附件多为 PDF，type=pdf 且
-       low_confidence=true 表示疑似加密或扫描件，抽取不可靠，如实告知用户而非当正文解读。
-       engine_used=reader_proxy 表示正文经远端渲染代理转交、非原站直出，须在信息来源注明；
-       法条原文、文号、日期、处罚幅度这类关键表述建议对照原文链接复核后再引用。
-       抓取普遍受阻时先跑 uv run ../web-fetch/scripts/fetch.py --check-env 确认环境缺哪层引擎。
+       每条含 type(html|pdf)/engine_used/degraded/text。政策核心条款（指标、期限、处罚）几乎
+       总在附件 PDF 里，正文通知页往往只有一句「现将《XX》印发给你们」，务必分两步取全文：
+         a. 抓正文页，读结果里的 attachments 字段（[{url, ext}]，页面确有附件时才出现）；
+         b. 把 attachments 里的 .pdf 再交给 fetch.py 抓全文，作为条款解读的依据。
+            .ofd 是政务版式文件抽不了，同名 .pdf 通常并存，优先取 .pdf。
+       附件 URL 只能来自 attachments 字段或正文页原文，绝不可按 gov.cn/部委站的 URL 命名
+       规律去推测——推测出的 URL 命中站点错误页时，返回的可能是一个内容完全无关的页面（如
+       中国政府网首页）当成「政策 PDF」。type=pdf 且 low_confidence=true 表示疑似加密或扫描件，
+       抽取不可靠，如实告知用户而非当正文解读。degraded=true 表示该 URL 必须靠浏览器渲染才
+       拿得到；法条原文、文号、日期、处罚幅度这类关键表述建议对照原文链接复核后再引用。失败
+       结果带 attempts（逐层 kind/detail，含 wrong_content_type=请求 PDF 却拿回 HTML），报错时
+       直接引用它。用管道解析 fetch.py 的 JSON 输出时不要加 2>&1（进度日志走 stderr，会污染
+       JSON）。抓取普遍受阻时先跑 uv run ../web-fetch/scripts/fetch.py --check-env 确认环境缺哪层引擎。
     4. 分析六个维度：政策层级(法律/行政法规/部门规章/规范性文件)、核心条款、适用范围、
        时间节点(实施日期/过渡期/整改期限)、处罚条款、企业影响。
     5. 读 references/report-formats.md，按解读深度选格式 A(深度解读)/B(要点速览)/C(多政策对比) 输出。
@@ -43,6 +51,7 @@ metadata:
     区分政策原文表述与解读意见，信息来源须注明政策文件库/官网列表页/360 检索补充；
     标注征求意见稿与已废止政策(废止状态从正文判定，检索接口不返回时效性)；
     条款模糊标注「待进一步明确」；未从原文获取到的字段填「未提及」，不编造文号、日期与处罚条款；
+    附件 URL 只取自 attachments 或页面原文，绝不按 URL 命名规律推测；
     不臆造抓取失败的原因，直接引用 error/errors[].detail 原文；
     解读末尾注明具体合规事项请咨询专业法律顾问。所有 uv run 命令不得加 timeout 参数。
 ---
@@ -81,7 +90,7 @@ uv run scripts/departments.py --show ndrc     # 打印单个部委详情
 uv run scripts/search.py --dept ndrc,miit,mem --keywords "节能减排" --max-results 5
 ```
 
-脚本构造政策文件库检索接口与官网列表页的 URL，交给 `web-fetch` 一次批量抓原始响应体（并发与四层引擎降级由基座负责），再解析成候选。`--raw` 拿到的响应体可能来自 `reader_proxy` 层（远端渲染代理输出的渲染后 HTML，而非原站字节），JSON 接口与列表页的解析不受影响，但引用正文时须注明来源。
+脚本构造政策文件库检索接口与官网列表页的 URL，交给 `web-fetch` 一次批量抓原始响应体（并发与两层引擎降级由基座负责），再解析成候选。`--raw` 拿到的响应体可能来自 `browser` 层（浏览器渲染后的 HTML，而非原站字节），JSON 接口与列表页的解析不受影响。
 
 输出为 `{"results": [...], "errors": [...]}` 对象：
 
@@ -98,15 +107,20 @@ uv run ../web-fetch/scripts/search.py --query "节能减排" --site ndrc.gov.cn 
 
 360 检索也无结果，再回落宿主内置 WebSearch / WebFetch；仍失败见「特殊处理」。
 
-### Step 3：抓取正文
+### Step 3：抓取正文与附件
 
-把筛选后的候选 URL 交给基座，批量获取清洗后的纯文本：
+政策的核心条款——量化指标、实施与整改期限、处罚幅度——几乎总在**附件 PDF** 里，正文通知页往往只有一句「现将《XX》印发给你们，请认真贯彻执行」。所以抓取要分两步：
 
 ```bash
-uv run ../web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
+# a. 抓正文页，读结果里的 attachments
+uv run ../web-fetch/scripts/fetch.py --urls '["https://...通知页"]' --max-chars 8000
+# b. 把 attachments 里的 .pdf 再抓一次，取全文
+uv run ../web-fetch/scripts/fetch.py --urls '["https://...附件.pdf"]' --max-chars 8000
 ```
 
-`type` 区分 `html` / `pdf`（政策附件常为 PDF，按 Content-Type 判定而非后缀）。PDF 结果带 `low_confidence=true` 表示疑似加密或扫描件，抽取不可靠。抓取普遍受阻时先跑 `uv run ../web-fetch/scripts/fetch.py --check-env` 确认当前环境的引擎能力上限，如实告知而非猜测原因。
+正文页结果的 `attachments` 字段（`[{url, ext}]`，页面确有附件时才出现）已把附件链接绝对化去重。**附件 URL 只能来自这里或正文页原文，绝不可按 `gov.cn` / 部委站的 URL 命名规律去推测**——推测出的 URL 命中站点错误页时，基座会如实报 `http_error` 或 `wrong_content_type`，但若你不核对 `type`/`title` 就拿去解读，很可能把一个内容无关的页面（如中国政府网首页）当成政策原文。`.ofd` 是政务版式文件，`pypdf` 抽不了，同名 `.pdf` 通常并存，优先取 `.pdf`。
+
+`type` 区分 `html` / `pdf`（按 Content-Type 与 `%PDF-` 魔数判定，不看后缀）。PDF 结果带 `low_confidence=true` 表示疑似加密或扫描件，抽取不可靠。用管道把 `fetch.py` 的 JSON 喂给解析脚本时**不要**加 `2>&1`——进度日志走 stderr，混进 stdout 会让 JSON 解析崩溃。抓取普遍受阻时先跑 `uv run ../web-fetch/scripts/fetch.py --check-env` 确认当前环境的引擎能力上限，如实告知而非猜测原因。
 
 ### Step 4：分析与输出
 
@@ -117,6 +131,7 @@ uv run ../web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]' --m
 ## 质量要求
 
 - 准确性：严格基于政策原文解读，不扩大或缩小政策范围
+- 溯源性：附件 URL 只取自 `attachments` 字段或页面原文，绝不按 URL 命名规律推测；解读附件前先核对结果的 `type` 与 `title` 确属该政策，不把无关页面当原文
 - 专业性：区分「应当」（强制）与「鼓励」（引导）等法律术语
 - 客观性：区分政策原文表述与解读意见，在信息来源中注明政策文件库、官网列表页还是 360 检索补充
 - 实用性：落到企业合规操作层面，给出可执行建议
@@ -129,6 +144,7 @@ uv run ../web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]' --m
 - 地方配套政策：提示地方实施细则可能存在差异
 - 条款表述模糊：标注「待进一步明确」，建议关注后续细则或官方解读
 - PDF 附件低置信度：如实告知抽取不可靠，建议用户直接查阅原文链接，不强行分析空文本
+- 附件链接缺失：正文页结果无 `attachments`、正文里也找不到附件链接时，如实说明「未获取到附件原文」并只就通知正文可见的内容解读，绝不按 URL 命名规律硬编附件地址去抓——命中站点错误页会返回内容无关的页面
 - 检索失败：按 Step 2 的兜底顺序（换关键词 → 360 检索 → 内置 WebSearch）逐级降级；三级都无结果则引导用户提供更具体的关键词或直接上传本地政策文档
 - 每份解读末尾注明：以上内容为政策要点梳理，具体合规事项请咨询专业法律顾问
 
@@ -136,7 +152,7 @@ uv run ../web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]' --m
 
 > 最近发改委关于节能减排有什么新政策？帮我解读一下
 
-部委 `ndrc`，领域节能减排 → `search.py --dept ndrc --keywords "节能减排"` → 基座 `fetch.py` 抓正文 → 格式 A 输出。
+部委 `ndrc`，领域节能减排 → `search.py --dept ndrc --keywords "节能减排"` → 基座 `fetch.py` 抓通知正文页 → 从结果 `attachments` 取附件 `.pdf` → `fetch.py` 抓附件全文 → 格式 A 输出。
 
 > 工信部和应急管理部关于安全生产的最新规定有哪些？对化工企业有什么影响？
 

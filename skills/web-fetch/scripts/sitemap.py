@@ -8,7 +8,7 @@ sitemap 发现层：域名 [+路径过滤 +时间范围] -> 候选 URL。零 API
 与 search.py 的分工：搜索引擎擅长模糊关键词匹配，但覆盖率取决于它索引了什么——
 实测 360 对 site:iea.org 只返回 1 条首页，而 IEA 自己的 sitemap 里有 2926 条报告，
 每条还带 <lastmod> 日期。所以"枚举某站某类内容"「取最新一期」「筛某时间段」这类需求
-应当首选本模块：覆盖全、带日期、直连原站不外发第三方、也不吃渲染代理的配额。
+应当首选本模块：覆盖全、带日期、一个 HTTP 请求拿到，不必启动浏览器。
 
 站点没有 sitemap、或 sitemap 被反爬挡住时，才回落到 search.py。
 
@@ -37,10 +37,9 @@ from engines import ENGINE_NAMES, fetch_bytes
 
 MAX_INDEX_FETCH = 20  # sitemapindex 最多展开的子 sitemap 数，避免大站把沙箱拖垮
 
-# sitemap 是静态 XML，后两层引擎对它天然无用，且各有害处：reader_proxy 是内容转换代理，
-# 会把 XML 渲染成 HTML 视图从而毁掉 <loc> 解析；playwright 同理，还会为了一个 404 探测
-# 触发 150MB 的 chromium 下载。所以本模块把引擎链收窄到前两层。
-SITEMAP_ENGINES = ("urllib", "curl_cffi")
+# sitemap 是静态 XML，浏览器层对它天然无用且有害：Chromium 会把 XML 渲染成自己的树视图
+# DOM，毁掉 <loc> 解析，还会为了一个 404 探测触发浏览器下载。所以本模块固定走 http 层。
+SITEMAP_ENGINE = "http"
 
 _LOC_RE = re.compile(r"<loc>\s*([^<\s]+)\s*</loc>", re.I)
 _ENTRY_RE = re.compile(r"<(url|sitemap)\b.*?</\1>", re.I | re.S)
@@ -61,43 +60,48 @@ def _decompress_gz(data: bytes) -> bytes:
         return data
 
 
+# engines 的逐层失败 kind -> 本模块对外的 errors[].kind
+_KIND_MAP = {
+    "challenge": "blocked",
+    "empty_body": "blocked",
+    "unexpected_structure": "blocked",
+    "timeout": "network_unreachable",
+    "network": "network_unreachable",
+    "http_error": "http_error",
+    "too_large": "invalid_response",
+}
+
+
 def _fetch_xml(url: str, engine: str) -> tuple[str, dict | None]:
-    """取一份 sitemap/robots，返回 (文本, 错误)。错误为 None 表示成功。
+    """取一份 sitemap/robots，返回 (文本, 错误)。错误为 None 表示成功。"""
+    fetched = fetch_bytes(url, engine=engine)
+    if fetched.get("data") is not None:
+        return _decompress_gz(fetched["data"]).decode("utf-8", errors="replace"), None
 
-    engine=auto 时只走 SITEMAP_ENGINES，逐层试到第一个成功为止——不能直接把 auto 交给
-    fetch_bytes，那会把链一路升到 playwright（见 SITEMAP_ENGINES 注释）。
-    """
-    chain = SITEMAP_ENGINES if engine == "auto" else (engine,)
-    last: dict = {}
-    for eng in chain:
-        fetched = fetch_bytes(url, engine=eng)
-        if fetched.get("data") is not None:
-            return _decompress_gz(fetched["data"]).decode("utf-8", errors="replace"), None
-        last = fetched
-    error = last.get("error", "")
-    return "", {"kind": _classify(error), "detail": error}
-
-
-def _classify(error: str) -> str:
-    if "疑似反爬" in error or "验证" in error or "访问异常" in error:
-        return "blocked"
-    if any(k in error for k in ("URLError", "TimeoutError", "ConnectionError", "OSError", "SSLError")):
-        return "network_unreachable"
-    if "HTTPError" in error or error.startswith("HTTP "):
-        return "http_error"
-    return "invalid_response"
+    attempts = fetched.get("attempts") or []
+    detail = fetched.get("error", "")
+    kind = _KIND_MAP.get(attempts[-1]["kind"], "invalid_response") if attempts else "invalid_response"
+    return "", {"kind": kind, "detail": detail}
 
 
 def _roots(site: str) -> list[str]:
-    """站点根 URL 候选。裸顶级域未必对外服务（如 ndrc.gov.cn 连不上、www.ndrc.gov.cn 才是本体），
-    所以顶级域要补一个 www. 变体。"""
+    """站点根 URL 候选。裸域名未必对外服务（如 ndrc.gov.cn 连不上、www.ndrc.gov.cn 才是本体），
+    所以要补一个 www. 变体。
+
+    曾经只对 host.count(".") == 1 的单段后缀（example.com）补 www，两段式后缀（.com.cn/
+    .gov.cn/.org.cn 一类，中国政务/央企站点极常见）被漏判——cnpc.com.cn 实测裸域直接
+    DNS 解析失败，www.cnpc.com.cn 才是真正服务内容的主机，但因为有 2 个点，www 变体
+    从未被尝试，最终把"问都没问对主机"误报成"站点没有 sitemap"。现在不按点数判断，
+    只要不是已经带 www. 前缀就补一个变体，对子域名站点（news.cnpc.com.cn）虽会多探测
+    一个通常不存在的 www.news.cnpc.com.cn，但探测失败代价很低，换来的是不会再漏判。
+    """
     base = site if "://" in site else f"https://{site}"
     parsed = urllib.parse.urlsplit(base)
     scheme = parsed.scheme or "https"
     host = parsed.netloc or parsed.path
 
     roots = [f"{scheme}://{host}"]
-    if host.count(".") == 1:  # 顶级域（example.com），补 www
+    if not host.startswith("www."):
         roots.append(f"{scheme}://www.{host}")
     return roots
 
@@ -111,7 +115,9 @@ def discover(site: str, engine: str) -> tuple[list[str], dict | None]:
     blocked: dict | None = None
 
     for root in _roots(site):
-        robots, _ = _fetch_xml(f"{root}/robots.txt", engine)
+        robots, robots_error = _fetch_xml(f"{root}/robots.txt", engine)
+        if robots_error and robots_error["kind"] == "blocked":
+            blocked = robots_error  # robots.txt 本身被拦截也是"被拦截"，不能悄悄吞掉
         declared = _ROBOTS_SITEMAP_RE.findall(robots) if robots else []
         if declared:
             return declared, None
@@ -201,8 +207,8 @@ def main() -> None:
     parser.add_argument("--match", "-m", default="", help="URL 过滤正则，如 /reports/")
     parser.add_argument("--since", default="", help="按 lastmod 筛起始日期，格式 YYYY-MM-DD")
     parser.add_argument("--max-results", "-n", type=int, default=20)
-    parser.add_argument("--engine", choices=["auto", *ENGINE_NAMES], default="auto",
-                        help=f"auto 只走 {'/'.join(SITEMAP_ENGINES)}（后两层对静态 XML 无用，见源码注释）")
+    parser.add_argument("--engine", choices=["auto", *ENGINE_NAMES], default=SITEMAP_ENGINE,
+                        help="默认固定 http：静态 XML 经浏览器渲染会被毁掉（见源码注释）")
     args = parser.parse_args()
 
     print(f"sitemap: {args.site} match={args.match or '(不限)'} since={args.since or '(不限)'}...", file=sys.stderr)
