@@ -268,6 +268,89 @@ class TestAttachments:
         assert "attachments" not in engines._clean_one(fetched, max_chars=8000, max_pages=30)
 
 
+class TestExtractLinksAnchorText:
+    """锚文本是同页多份 PDF 之间唯一的判别依据，串位比缺失更危险。
+
+    CNPC 首页实测：附件 5 条，URL 全是拼音缩写路径（qyshzrbg/ndbg/hsebg），单看 URL 分不出
+    哪条是目标；而页面里的 <a> 大量未闭合，用正则跨标签抓锚文本会越过锚点边界，把「集团公司
+    2025年社会责任报告」绑到相邻那份 2021 年合规手册上——调用方会拿着一个自信的标签去抓错文件。
+    下面的样本就是这个结构。
+    """
+
+    BASE = "https://www.cnpc.com.cn/"
+    PAGE = (
+        '<html><body>'
+        '<a href="/dxcy/2021hgsc/index.shtml">2021年合规手册'  # 未闭合，浏览器遇新 <a> 自动断开
+        '<a href="/cnpc/qyshzrbg/202506/P020250612.pdf">集团公司2025年社会责任报告</a>'
+        '<a href="/cnpc/ndbg/202504/P020250408.pdf"><img src="/img/cover.png" alt="年度报告"></a>'
+        '<a href="/cnpc/hsebg/202503/P020250320.pdf"><img src="/img/hse.png"></a>'
+        '<a href="https://www.gov.cn/">中国政府网</a>'
+        '<a href="https://www.sasac.gov.cn/report.pdf">国资委引用报告</a>'
+        '<a href="https://news.cnpc.com.cn/system/2025/list.shtml">集团要闻</a>'
+        '<a href="/nav/icon.shtml"></a>'
+        '<a href="javascript:void(0)">展开</a>'
+        '</body></html>'
+    )
+
+    def _links(self):
+        return engines.extract_links(self.PAGE, self.BASE)
+
+    def test_anchor_text_not_bound_to_neighbouring_link(self):
+        """未闭合的 <a> 不得让锚文本跨越锚点边界——这正是正则实现踩过的坑。"""
+        attachments, pages = self._links()
+        report = next(a for a in attachments if a["url"].endswith("P020250612.pdf"))
+        assert report["text"] == "集团公司2025年社会责任报告"
+        manual = next(p for p in pages if p["url"].endswith("/dxcy/2021hgsc/index.shtml"))
+        assert manual["text"] == "2021年合规手册"
+
+    def test_image_link_falls_back_to_alt(self):
+        attachments, _ = self._links()
+        annual = next(a for a in attachments if a["url"].endswith("P020250408.pdf"))
+        assert annual["text"] == "年度报告"
+
+    def test_image_link_without_alt_stays_empty_rather_than_guessed(self):
+        """猜不出来就留空。编一个锚文本比没有锚文本更糟：调用方会信它。"""
+        attachments, _ = self._links()
+        hse = next(a for a in attachments if a["url"].endswith("P020250320.pdf"))
+        assert hse["text"] == ""
+
+    def test_offsite_attachment_kept(self):
+        """其他域名的附件仍可能是合规引用，附件不受同域限制。"""
+        attachments, _ = self._links()
+        assert any(a["url"] == "https://www.sasac.gov.cn/report.pdf" for a in attachments)
+
+    def test_offsite_page_link_excluded(self):
+        _, pages = self._links()
+        assert not any("gov.cn" in p["url"] for p in pages)
+
+    def test_subdomain_page_link_kept(self):
+        _, pages = self._links()
+        assert any(p["url"].startswith("https://news.cnpc.com.cn/") for p in pages)
+
+    def test_page_link_without_anchor_text_dropped(self):
+        """导航图标一类无锚文本的链接对调用方没有判别价值。"""
+        _, pages = self._links()
+        assert all(p["text"] for p in pages)
+        assert not any("/nav/icon.shtml" in p["url"] for p in pages)
+
+    def test_javascript_scheme_skipped(self):
+        _, pages = self._links()
+        assert not any(p["url"].startswith("javascript:") for p in pages)
+
+    def test_extract_attachments_stays_backward_compatible(self):
+        attachments, _ = self._links()
+        assert engines.extract_attachments(self.PAGE, self.BASE) == attachments
+        assert set(attachments[0]) == {"url", "ext", "text"}
+
+    def test_links_surfaced_only_when_requested(self):
+        fetched = {"url": self.BASE, "data": self.PAGE.encode() + "正文 ".encode() * 200,
+                   "content_type": "text/html; charset=utf-8", "status": 200,
+                   "engine_used": "browser", "attempts": []}
+        assert "links" not in engines._clean_one(fetched, max_chars=8000, max_pages=30)
+        result = engines._clean_one(fetched, max_chars=8000, max_pages=30, include_links=True)
+        assert any(p["text"] == "集团要闻" for p in result["links"])
+
+
 class TestDownloadDetection:
     """浏览器 goto 一个 PDF 会抛 Download is starting —— 必须识别并改走请求上下文取字节。"""
 

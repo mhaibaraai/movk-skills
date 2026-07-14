@@ -12,7 +12,7 @@ CLI:
   uv run scripts/fetch.py --urls '["https://...json 接口或列表页"]' --raw
   uv run scripts/fetch.py --check-env
 
-输出 JSON: [{url, engine_used, type, title, length, truncated?, degraded, attachments?, text}
+输出 JSON: [{url, engine_used, type, title, length, truncated?, degraded, attachments?, links?, text}
             | {url, error, attempts}]
 --raw 模式输出: [{url, engine_used, status, content_type, degraded, length, raw} | {url, error, attempts}]
 
@@ -20,9 +20,12 @@ CLI:
   engine_used  实际生效的引擎：http（curl_cffi 直发）或 browser（playwright 渲染）
   degraded     true 表示该 URL 必须靠浏览器渲染才拿得到；部署环境装不了浏览器时这类 URL 会失败
   type         html 或 pdf（按 Content-Type 与 %PDF- 魔数判定，不看 URL 后缀）
-  attachments  仅 HTML 且页面确有附件时出现：[{url, ext}]，ext ∈ pdf/doc/docx/xls/xlsx/ofd/wps。
-               政策与报告的核心条款几乎总在附件里，要附件全文就从这里取 URL 再抓一次——
-               绝不要按 URL 命名规律去猜，猜错会撞上站点错误页
+  attachments  仅 HTML 且页面确有附件时出现：[{url, ext, text}]，ext ∈ pdf/doc/docx/xls/xlsx/ofd/wps，
+               text 是锚文本（图片链接可能为空）。政策与报告的核心条款几乎总在附件里，要附件全文
+               就从这里取 URL 再抓一次——绝不要按 URL 命名规律去猜，猜错会撞上站点错误页；锚文本
+               是唯一的判别依据，同一页面里多份 PDF 单看 URL 往往分不出哪份是目标文件
+  links        仅 --links 且页面确有带锚文本的同域链接时出现：[{url, text}]。发现通道（sitemap/
+               search）都失效时的兜底——从入口页锚文本定位栏目页再逐级跳，同样不要按 URL 猜
   attempts     仅失败时出现，逐层列出失败原因 [{engine, kind, detail}]
                kind: http_error / challenge / empty_body / unexpected_structure /
                      wrong_content_type / timeout / network / too_large
@@ -73,6 +76,11 @@ def main() -> None:
         help="返回解码后的原始响应体（不清洗不截断），供调用方自行解析 JSON 或提取链接；不支持 PDF",
     )
     parser.add_argument(
+        "--links", action="store_true",
+        help="附带页内带锚文本的同域链接（links 字段），用于 sitemap/search 都失效时"
+             "从入口页锚文本兜底定位目标；默认关闭，避免几百条导航链接淹没正文",
+    )
+    parser.add_argument(
         "--no-auto-install", action="store_true",
         help="禁止在 http 层不过关时自动安装 playwright/浏览器",
     )
@@ -106,7 +114,7 @@ def main() -> None:
     print(f"抓取 {len(deduped)} 个页面（engine={args.engine}, mode={mode}, max_workers={args.max_workers}）...", file=sys.stderr)
 
     results = fetch_many(deduped, args.max_chars, args.max_pages, args.engine,
-                         raw=args.raw, max_workers=args.max_workers)
+                         raw=args.raw, include_links=args.links, max_workers=args.max_workers)
 
     succeeded = sum(1 for r in results if "error" not in r)
     degraded = sum(1 for r in results if r.get("degraded"))
