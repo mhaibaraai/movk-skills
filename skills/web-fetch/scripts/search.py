@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# /// script
+# dependencies = ["pypdf>=4.0", "curl_cffi>=0.7"]
+# ///
 """
 360 搜索检索层：关键词 [+域名限定] -> 候选 URL。零 API Key。
 
@@ -10,7 +13,7 @@ Bing/cn.bing 是 JS 空壳（0 个结果块）、百度跳验证码——唯 360
 真实结果块结构（已用样本核实，导航/反馈等站内链接不在此结构内，天然被排除）：
   <h3 class="res-title ..."><a href="..." data-mdurl="真实外链" ...>标题(含 <em> 高亮)</a></h3>
 
-底层抓取复用 engines.fetch_bytes，命中验证码/反爬时会按三层引擎自动升级。
+底层抓取复用 engines.fetch_bytes，命中验证码/反爬时会按四层引擎自动升级。
 
 CLI:
   uv run scripts/search.py --query "world energy outlook" --site iea.org
@@ -20,7 +23,7 @@ CLI:
   results[] 含 title, url, rank
   errors[]  含 kind, detail
             kind 取值 no_match（无结果）、network_unreachable、http_error、
-                      invalid_response、blocked（三层引擎均命中验证码/挑战页）
+                      invalid_response、blocked（各层引擎均命中验证码/挑战页）
 """
 import argparse
 import json
@@ -28,7 +31,7 @@ import re
 import sys
 import urllib.parse
 
-from engines import fetch_bytes, strip_tags
+from engines import ENGINE_NAMES, fetch_bytes, strip_tags
 
 SEARCH_URL = "https://www.so.com/s"
 
@@ -85,7 +88,7 @@ def main() -> None:
     parser.add_argument("--query", "-q", required=True, help="检索关键词")
     parser.add_argument("--site", "-s", default="", help="限定域名，如 iea.org（对应 site: 语法）")
     parser.add_argument("--max-results", "-n", type=int, default=10)
-    parser.add_argument("--engine", choices=["auto", "urllib", "curl_cffi", "playwright"], default="auto")
+    parser.add_argument("--engine", choices=["auto", *ENGINE_NAMES], default="auto")
     args = parser.parse_args()
 
     print(f"检索: {args.query!r} site={args.site or '(不限)'}...", file=sys.stderr)
