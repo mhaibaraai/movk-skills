@@ -82,11 +82,13 @@ uv run scripts/search.py --query "world energy outlook" --site iea.org --max-res
 uv run scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
 ```
 
-自动识别 HTML 正文与 PDF（按 Content-Type 而非 URL 后缀判定），分别走正文提取与 `pypdf` 文本抽取。输出每条含 `engine_used`（`http`/`browser`）、`type`（`html`/`pdf`）、`degraded`（是否必须靠浏览器渲染）。PDF 结果可能带 `low_confidence`（疑似加密/扫描件）。需要浏览器的 URL 会收拢到同一个浏览器实例下并发处理，不是每个 URL 起一个。
+自动识别 HTML 正文与 PDF（按 Content-Type 与 `%PDF-` 魔数判定，不看 URL 后缀——政府站常把 PDF 标成 `application/octet-stream`），分别走正文提取与 `pypdf` 文本抽取。输出每条含 `engine_used`（`http`/`browser`）、`type`（`html`/`pdf`）、`degraded`（是否必须靠浏览器渲染）。PDF 结果可能带 `low_confidence`（疑似加密/扫描件）。需要浏览器的 URL 会收拢到同一个浏览器实例下并发处理，不是每个 URL 起一个。
+
+**HTML 结果带 `attachments`（页面确有附件时才出现）。** 每条 `{url, ext}`，`ext` ∈ `pdf`/`doc`/`docx`/`xls`/`xlsx`/`ofd`/`wps`，已绝对化去重。政策与报告的核心条款（指标、期限、处罚）几乎总在附件里，正文通知页往往只有一句「现将《XX》印发给你们」。**要附件全文就从 `attachments` 取 URL 再抓一次，绝不要按 URL 命名规律去猜**——猜测命中站点错误页时，返回的是一个内容完全无关的页面。`.ofd` 是政务版式文件，`pypdf` 读不了，但同名 `.pdf` 通常并存，优先取 `.pdf`。
 
 **正文低于 200 字符一律判失败而非返回空壳。** 挑战未通过的页面往往只剩一个标题，把它当成功返回会让调用方拿着空内容做分析——宁可报错。
 
-失败结果带 `attempts: [{engine, kind, detail}]`，逐层说明为什么没过：`http_error`（带状态码）、`challenge`（命中挑战页）、`empty_body`（疑似 JS 空壳）、`unexpected_structure`（200 但不是预期结构）、`timeout`/`network`、`too_large`。报错时直接引用它，不要自己猜原因。
+失败结果带 `attempts: [{engine, kind, detail}]`，逐层说明为什么没过：`http_error`（带状态码）、`challenge`（命中挑战页）、`empty_body`（疑似 JS 空壳）、`unexpected_structure`（200 但不是预期结构）、`wrong_content_type`（请求 `.pdf` 却拿回 HTML，多为链接失效或被重定向到错误页）、`timeout`/`network`、`too_large`。报错时直接引用它，不要自己猜原因。
 
 参数：`--max-chars`（单篇正文最大字符数，默认 8000）、`--max-pages`（PDF 最多读取页数，默认 30）、`--engine`（`auto`/`http`/`browser`）、`--no-auto-install`（禁止自动安装浏览器）。
 
@@ -111,6 +113,7 @@ uv run scripts/fetch.py --urls '["https://.../api?q=..."]' --raw
 - PDF 加密且无法解密、或抽出文本长度接近 0（疑似扫描件）：如实告知用户，不强行分析空文本
 - 单个响应体超过 30MB：直接跳过下载并报错，不做全量拉取
 - 两层引擎全部命中拦截：如实告知用户当前部署环境的能力边界，不要无限重试
+- 进度日志走 stderr、JSON 结果走 stdout：用管道把输出喂给 `python3 -c "json.load(...)"` 解析时**不要**加 `2>&1`，否则日志会混进 stdout 导致 JSON 解析崩溃
 
 ## 被其他技能调用
 
