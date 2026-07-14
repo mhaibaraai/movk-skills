@@ -12,21 +12,27 @@ CLI:
   uv run scripts/fetch.py --urls '["https://...json 接口或列表页"]' --raw
   uv run scripts/fetch.py --check-env
 
-输出 JSON: [{url, engine_used, type, title, length, truncated?, degraded, text} | {url, error, attempts}]
+输出 JSON: [{url, engine_used, type, title, length, truncated?, degraded, attachments?, text}
+            | {url, error, attempts}]
 --raw 模式输出: [{url, engine_used, status, content_type, degraded, length, raw} | {url, error, attempts}]
 
 字段说明：
   engine_used  实际生效的引擎：http（curl_cffi 直发）或 browser（playwright 渲染）
   degraded     true 表示该 URL 必须靠浏览器渲染才拿得到；部署环境装不了浏览器时这类 URL 会失败
-  type         html 或 pdf
+  type         html 或 pdf（按 Content-Type 与 %PDF- 魔数判定，不看 URL 后缀）
+  attachments  仅 HTML 且页面确有附件时出现：[{url, ext}]，ext ∈ pdf/doc/docx/xls/xlsx/ofd/wps。
+               政策与报告的核心条款几乎总在附件里，要附件全文就从这里取 URL 再抓一次——
+               绝不要按 URL 命名规律去猜，猜错会撞上站点错误页
   attempts     仅失败时出现，逐层列出失败原因 [{engine, kind, detail}]
-               kind: http_error / challenge / empty_body / unexpected_structure / timeout /
-                     network / too_large
+               kind: http_error / challenge / empty_body / unexpected_structure /
+                     wrong_content_type / timeout / network / too_large
   low_confidence（仅 PDF）true 表示疑似加密/扫描件，抽取结果不可靠，建议改用其他方式获取原文
   raw（仅 --raw）解码后的原始响应体，不清洗不截断，供调用方自行解析 JSON 或提取链接
 
 正文低于 MIN_TEXT_CHARS 字符一律判失败而非返回空壳——挑战未通过的页面往往只剩一个标题，
 把它当成功返回会让调用方拿着空内容做分析。
+
+进度日志走 stderr、JSON 走 stdout：用管道解析 JSON 时不要 2>&1，那会把日志混进 JSON。
 """
 import argparse
 import json
