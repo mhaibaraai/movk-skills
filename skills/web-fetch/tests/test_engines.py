@@ -3,6 +3,7 @@
 
   uv run --with pytest pytest skills/web-fetch/tests/ -q
 """
+import re
 import sys
 from pathlib import Path
 
@@ -37,6 +38,35 @@ class TestChallengeDetection:
     def test_normal_page_passes(self):
         body = ("<html><body>" + "正文内容 " * 200 + "</body></html>").encode()
         assert not engines._looks_blocked(200, body, "text/html; charset=utf-8")
+
+    def test_360_ip_block_page(self):
+        """360 的 IP 层拦截页：HTTP 200、体积正常、不含任何 JS 挑战特征，仅标题可辨。"""
+        body = b"<html><head><title>\xe8\xae\xbf\xe9\x97\xae\xe5\xbc\x82\xe5\xb8\xb8\xe9\xa1\xb5\xe9\x9d\xa2</title></head><body>" + b"x" * 9000
+        assert engines._looks_blocked(200, body, "text/html; charset=utf-8")
+
+
+class TestExpectSentinel:
+    """expect 哨兵：黑名单认不出的拦截页，靠调用方声明的"有效响应结构"来识别。"""
+
+    SERP = re.compile(r"_360搜索\s*</title>", re.I)
+
+    def _page(self, title: str) -> bytes:
+        return f"<html><head><title>{title}</title></head><body>".encode() + b"x" * 9000
+
+    def test_valid_serp_passes(self):
+        assert not engines._looks_blocked(200, self._page("shell report_360搜索"), "text/html", expect=self.SERP)
+
+    def test_zero_result_serp_still_passes(self):
+        """零结果 SERP 仍是有效响应，不能误判为拦截——否则会白白升级四层引擎。"""
+        page = self._page("zzqqxx9988 fakenonsense_360搜索")
+        assert not engines._looks_blocked(200, page, "text/html", expect=self.SERP)
+
+    def test_structurally_wrong_page_rejected(self):
+        """页面 200 且体积正常，但根本不是 SERP —— 必须判定未过关并升级。"""
+        assert engines._looks_blocked(200, self._page("某站首页"), "text/html", expect=self.SERP)
+
+    def test_no_expect_keeps_old_behaviour(self):
+        assert not engines._looks_blocked(200, self._page("某站首页"), "text/html")
 
 
 class TestReaderProxy:
