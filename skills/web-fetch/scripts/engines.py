@@ -419,11 +419,6 @@ def _blocked_reason(status: int, data: bytes, content_type: str,
     return None
 
 
-def _looks_blocked(status: int, data: bytes, content_type: str,
-                   expect: re.Pattern | None = None) -> bool:
-    return _blocked_reason(status, data, content_type, expect) is not None
-
-
 def _exception_reason(e: Exception) -> tuple[str, str]:
     name = type(e).__name__
     detail = f"{name}: {e}"
