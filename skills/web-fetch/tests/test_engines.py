@@ -140,6 +140,134 @@ class TestFailureAttempts:
         assert engines._exception_reason(engines.ContentTooLarge(50 * 1024 * 1024))[0] == "too_large"
 
 
+class TestBrowserStatusNotWhitewashed:
+    """核心回归：渲染出正文只能洗白「挑战类」状态码，不能洗白 404。
+
+    gov.cn 对任何不存在的路径返回 404 + 一个 JS 跳首页的错误页。浏览器导航后跳到首页、
+    渲染出 2781 字符正文，旧实现据此把 404 改写成 200，于是中国政府网首页被当作
+    「政策 PDF 正文」返回给下游解读。
+    """
+
+    def test_404_stays_404_even_after_body_renders(self):
+        assert engines._resolve_browser_status(404, passed=True) == 404
+
+    def test_410_stays_410(self):
+        assert engines._resolve_browser_status(410, passed=True) == 410
+
+    def test_riverside_412_whitewashed_once_body_renders(self):
+        """瑞数首跳 412 + 混淆脚本，脚本跑完才有正文——这才是洗白的正当场景。"""
+        assert engines._resolve_browser_status(412, passed=True) == 200
+
+    @pytest.mark.parametrize("status", sorted(engines.CHALLENGE_STATUS))
+    def test_challenge_statuses_whitewashed(self, status):
+        assert engines._resolve_browser_status(status, passed=True) == 200
+
+    def test_nothing_whitewashed_when_body_never_rendered(self):
+        assert engines._resolve_browser_status(412, passed=False) == 412
+
+    def test_404_from_browser_reported_as_http_error(self):
+        """洗白被拦下之后，_blocked_reason 必须把它判成 http_error 而非放行。"""
+        gov_404_page = ("<html><body>" + "跳转首页 " * 300 + "</body></html>").encode()
+        status = engines._resolve_browser_status(404, passed=True)
+        kind, detail = engines._blocked_reason(status, gov_404_page, "text/html")
+        assert kind == "http_error"
+        assert "404" in detail
+
+
+class TestPdfDetection:
+    """PDF 按魔数认，而不是只信 Content-Type——政府站常把 PDF 标成 octet-stream。"""
+
+    PDF_BYTES = b"%PDF-1.7\n" + b"x" * 600
+
+    def test_magic_number_beats_octet_stream(self):
+        assert engines._is_pdf(self.PDF_BYTES, "application/octet-stream")
+
+    def test_content_type_alone_is_enough(self):
+        assert engines._is_pdf(b"whatever", "application/pdf")
+
+    def test_html_is_not_pdf(self):
+        assert not engines._is_pdf(b"<html><body>hi</body></html>", "text/html")
+
+    def test_octet_stream_pdf_routed_to_pdf_extractor(self, monkeypatch):
+        """否则 PDF 二进制会被 decode 成乱码，当作一篇 html 正文返回。
+
+        桩掉 _extract_pdf：这里验证的是路由选择，不是 pypdf 的抽取能力（pypdf 是脚本的
+        PEP 723 依赖，单元测试环境里没有它，也不该为一个路由断言把它拖进来）。
+        """
+        monkeypatch.setattr(engines, "_extract_pdf",
+                            lambda data, max_chars, max_pages: {"type": "pdf", "text": "stub"})
+        fetched = {"url": "https://x.gov.cn/a.pdf", "data": self.PDF_BYTES,
+                   "content_type": "application/octet-stream", "status": 200,
+                   "engine_used": "http", "attempts": []}
+        result = engines._clean_one(fetched, max_chars=8000, max_pages=30)
+        assert result["type"] == "pdf"
+
+    def test_pdf_url_returning_html_is_rejected(self):
+        """请求 .pdf 却拿到 HTML：链接失效或被重定向到错误页，绝不能当正文返回。"""
+        page = ("<html><body>" + "首页内容 " * 300 + "</body></html>").encode()
+        kind, _ = engines._blocked_reason(200, page, "text/html",
+                                          url="https://www.gov.cn/x/files/7072084.pdf")
+        assert kind == "wrong_content_type"
+
+    def test_pdf_url_returning_real_pdf_passes(self):
+        assert engines._blocked_reason(200, self.PDF_BYTES, "application/octet-stream",
+                                       url="https://x.gov.cn/a.pdf") is None
+
+    def test_html_url_returning_html_unaffected(self):
+        page = ("<html><body>" + "正文 " * 300 + "</body></html>").encode()
+        assert engines._blocked_reason(200, page, "text/html",
+                                       url="https://x.gov.cn/a.html") is None
+
+
+class TestAttachments:
+    """政策条款几乎总在附件里，正文通知页往往只有一句「现将《XX》印发给你们」。
+
+    附件链接就明明白白挂在 HTML 里，清洗时被抹掉了，下游只好按 URL 规律硬编——猜错就
+    撞上站点错误页。把链接提出来还给调用方，猜测就没有存在的理由。
+    """
+
+    BASE = "https://www.ndrc.gov.cn/xxgk/zcfb/tz/202606/t20260615_1405852.html"
+    PAGE = (
+        '<html><body><p>现将《重点行业节能降碳改造攻坚三年行动计划》印发给你们。</p>'
+        '<a href="./P020260615375309063825.pdf">附件：三年行动计划</a>'
+        '<a href="./P020260615375739523059.ofd">附件：三年行动计划</a>'
+        '<a href="../../../jd/jd/202606/t20260615_1405864.html">政策解读</a>'
+        "</body></html>"
+    )
+
+    def test_relative_links_resolved_to_absolute(self):
+        found = engines.extract_attachments(self.PAGE, self.BASE)
+        assert [a["url"] for a in found] == [
+            "https://www.ndrc.gov.cn/xxgk/zcfb/tz/202606/P020260615375309063825.pdf",
+            "https://www.ndrc.gov.cn/xxgk/zcfb/tz/202606/P020260615375739523059.ofd",
+        ]
+
+    def test_extension_recorded_and_order_preserved(self):
+        assert [a["ext"] for a in engines.extract_attachments(self.PAGE, self.BASE)] == ["pdf", "ofd"]
+
+    def test_ordinary_page_links_ignored(self):
+        urls = [a["url"] for a in engines.extract_attachments(self.PAGE, self.BASE)]
+        assert not any(u.endswith(".html") for u in urls)
+
+    def test_duplicates_collapsed(self):
+        page = '<a href="/a.pdf">x</a><a href="/a.pdf">同一份，两个入口</a>'
+        assert len(engines.extract_attachments(page, self.BASE)) == 1
+
+    def test_attachments_surfaced_in_cleaned_result(self):
+        fetched = {"url": self.BASE, "data": self.PAGE.encode() + "正文 ".encode() * 200,
+                   "content_type": "text/html; charset=utf-8", "status": 200,
+                   "engine_used": "http", "attempts": []}
+        result = engines._clean_one(fetched, max_chars=8000, max_pages=30)
+        assert [a["ext"] for a in result["attachments"]] == ["pdf", "ofd"]
+
+    def test_key_absent_when_page_has_no_attachments(self):
+        """空数组会诱使调用方以为「找过了、确实没有」，缺席才是诚实的表达。"""
+        fetched = {"url": self.BASE, "data": ("<html><body>" + "正文 " * 300 + "</body></html>").encode(),
+                   "content_type": "text/html; charset=utf-8", "status": 200,
+                   "engine_used": "http", "attempts": []}
+        assert "attachments" not in engines._clean_one(fetched, max_chars=8000, max_pages=30)
+
+
 class TestDownloadDetection:
     """浏览器 goto 一个 PDF 会抛 Download is starting —— 必须识别并改走请求上下文取字节。"""
 
