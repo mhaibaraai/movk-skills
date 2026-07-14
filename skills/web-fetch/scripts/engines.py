@@ -78,9 +78,10 @@ _TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.I | re.S)
 _H1_RE = re.compile(r"<h1[^>]*>(.*?)</h1>", re.I | re.S)
 _TAG_RE = re.compile(r"<[^>]+>")
 _BLANK_RE = re.compile(r"\n{3,}")
-# $_ts / __jsluid 分别是瑞数与加速乐的 JS 挑战特征，这类站点可能以 200 返回挑战页
+# $_ts / __jsluid 分别是瑞数与加速乐的 JS 挑战特征，这类站点可能以 200 返回挑战页；
+# 「访问异常」是 360 的 IP 层拦截页（HTTP 200、体积正常，仅标题可辨）
 _CHALLENGE_RE = re.compile(
-    r"Just a moment|Attention Required|请稍候|安全验证|verify you are human|\$_ts|__jsluid",
+    r"Just a moment|Attention Required|请稍候|安全验证|访问异常|verify you are human|\$_ts|__jsluid",
     re.I,
 )
 
@@ -417,7 +418,13 @@ _ENGINE_FUNCS = {
 }
 
 
-def _looks_blocked(status: int, data: bytes, content_type: str) -> bool:
+def _looks_blocked(status: int, data: bytes, content_type: str, expect: re.Pattern | None = None) -> bool:
+    """判断响应是否"未过关"，用于决定是否升级到下一层引擎。
+
+    expect 是调用方声明的"有效响应长什么样"的结构哨兵。仅靠 _CHALLENGE_RE 的黑名单
+    不够——拦截页可能 HTTP 200、体积正常且不含任何已知特征（360 的「访问异常页面」即
+    如此），只有调用方知道自己要的页面该有什么结构。哨兵须落在文档头部 4096 字节内。
+    """
     if status and status >= 400:
         return True
     ct = (content_type or "").lower()
@@ -426,7 +433,9 @@ def _looks_blocked(status: int, data: bytes, content_type: str) -> bool:
     if len(data) < MIN_GOOD_BYTES:
         return True
     sample = data[:4096].decode("utf-8", errors="ignore")
-    return bool(_CHALLENGE_RE.search(sample))
+    if _CHALLENGE_RE.search(sample):
+        return True
+    return expect is not None and not expect.search(sample)
 
 
 def _engine_ready(eng: str, avail: dict) -> bool:
@@ -439,8 +448,12 @@ def _engine_ready(eng: str, avail: dict) -> bool:
     return True
 
 
-def fetch_bytes(url: str, engine: str = "auto", timeout: int = 20) -> dict:
+def fetch_bytes(url: str, engine: str = "auto", timeout: int = 20,
+                expect: re.Pattern | None = None) -> dict:
     """抓取原始字节，自动按 urllib -> curl_cffi -> reader_proxy -> playwright 升级直到拿到可用内容。
+
+    expect：可选的结构哨兵正则，声明"有效响应长什么样"。不匹配即视为未过关、继续升级。
+    用于识别那些 HTTP 200、体积正常、又不含已知挑战特征的拦截页（见 _looks_blocked）。
 
     返回：
       成功 {"data": bytes, "content_type": str, "status": int,
@@ -469,7 +482,7 @@ def fetch_bytes(url: str, engine: str = "auto", timeout: int = 20) -> dict:
             last_error = f"{type(e).__name__}: {e}"
             continue
 
-        if not _looks_blocked(status, data, content_type):
+        if not _looks_blocked(status, data, content_type, expect):
             return {
                 "data": data,
                 "content_type": content_type,
