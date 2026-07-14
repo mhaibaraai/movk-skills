@@ -29,6 +29,13 @@ metadata:
        kind=no_match 才是真的无结果（罕见），可换关键词重试；
        kind=blocked 说明两层引擎都没能过关——360 是 IP 层拦截，被拉黑的出口 IP 连真实浏览器
        也过不去，这是环境限制、不是「该查询没有结果」，须如实告知，不要编造内容替代。
+       c) 两个通道都失效时（sitemap 报 no_sitemap 且 search 报 blocked）的兜底：直接抓入口页，
+          从锚文本定位目标。
+          uv run scripts/fetch.py --urls '["https://www.<域名>/"]' --links
+          engine=auto 会自动升级到 browser 越过反爬。从 attachments[].text（附件锚文本）或
+          links[].text（同域页面锚文本）里找目标，再抓那条 URL；找不到就顺着栏目页锚文本逐级跳。
+          锚文本是唯一的判别依据——同页十余份 PDF 的 URL 常是拼音缩写（qyshzrbg/ndbg），
+          单看 URL 分不出哪份是目标，仍然绝不允许按 URL 命名规律去猜。
     3. 抓取：uv run scripts/fetch.py --urls '["url1","url2"]' --max-chars 8000
        输出数组，每条含 engine_used/type(html|pdf)/title/length/degraded/text，
        失败则含 error/attempts。
@@ -84,7 +91,9 @@ uv run scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
 
 自动识别 HTML 正文与 PDF（按 Content-Type 与 `%PDF-` 魔数判定，不看 URL 后缀——政府站常把 PDF 标成 `application/octet-stream`），分别走正文提取与 `pypdf` 文本抽取。输出每条含 `engine_used`（`http`/`browser`）、`type`（`html`/`pdf`）、`degraded`（是否必须靠浏览器渲染）。PDF 结果可能带 `low_confidence`（疑似加密/扫描件）。需要浏览器的 URL 会收拢到同一个浏览器实例下并发处理，不是每个 URL 起一个。
 
-**HTML 结果带 `attachments`（页面确有附件时才出现）。** 每条 `{url, ext}`，`ext` ∈ `pdf`/`doc`/`docx`/`xls`/`xlsx`/`ofd`/`wps`，已绝对化去重。政策与报告的核心条款（指标、期限、处罚）几乎总在附件里，正文通知页往往只有一句「现将《XX》印发给你们」。**要附件全文就从 `attachments` 取 URL 再抓一次，绝不要按 URL 命名规律去猜**——猜测命中站点错误页时，返回的是一个内容完全无关的页面。`.ofd` 是政务版式文件，`pypdf` 读不了，但同名 `.pdf` 通常并存，优先取 `.pdf`。
+**HTML 结果带 `attachments`（页面确有附件时才出现）。** 每条 `{url, ext, text}`，`ext` ∈ `pdf`/`doc`/`docx`/`xls`/`xlsx`/`ofd`/`wps`，已绝对化去重，`text` 是锚文本（图片链接可能为空）。政策与报告的核心条款（指标、期限、处罚）几乎总在附件里，正文通知页往往只有一句「现将《XX》印发给你们」。**要附件全文就从 `attachments` 取 URL 再抓一次，绝不要按 URL 命名规律去猜**——猜测命中站点错误页时，返回的是一个内容完全无关的页面。同一页面里多份 PDF 单看 URL 往往分不出哪份是目标（拼音缩写路径 `qyshzrbg`/`ndbg` 之间无从选择），**`text` 是唯一的判别依据**。`.ofd` 是政务版式文件，`pypdf` 读不了，但同名 `.pdf` 通常并存，优先取 `.pdf`。
+
+**`--links` 额外带回页内同域链接（`links` 字段）。** 每条 `{url, text}`，只收有锚文本的（导航图标一类无锚文本的链接对判别没有价值），限同域含子域名。默认关闭——几百条导航链接会淹没正文。用途是 sitemap 与 search 两个发现通道都失效时的兜底：抓入口页，顺着锚文本找到栏目页，再逐级跳到目标（见「特殊处理」）。
 
 **正文低于 200 字符一律判失败而非返回空壳。** 挑战未通过的页面往往只剩一个标题，把它当成功返回会让调用方拿着空内容做分析——宁可报错。
 
@@ -110,6 +119,7 @@ uv run scripts/fetch.py --urls '["https://.../api?q=..."]' --raw
 
 - 列表页/索引页状态码非常规（如 404）但内容仍可能有用：不要固定抓该页面本身，改用 `sitemap.py` 或 `search.py` 拿更精确的条目 URL（`iea.org/reports` 是典型案例，见 references）
 - 关键词检索报 `blocked` 而 `--check-env` 显示引擎齐全：多半是 360 对当前出口 IP 的拦截。此时改走 `sitemap.py`（走 http 层，不依赖搜索引擎）
+- 两个发现通道都失效（`sitemap.py` 报 `no_sitemap` 且 `search.py` 报 `blocked`）：不要就此断言「找不到」。改抓入口页 `uv run scripts/fetch.py --urls '["https://www.<域名>/"]' --links`，从 `attachments[].text` 或 `links[].text` 的锚文本定位目标（`engine=auto` 会自动升级到 browser 越过反爬）。CNPC 实测：首页附件锚文本直接标出「集团公司2025年社会责任报告」，`links` 里也有通往对应栏目页的入口，两条路都走得通
 - PDF 加密且无法解密、或抽出文本长度接近 0（疑似扫描件）：如实告知用户，不强行分析空文本
 - 单个响应体超过 30MB：直接跳过下载并报错，不做全量拉取
 - 两层引擎全部命中拦截：如实告知用户当前部署环境的能力边界，不要无限重试
