@@ -1,0 +1,3406 @@
+{
+  "template": "通用模板",
+  "source": "assets/PPT制作培训与模板.pptx",
+  "slides": [
+    {
+      "i": 0,
+      "kind": "cover",
+      "slots": [
+        {
+          "sid": 13,
+          "role": "decor",
+          "sample": "xxx"
+        },
+        {
+          "sid": 12,
+          "role": "title",
+          "sample": "PPT制作规范与模板应用",
+          "cap": 12
+        },
+        {
+          "sid": 16,
+          "role": "subtitle",
+          "sample": "Xxx - 主讲人",
+          "cap": 9
+        },
+        {
+          "sid": 17,
+          "role": "item_body",
+          "sample": "2023 / 03 / 24",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "xxx xxx xxx xxx"
+        }
+      ],
+      "items": 1
+    },
+    {
+      "i": 1,
+      "kind": "toc",
+      "slots": [
+        {
+          "sid": 5,
+          "role": "decor",
+          "sample": "CONTENTS"
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 23,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "适用范围和目的",
+          "cap": 7,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "版面和布局规范",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 15,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 26,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "常用功能",
+          "cap": 4,
+          "idx": 2
+        },
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "PPT模板",
+          "cap": 5,
+          "idx": 3
+        },
+        {
+          "sid": 4,
+          "role": "no",
+          "sample": "2"
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 2,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "01."
+        },
+        {
+          "sid": 4,
+          "role": "title",
+          "sample": "适用范围和目的",
+          "cap": 14
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "02."
+        },
+        {
+          "sid": 4,
+          "role": "title",
+          "sample": "制作规范",
+          "cap": 14
+        }
+      ]
+    },
+    {
+      "i": 15,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "03."
+        },
+        {
+          "sid": 4,
+          "role": "title",
+          "sample": "常用功能",
+          "cap": 14
+        }
+      ]
+    },
+    {
+      "i": 22,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "04."
+        },
+        {
+          "sid": 4,
+          "role": "title",
+          "sample": "PPT模板",
+          "cap": 14
+        }
+      ]
+    },
+    {
+      "i": 23,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 22,
+          "role": "title",
+          "sample": "副标题",
+          "cap": 12
+        },
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "城市景观",
+          "cap": 7,
+          "idx": 0
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "建筑物",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "河湖岸线",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "建筑工地",
+          "cap": 7,
+          "idx": 3
+        },
+        {
+          "sid": 28,
+          "role": "item_head",
+          "sample": "矿区用途",
+          "cap": 7,
+          "idx": 4
+        },
+        {
+          "sid": 27,
+          "role": "item_head",
+          "sample": "森林防火",
+          "cap": 7,
+          "idx": 5
+        },
+        {
+          "sid": 16,
+          "role": "decor",
+          "sample": "Unified fontsmake readin"
+        },
+        {
+          "sid": 9,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 12,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 14,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 10,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 13,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 4
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 26,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 13,
+          "role": "decor",
+          "sample": "S"
+        },
+        {
+          "sid": 17,
+          "role": "decor",
+          "sample": "Unified fonts \nmake read"
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "Adjust the spacing to ad",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 14,
+          "role": "decor",
+          "sample": "W"
+        },
+        {
+          "sid": 6,
+          "role": "item_body",
+          "sample": "Adjust the spacing to ad",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "O"
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "Adjust the spacing to ad",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 16,
+          "role": "decor",
+          "sample": "T"
+        },
+        {
+          "sid": 18,
+          "role": "decor",
+          "sample": "Supporting text here."
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "Adjust the spacing to ad",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "Adjust the spacing to ad",
+          "cap": 80,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 27,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 16,
+          "role": "decor",
+          "sample": "Unified fonts make readi"
+        },
+        {
+          "sid": 17,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 10,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 14,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 29,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 45,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 61,
+          "role": "decor",
+          "sample": "Unified fonts make readi"
+        },
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 25,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 27,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 29,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 24,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 26,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 28,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 30,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 30,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 44,
+          "idx": 0
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 11,
+          "role": "decor",
+          "sample": "Supporting text here"
+        },
+        {
+          "sid": 14,
+          "role": "decor",
+          "sample": "Text here"
+        }
+      ],
+      "items": 2
+    },
+    {
+      "i": 31,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 18,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 7,
+          "role": "decor",
+          "sample": "Unified fonts make readi"
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "Supporting text here."
+        },
+        {
+          "sid": 10,
+          "role": "decor",
+          "sample": "Supporting text here."
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "2500+",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "3600+",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "Theme  color makes PPT m",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "Theme  color makes PPT m",
+          "cap": 80,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 32,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 20,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 7,
+          "role": "decor",
+          "sample": "Unified fonts make readi"
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "1,036k",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 66,
+          "idx": 1
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "1,036k",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 66,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "1,036k",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 66,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 33,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 7,
+          "role": "decor",
+          "sample": "Unified fonts \nmake read"
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "￥28100",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 9,
+          "role": "decor",
+          "sample": "Theme  color makes PPT m"
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "￥12600",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "decor",
+          "sample": "Theme  color makes PPT m"
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 35,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "decor",
+          "sample": "Supporting text h ere."
+        },
+        {
+          "sid": 8,
+          "role": "title",
+          "sample": "01.Text here",
+          "cap": 23
+        },
+        {
+          "sid": 6,
+          "role": "decor",
+          "sample": "Theme  color makes PPT\nm"
+        },
+        {
+          "sid": 7,
+          "role": "item_head",
+          "sample": "02.Text here",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 12,
+          "role": "decor",
+          "sample": "Theme  color makes PPT\nm"
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "03.Text here",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 13,
+          "role": "decor",
+          "sample": "Theme  color makes PPT\nm"
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "04.Text here",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 14,
+          "role": "decor",
+          "sample": "Theme  color makes PPT\nm"
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "05.Text here",
+          "cap": 12,
+          "idx": 4
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "Theme  color makes PPT\nm"
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 36,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 27,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 25,
+          "role": "decor",
+          "sample": "Unified fonts make readi"
+        },
+        {
+          "sid": 26,
+          "role": "item_body",
+          "sample": "Theme  color makes PPT m",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 12,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 18,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "Unified fonts make readi",
+          "cap": 80,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 37,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 11,
+          "role": "decor",
+          "sample": "Unified fonts make readi"
+        },
+        {
+          "sid": 10,
+          "role": "decor",
+          "sample": "Copy paste fonts Choose "
+        },
+        {
+          "sid": 22,
+          "role": "decor",
+          "sample": "Supporting\ntext here."
+        },
+        {
+          "sid": 19,
+          "role": "decor",
+          "sample": "Supporting\ntext here."
+        },
+        {
+          "sid": 16,
+          "role": "decor",
+          "sample": "Supporting\ntext here."
+        },
+        {
+          "sid": 13,
+          "role": "decor",
+          "sample": "Supporting\ntext here."
+        },
+        {
+          "sid": 21,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 38,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 8,
+          "role": "decor",
+          "sample": "Supporting text here"
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "+52460",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 6,
+          "role": "decor",
+          "sample": "Supporting text Here."
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "Adjust the spacing to ad",
+          "cap": 80,
+          "idx": 1
+        }
+      ],
+      "items": 2
+    },
+    {
+      "i": 39,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 21,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "decor",
+          "sample": "Unified fonts make readi"
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "Theme  color makes PPT m",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "Theme  color makes PPT m",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "Theme  color makes PPT m",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 17,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 13,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 9,
+          "role": "decor",
+          "sample": "Text here"
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 40,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 31,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "decor",
+          "sample": "Supporting text here"
+        },
+        {
+          "sid": 6,
+          "role": "item_body",
+          "sample": "Theme color makes PPT mo",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "￥40K",
+          "cap": 4,
+          "idx": 1
+        },
+        {
+          "sid": 27,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 30,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 21,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 35,
+          "role": "decor",
+          "sample": "Text here"
+        },
+        {
+          "sid": 26,
+          "role": "decor",
+          "sample": "Theme color makes PPT mo"
+        },
+        {
+          "sid": 22,
+          "role": "decor",
+          "sample": "Theme color makes PPT mo"
+        },
+        {
+          "sid": 20,
+          "role": "decor",
+          "sample": "Theme color makes PPT mo"
+        },
+        {
+          "sid": 34,
+          "role": "decor",
+          "sample": "Theme color makes PPT mo"
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "￥30K",
+          "cap": 4,
+          "idx": 2
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "￥20K",
+          "cap": 4,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 41,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 50,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "decor",
+          "sample": "Supporting text here"
+        },
+        {
+          "sid": 49,
+          "role": "item_head",
+          "sample": "3,005K",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 43,
+          "role": "item_head",
+          "sample": "3,505K",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 46,
+          "role": "item_head",
+          "sample": "3,505K",
+          "cap": 10,
+          "idx": 3
+        },
+        {
+          "sid": 48,
+          "role": "decor",
+          "sample": "Theme  color makes PPT \n"
+        },
+        {
+          "sid": 42,
+          "role": "decor",
+          "sample": "Theme  color makes PPT \n"
+        },
+        {
+          "sid": 45,
+          "role": "decor",
+          "sample": "Theme  color makes PPT \n"
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 42,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 56,
+          "role": "item_body",
+          "sample": "湖库水华预警与阈值分析系统，通过集成水环境参数数",
+          "cap": 78,
+          "idx": 2
+        },
+        {
+          "sid": 57,
+          "role": "item_body",
+          "sample": "湖库水环境参数变化的动态展现",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 58,
+          "role": "item_head",
+          "sample": "湖库水质模拟和水华预警",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 59,
+          "role": "item_head",
+          "sample": "湖库富营养化评估",
+          "cap": 12,
+          "idx": 2
+        },
+        {
+          "sid": 60,
+          "role": "item_head",
+          "sample": "湖库水华控制阈值分析",
+          "cap": 12,
+          "idx": 3
+        },
+        {
+          "sid": 61,
+          "role": "item_head",
+          "sample": "入库河流水污染模拟",
+          "cap": 14,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 43,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 67,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "项目模式",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 27,
+          "role": "item_head",
+          "sample": "项目模式",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "项目模式",
+          "cap": 7,
+          "idx": 3
+        },
+        {
+          "sid": 33,
+          "role": "item_head",
+          "sample": "项目模式",
+          "cap": 7,
+          "idx": 4
+        },
+        {
+          "sid": 36,
+          "role": "item_head",
+          "sample": "项目模式",
+          "cap": 7,
+          "idx": 5
+        },
+        {
+          "sid": 23,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 26,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 29,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 32,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 4
+        },
+        {
+          "sid": 35,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 45,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "违章建筑造成的后果",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "监管存在的问题\n（时效性、准确性）",
+          "cap": 36,
+          "idx": 2
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "增加城市公共安全隐患\n城市环境遭到破坏\n公众利益",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "监管手段较传统\n监查范围受局限\n监查频率低，缺乏",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "对城市管理造成新的挑战",
+          "cap": 12,
+          "idx": 2
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "如何解决",
+          "cap": 5,
+          "idx": 3
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "实时宏观科学的监测方式 + 系统化管理",
+          "cap": 19,
+          "idx": 1
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 47,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 23,
+          "role": "item_body",
+          "sample": "这里可以添加主要内容这里可以添加主要内容这里可以",
+          "cap": 48,
+          "idx": 1
+        },
+        {
+          "sid": 25,
+          "role": "item_body",
+          "sample": "这里可以添加主要内容这里可以添加主要内容这里可以",
+          "cap": 48,
+          "idx": 2
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "点击添加表述内容标题",
+          "cap": 10,
+          "idx": 3
+        },
+        {
+          "sid": 27,
+          "role": "item_body",
+          "sample": "这里可以添加主要内容这里可以添加主要内容这里可以",
+          "cap": 48,
+          "idx": 4
+        },
+        {
+          "sid": 29,
+          "role": "item_body",
+          "sample": "这里可以添加主要内容这里可以添加主要内容这里可以",
+          "cap": 48,
+          "idx": 5
+        },
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 7,
+          "idx": 4
+        },
+        {
+          "sid": 28,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 7,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 48,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 12,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 4
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 49,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 18,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 17,
+          "role": "title",
+          "sample": "添加标题内容文字",
+          "cap": 11
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "单击此处添加文本\n单击此处添加文本",
+          "cap": 20,
+          "idx": 1
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "2019年1月",
+          "cap": 9,
+          "idx": 1
+        },
+        {
+          "sid": 8,
+          "role": "item_head",
+          "sample": "2018年6月",
+          "cap": 9,
+          "idx": 2
+        },
+        {
+          "sid": 14,
+          "role": "item_body",
+          "sample": "单击此处添加文本\n单击此处添加文本",
+          "cap": 20,
+          "idx": 2
+        },
+        {
+          "sid": 7,
+          "role": "item_head",
+          "sample": "2017年5月",
+          "cap": 9,
+          "idx": 3
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "单击此处添加文本\n单击此处添加文本",
+          "cap": 20,
+          "idx": 3
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "2016年4月",
+          "cap": 9,
+          "idx": 4
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "单击此处添加文本\n单击此处添加文本",
+          "cap": 20,
+          "idx": 4
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "2015年3月",
+          "cap": 9,
+          "idx": 5
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "单击此处添加文本\n单击此处添加文本",
+          "cap": 20,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 50,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 7,
+          "role": "title",
+          "sample": "添加标题\n点击此处添加文字内容",
+          "cap": 16
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "添加标题\n点击此处添加文字内容",
+          "cap": 16,
+          "idx": 0
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "添加标题\n点击此处添加文字内容",
+          "cap": 16,
+          "idx": 3
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 4,
+          "idx": 1
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 4,
+          "idx": 2
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 4,
+          "idx": 3
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "点击此处添加文字说明内容，可以通过复制您的文本内",
+          "cap": 44,
+          "idx": 2
+        },
+        {
+          "sid": 14,
+          "role": "item_body",
+          "sample": "点击此处添加文字说明内容，可以通过复制您的文本内",
+          "cap": 44,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "点击此处添加文字说明内容，可以通过复制您的文本内",
+          "cap": 44,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 53,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 59,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 61,
+          "role": "title",
+          "sample": "数据管理",
+          "cap": 9
+        },
+        {
+          "sid": 60,
+          "role": "item_body",
+          "sample": "走访数据、兑换记录数据、垃圾投放数据、投诉数据、",
+          "cap": 36,
+          "idx": 1
+        },
+        {
+          "sid": 58,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 66,
+          "role": "item_head",
+          "sample": "功能管理",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 65,
+          "role": "item_body",
+          "sample": "任务派发、重点督办、事件曝光、投票管理、精准率抽",
+          "cap": 36,
+          "idx": 2
+        },
+        {
+          "sid": 62,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 64,
+          "role": "item_head",
+          "sample": "报送管理",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 70,
+          "role": "item_body",
+          "sample": "系统汇总小程序采集的业务数据，并提供三方公司垃圾",
+          "cap": 38,
+          "idx": 0
+        },
+        {
+          "sid": 63,
+          "role": "item_body",
+          "sample": "四类垃圾基本数据报送、\n垃圾循环利用数据报送、\n",
+          "cap": 38,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 54,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 35,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "垃圾分类收集有助于减少垃圾填埋总量及占用土地量",
+          "cap": 36,
+          "idx": 2
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "利用效率",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 23,
+          "role": "item_body",
+          "sample": "垃圾分类收集有助于提升资源利用效率",
+          "cap": 18,
+          "idx": 1
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "习惯养成",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 27,
+          "role": "item_body",
+          "sample": "垃圾分类收集有助于减少环境污染",
+          "cap": 18,
+          "idx": 0
+        },
+        {
+          "sid": 18,
+          "role": "item_head",
+          "sample": "减少污染",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 31,
+          "role": "item_body",
+          "sample": "有助于培养垃圾分类习惯的养成，让城市更干净整洁",
+          "cap": 23,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 55,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 41,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 32,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 13,
+          "idx": 1
+        },
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 13,
+          "idx": 2
+        },
+        {
+          "sid": 28,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 13,
+          "idx": 3
+        },
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 13,
+          "idx": 4
+        },
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 13,
+          "idx": 5
+        },
+        {
+          "sid": 31,
+          "role": "item_body",
+          "sample": "点击此处更换文本编辑文字，点击此处更换文本编辑文",
+          "cap": 40,
+          "idx": 1
+        },
+        {
+          "sid": 29,
+          "role": "item_body",
+          "sample": "点击此处更换文本编辑文字，点击此处更换文本编辑文",
+          "cap": 40,
+          "idx": 2
+        },
+        {
+          "sid": 27,
+          "role": "item_body",
+          "sample": "点击此处更换文本编辑文字，点击此处更换文本编辑文",
+          "cap": 40,
+          "idx": 3
+        },
+        {
+          "sid": 25,
+          "role": "item_body",
+          "sample": "点击此处更换文本编辑文字，点击此处更换文本编辑文",
+          "cap": 40,
+          "idx": 4
+        },
+        {
+          "sid": 21,
+          "role": "item_body",
+          "sample": "点击此处更换文本编辑文字，点击此处更换文本编辑文",
+          "cap": 40,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 59,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 48,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "STEP1",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "STEP3",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 23,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 12,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 13,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 14,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "STEP2",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 27,
+          "role": "item_head",
+          "sample": "STEP4",
+          "cap": 6,
+          "idx": 4
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 26,
+          "role": "item_body",
+          "sample": "Lorem ipsum dolor sit am",
+          "cap": 80,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 60,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 31,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 27,
+          "role": "item_head",
+          "sample": "单击添加标题",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 28,
+          "role": "item_head",
+          "sample": "单击添加标题",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 29,
+          "role": "item_body",
+          "sample": "单击文本框，可修改文字内容，调整文字颜色和大小，",
+          "cap": 50,
+          "idx": 1
+        },
+        {
+          "sid": 30,
+          "role": "item_body",
+          "sample": "单击文本框，可修改文字内容，调整文字颜色和大小，",
+          "cap": 50,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 61,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 23,
+          "role": "title",
+          "sample": "标题文本预设",
+          "cap": 8
+        },
+        {
+          "sid": 27,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 22,
+          "role": "item_body",
+          "sample": "Would a man running in t",
+          "cap": 49,
+          "idx": 0
+        },
+        {
+          "sid": 26,
+          "role": "item_body",
+          "sample": "Would a man running in t",
+          "cap": 49,
+          "idx": 1
+        },
+        {
+          "sid": 15,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 14,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 11,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 12,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 13,
+          "role": "no",
+          "sample": "05"
+        },
+        {
+          "sid": 21,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 8,
+          "idx": 3
+        },
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "标题文本预设",
+          "cap": 8,
+          "idx": 4
+        },
+        {
+          "sid": 20,
+          "role": "item_body",
+          "sample": "Would a man running in t",
+          "cap": 49,
+          "idx": 2
+        },
+        {
+          "sid": 24,
+          "role": "item_body",
+          "sample": "Would a man running in t",
+          "cap": 49,
+          "idx": 3
+        },
+        {
+          "sid": 28,
+          "role": "item_body",
+          "sample": "Would a man running in t",
+          "cap": 49,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 62,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "标题一",
+          "cap": 3,
+          "idx": 1
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "标题二",
+          "cap": 3,
+          "idx": 2
+        },
+        {
+          "sid": 21,
+          "role": "item_head",
+          "sample": "标题三",
+          "cap": 3,
+          "idx": 3
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "标题四",
+          "cap": 3,
+          "idx": 4
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "单击文本框，可修改文字内容，调整文字颜色和大小，",
+          "cap": 44,
+          "idx": 1
+        },
+        {
+          "sid": 20,
+          "role": "item_body",
+          "sample": "单击文本框，可修改文字内容，调整文字颜色和大小，",
+          "cap": 44,
+          "idx": 2
+        },
+        {
+          "sid": 22,
+          "role": "item_body",
+          "sample": "单击文本框，可修改文字内容，调整文字颜色和大小，",
+          "cap": 44,
+          "idx": 3
+        },
+        {
+          "sid": 24,
+          "role": "item_body",
+          "sample": "单击文本框，可修改文字内容，调整文字颜色和大小，",
+          "cap": 44,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 63,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 44,
+          "role": "decor",
+          "sample": "PLAN.B"
+        },
+        {
+          "sid": 32,
+          "role": "decor",
+          "sample": "PLAN.A"
+        },
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "在此输入文本",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 30,
+          "role": "decor",
+          "sample": "THE ORIGINAL MATERIAL PA"
+        },
+        {
+          "sid": 36,
+          "role": "item_head",
+          "sample": "在此输入文本",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 37,
+          "role": "decor",
+          "sample": "THE ORIGINAL MATERIAL PA"
+        },
+        {
+          "sid": 41,
+          "role": "item_head",
+          "sample": "在此输入文本",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 42,
+          "role": "decor",
+          "sample": "THE ORIGINAL MATERIAL PA"
+        },
+        {
+          "sid": 34,
+          "role": "decor",
+          "sample": "PLAN.C"
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 66,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 26,
+          "role": "item_body",
+          "sample": "单击此处输入标题\n请在这里输入您的主要叙述内容\n",
+          "cap": 40,
+          "idx": 0
+        },
+        {
+          "sid": 15,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 28,
+          "role": "item_body",
+          "sample": "单击此处输入标题\n请在这里输入您的主要叙述内容\n",
+          "cap": 40,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "点击添加\n文字内容",
+          "cap": 9,
+          "idx": 1
+        },
+        {
+          "sid": 27,
+          "role": "item_body",
+          "sample": "单击此处输入标题\n请在这里输入您的主要叙述内容\n",
+          "cap": 40,
+          "idx": 2
+        },
+        {
+          "sid": 20,
+          "role": "no",
+          "sample": "03"
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 67,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 8,
+          "role": "item_head",
+          "sample": "标题之一",
+          "cap": 12,
+          "idx": 1
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "请在这里输入您的主要叙述内容请在这里输入您的主要",
+          "cap": 44,
+          "idx": 3
+        },
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "输入标题",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "标题之二",
+          "cap": 12,
+          "idx": 3
+        },
+        {
+          "sid": 17,
+          "role": "item_body",
+          "sample": "请在这里输入您的主要叙述内容请在这里输入您的主要",
+          "cap": 40,
+          "idx": 4
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "标题之三",
+          "cap": 12,
+          "idx": 4
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "请在这里输入您的主要叙述内容请在这里输入您的主要",
+          "cap": 40,
+          "idx": 1
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 68,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 18,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 31,
+          "role": "title",
+          "sample": "这里填写小标题",
+          "cap": 10
+        },
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "这里填写小标题",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "点击添加\n标题三",
+          "cap": 10,
+          "idx": 2
+        },
+        {
+          "sid": 20,
+          "role": "item_head",
+          "sample": "点击添加\n标题一",
+          "cap": 10,
+          "idx": 3
+        },
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "点击添加\n标题二",
+          "cap": 10,
+          "idx": 4
+        },
+        {
+          "sid": 30,
+          "role": "item_body",
+          "sample": "这里输入简单的文字概述这里输入简单文字概述简单的",
+          "cap": 42,
+          "idx": 5
+        },
+        {
+          "sid": 21,
+          "role": "item_body",
+          "sample": "这里输入简单的文字概述这里输入简单文字概述简单的",
+          "cap": 42,
+          "idx": 1
+        },
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "这里填写小标题",
+          "cap": 9,
+          "idx": 5
+        },
+        {
+          "sid": 33,
+          "role": "item_body",
+          "sample": "这里输入简单的文字概述这里输入简单文字概述简单的",
+          "cap": 42,
+          "idx": 4
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 69,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 35,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 13,
+          "role": "title",
+          "sample": "输入标题文字",
+          "cap": 7
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 22,
+          "role": "decor",
+          "sample": "S"
+        },
+        {
+          "sid": 6,
+          "role": "item_body",
+          "sample": "添加适当的文字，一页的文字最好不要超过200,添",
+          "cap": 40,
+          "idx": 2
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "添加适当的文字，一页的文字最好不要超过200,添",
+          "cap": 40,
+          "idx": 1
+        },
+        {
+          "sid": 34,
+          "role": "decor",
+          "sample": "W"
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "添加适当的文字，一页的文字最好不要超过200,添",
+          "cap": 40,
+          "idx": 0
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "添加适当的文字，一页的文字最好不要超过200,添",
+          "cap": 40,
+          "idx": 3
+        },
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 7,
+          "idx": 3
+        },
+        {
+          "sid": 30,
+          "role": "decor",
+          "sample": "O"
+        },
+        {
+          "sid": 26,
+          "role": "decor",
+          "sample": "T"
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 70,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 49,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 46,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 31,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 37,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 25,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "点击添加标题",
+          "cap": 8
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "在此录入上述图表的综合描述说明，在此录入上述图表",
+          "cap": 64,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "在此录入上述图表的综合描述说明，在此录入上述图表",
+          "cap": 64,
+          "idx": 2
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "点击添加标题",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "点击添加标题",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "在此录入上述图表的综合描述说明，在此录入上述图表",
+          "cap": 64,
+          "idx": 3
+        },
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "点击添加标题",
+          "cap": 8,
+          "idx": 3
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "在此录入上述图表的综合描述说明，在此录入上述图表",
+          "cap": 64,
+          "idx": 0
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 71,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 64,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 50,
+          "role": "item_head",
+          "sample": "点击添加主要内容",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 56,
+          "role": "item_head",
+          "sample": "点击添加主要内容",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 59,
+          "role": "item_head",
+          "sample": "点击添加主要内容",
+          "cap": 8,
+          "idx": 3
+        },
+        {
+          "sid": 62,
+          "role": "item_head",
+          "sample": "点击添加主要内容",
+          "cap": 8,
+          "idx": 4
+        },
+        {
+          "sid": 51,
+          "role": "item_body",
+          "sample": "点击添加主要内容点击添加主要内容点击添加主要内容",
+          "cap": 32,
+          "idx": 1
+        },
+        {
+          "sid": 57,
+          "role": "item_body",
+          "sample": "点击添加主要内容点击添加主要内容点击添加主要内容",
+          "cap": 32,
+          "idx": 2
+        },
+        {
+          "sid": 60,
+          "role": "item_body",
+          "sample": "点击添加主要内容点击添加主要内容点击添加主要内容",
+          "cap": 32,
+          "idx": 3
+        },
+        {
+          "sid": 63,
+          "role": "item_body",
+          "sample": "点击添加主要内容点击添加主要内容点击添加主要内容",
+          "cap": 32,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 72,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 15,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 21,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 27,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "请在此输入您的文字内容或者粘贴复制的文本到此处，",
+          "cap": 52,
+          "idx": 1
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "请在此输入您的文字内容或者粘贴复制的文本到此处，",
+          "cap": 52,
+          "idx": 2
+        },
+        {
+          "sid": 22,
+          "role": "item_body",
+          "sample": "请在此输入您的文字内容或者粘贴复制的文本到此处，",
+          "cap": 52,
+          "idx": 3
+        },
+        {
+          "sid": 28,
+          "role": "item_body",
+          "sample": "请在此输入您的文字内容或者粘贴复制的文本到此处，",
+          "cap": 52,
+          "idx": 4
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "输入标题",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "输入标题",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "输入标题",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "输入标题",
+          "cap": 6,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 75,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "请在此输入您的文字内容或者粘贴复制的文本到此处，",
+          "cap": 72,
+          "idx": 0
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "请在此输入您的文字内容或者粘贴复制的文本到此处，",
+          "cap": 72,
+          "idx": 1
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "请在此输入您的文字内容或者粘贴复制的文本到此处，",
+          "cap": 72,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 76,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 28,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "Copy paste fonts. Choose",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 21,
+          "role": "item_body",
+          "sample": "Copy paste fonts. Choose",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 24,
+          "role": "item_body",
+          "sample": "Copy paste fonts. Choose",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 77,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 11,
+          "role": "title",
+          "sample": "标题添加",
+          "cap": 4
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "标题添加",
+          "cap": 4,
+          "idx": 1
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "标题添加",
+          "cap": 4,
+          "idx": 2
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "此处添加详细文本描述，建议与标题相关并符合整体语",
+          "cap": 66,
+          "idx": 1
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "此处添加详细文本描述，建议与标题相关并符合整体语",
+          "cap": 66,
+          "idx": 2
+        },
+        {
+          "sid": 24,
+          "role": "item_body",
+          "sample": "此处添加详细文本描述，建议与标题相关并符合整体语",
+          "cap": 66,
+          "idx": 0
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 78,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "添加文字",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "添加文字",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 79,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "YOUR NAME"
+        },
+        {
+          "sid": 14,
+          "role": "decor",
+          "sample": "CEO"
+        },
+        {
+          "sid": 19,
+          "role": "decor",
+          "sample": "YOUR NAME"
+        },
+        {
+          "sid": 18,
+          "role": "decor",
+          "sample": "CEO"
+        },
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "YOUR NAME"
+        },
+        {
+          "sid": 22,
+          "role": "decor",
+          "sample": "CEO"
+        },
+        {
+          "sid": 27,
+          "role": "decor",
+          "sample": "YOUR NAME"
+        },
+        {
+          "sid": 26,
+          "role": "decor",
+          "sample": "CEO"
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "Curabitur elementum posu",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 20,
+          "role": "item_body",
+          "sample": "Curabitur elementum posu",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 24,
+          "role": "item_body",
+          "sample": "Curabitur elementum posu",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 28,
+          "role": "item_body",
+          "sample": "Curabitur elementum posu",
+          "cap": 80,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 83,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "item_body",
+          "sample": "（1）接入浙政钉应用体系\n（2）浙政钉扫码登录\n",
+          "cap": 60,
+          "idx": 0
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "PC端",
+          "cap": 3,
+          "idx": 1
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "iOS端",
+          "cap": 4,
+          "idx": 2
+        },
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "Android端",
+          "cap": 8,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 84,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 7,
+          "role": "item_head",
+          "sample": "易腐垃圾量",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "精准投放率",
+          "cap": 10,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "活跃用户",
+          "cap": 10,
+          "idx": 3
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "垃分参与度",
+          "cap": 10,
+          "idx": 4
+        },
+        {
+          "sid": 14,
+          "role": "item_body",
+          "sample": "较大幅度下降，扣20分\n     近7天易腐垃圾",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "抽查精准率70-85%, 扣10分\n抽查精准率低",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "较大幅度丢失，扣15分\n      近30天活跃",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 17,
+          "role": "item_body",
+          "sample": "在所有小网格中排名倒数10%的网格，扣10分\n在",
+          "cap": 80,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 87,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 21,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 8,
+          "role": "title",
+          "sample": "城市建设用地违规示例",
+          "cap": 10
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "示例1：工业用地侵占绿地",
+          "cap": 12,
+          "idx": 1
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "示例2：居住用地侵占工业用地",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 20,
+          "role": "item_head",
+          "sample": "示例3：商业用地侵占绿地",
+          "cap": 12,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 88,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "资源要素分布零散\n主体间信息不对称",
+          "cap": 24
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "地块数量多分布广 \n管理难度大效率低",
+          "cap": 24,
+          "idx": 0
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "储备评估费时费力   \n精细化管理门槛高",
+          "cap": 26,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "跨部门协同难度大\n资源配置不够精准",
+          "cap": 26,
+          "idx": 2
+        },
+        {
+          "sid": 29,
+          "role": "item_body",
+          "sample": "迫切需要一个跨部门、跨层级的共同谋划和协同管理平",
+          "cap": 26,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 89,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "浙江时空智子大数据有限公司 \n        2",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "用数据\n说话",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "用数据\n决策",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "用数据\n管理",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "用数据\n创新",
+          "cap": 6,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 92,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "输入标题文字",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 21,
+          "role": "item_body",
+          "sample": "近30天内，收到督办单，未处置完成，扣5分/条；",
+          "cap": 60,
+          "idx": 1
+        },
+        {
+          "sid": 6,
+          "role": "item_body",
+          "sample": "近30天内，收到交办单/派件任务，未处置完成，扣",
+          "cap": 60,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "item_body",
+          "sample": "近15天内，收到交办单/派件任务但已处置完成，扣",
+          "cap": 30,
+          "idx": 2
+        },
+        {
+          "sid": 18,
+          "role": "item_head",
+          "sample": "协同管理",
+          "cap": 5,
+          "idx": 1
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "近30天内，宣传上门次数，在所有小网格中排名倒数",
+          "cap": 32,
+          "idx": 3
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "近30天内，督导员迟到/缺岗，扣2分/条。",
+          "cap": 26,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 94,
+      "kind": "closing",
+      "slots": [
+        {
+          "sid": 379,
+          "role": "title",
+          "sample": "参考图标",
+          "cap": 18
+        }
+      ]
+    }
+  ]
+}

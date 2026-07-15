@@ -1,0 +1,2364 @@
+{
+  "template": "项目立项汇报模版",
+  "source": "assets/项目立项汇报模版.pptx",
+  "slides": [
+    {
+      "i": 0,
+      "kind": "cover",
+      "slots": [
+        {
+          "sid": 2,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 10,
+          "role": "subtitle",
+          "sample": "完整框架·课题申报·项目答辩·实用易改",
+          "cap": 19
+        },
+        {
+          "sid": 9,
+          "role": "title",
+          "sample": "项目立项汇报",
+          "cap": 6
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "汇报人：待用名",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "汇报单位：XX单位名称",
+          "cap": 13,
+          "idx": 1
+        },
+        {
+          "sid": 21,
+          "role": "item_body",
+          "sample": "项目申报方向：输入您的项目方向在这里输入，方向输",
+          "cap": 37,
+          "idx": 2
+        },
+        {
+          "sid": 35,
+          "role": "decor",
+          "sample": "PROJECT APPLICATION"
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 1,
+      "kind": "toc",
+      "slots": [
+        {
+          "sid": 14,
+          "role": "decor",
+          "sample": "目录"
+        },
+        {
+          "sid": 15,
+          "role": "decor",
+          "sample": "contents"
+        },
+        {
+          "sid": 19,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 74,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 82,
+          "role": "no",
+          "sample": "5"
+        },
+        {
+          "sid": 98,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 106,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 114,
+          "role": "no",
+          "sample": "6"
+        },
+        {
+          "sid": 104,
+          "role": "item_head",
+          "sample": "建设内容与总体方案",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "项目背景与立项依据",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 72,
+          "role": "item_head",
+          "sample": "建设目标与总体思路",
+          "cap": 10,
+          "idx": 2
+        },
+        {
+          "sid": 80,
+          "role": "item_head",
+          "sample": "实施计划与人员安排",
+          "cap": 10,
+          "idx": 3
+        },
+        {
+          "sid": 96,
+          "role": "item_head",
+          "sample": "现状分析与问题诊断",
+          "cap": 10,
+          "idx": 4
+        },
+        {
+          "sid": 112,
+          "role": "item_head",
+          "sample": "项目经费与效益",
+          "cap": 10,
+          "idx": 5
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "课题项目申报答辩名称标题添加在这里",
+          "cap": 14,
+          "idx": 6
+        }
+      ],
+      "items": 7
+    },
+    {
+      "i": 2,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "PROJECT APPLICATION"
+        },
+        {
+          "sid": 2,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 13,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 11,
+          "role": "title",
+          "sample": "项目背景与立项依据",
+          "cap": 9
+        },
+        {
+          "sid": 34,
+          "role": "subtitle",
+          "sample": "政策背景与行业要求",
+          "cap": 9
+        },
+        {
+          "sid": 38,
+          "role": "item_body",
+          "sample": "研究意义与应用前景",
+          "cap": 10,
+          "idx": 0
+        },
+        {
+          "sid": 45,
+          "role": "item_body",
+          "sample": "立项依据与合规性说明",
+          "cap": 11,
+          "idx": 1
+        },
+        {
+          "sid": 20,
+          "role": "item_body",
+          "sample": "项目立项汇报名称标题添加在这里",
+          "cap": 15,
+          "idx": 2
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 10,
+          "role": "title",
+          "sample": "项目背景与立项依据",
+          "cap": 10
+        },
+        {
+          "sid": 17,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "政策背景与行业要求",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 49,
+          "role": "item_head",
+          "sample": "要求\n关键词添加",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 50,
+          "role": "item_head",
+          "sample": "要求\n关键词添加",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 51,
+          "role": "item_head",
+          "sample": "要求\n关键词添加",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "项目背景",
+          "cap": 9,
+          "idx": 4
+        },
+        {
+          "sid": 45,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 63,
+          "idx": 1
+        },
+        {
+          "sid": 47,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 63,
+          "idx": 2
+        },
+        {
+          "sid": 48,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 63,
+          "idx": 3
+        },
+        {
+          "sid": 52,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 66,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 4,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 2,
+          "role": "title",
+          "sample": "项目背景与立项依据",
+          "cap": 10
+        },
+        {
+          "sid": 9,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "研究意义与应用前景",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "研究意义",
+          "cap": 13,
+          "idx": 1
+        },
+        {
+          "sid": 77,
+          "role": "item_head",
+          "sample": "应用前景",
+          "cap": 13,
+          "idx": 2
+        },
+        {
+          "sid": 88,
+          "role": "item_body",
+          "sample": "项目意义描述添加\n学科门类针对不同基金的特点、要",
+          "cap": 59,
+          "idx": 2
+        },
+        {
+          "sid": 90,
+          "role": "item_body",
+          "sample": "项目意义描述添加\n学科门类针对不同基金的特点、要",
+          "cap": 59,
+          "idx": 1
+        },
+        {
+          "sid": 93,
+          "role": "item_body",
+          "sample": "项目意义描述添加\n学科门类针对不同基金的特点、要",
+          "cap": 59,
+          "idx": 0
+        },
+        {
+          "sid": 103,
+          "role": "decor",
+          "sample": "A"
+        },
+        {
+          "sid": 96,
+          "role": "item_body",
+          "sample": "项目意义描述添加\n学科门类针对不同基金的特点、要",
+          "cap": 60,
+          "idx": 3
+        },
+        {
+          "sid": 104,
+          "role": "decor",
+          "sample": "B"
+        },
+        {
+          "sid": 98,
+          "role": "item_body",
+          "sample": "项目意义描述添加\n学科门类针对不同基金的特点、要",
+          "cap": 60,
+          "idx": 4
+        },
+        {
+          "sid": 105,
+          "role": "decor",
+          "sample": "C"
+        },
+        {
+          "sid": 99,
+          "role": "item_body",
+          "sample": "项目意义描述添加\n学科门类针对不同基金的特点、要",
+          "cap": 60,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 5,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "项目背景与立项依据",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "立项依据与合规性说明",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 4,
+          "role": "item_head",
+          "sample": "项标题",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "项标题",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "项标题",
+          "cap": 7,
+          "idx": 3
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "项标题",
+          "cap": 7,
+          "idx": 4
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "项标题",
+          "cap": 7,
+          "idx": 5
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "项标题",
+          "cap": 7,
+          "idx": 6
+        },
+        {
+          "sid": 2,
+          "role": "item_body",
+          "sample": "单击此处输入正文，请尽量言简意赅的阐述观点",
+          "cap": 32,
+          "idx": 1
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，请尽量言简意赅的阐述观点",
+          "cap": 32,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "单击此处输入正文，请尽量言简意赅的阐述观点",
+          "cap": 32,
+          "idx": 3
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，请尽量言简意赅的阐述观点",
+          "cap": 32,
+          "idx": 4
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "单击此处输入正文，请尽量言简意赅的阐述观点",
+          "cap": 32,
+          "idx": 5
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，请尽量言简意赅的阐述观点",
+          "cap": 32,
+          "idx": 6
+        },
+        {
+          "sid": 5,
+          "role": "decor",
+          "sample": "YUANHUAN"
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "立项依据与合规性说明",
+          "cap": 14,
+          "idx": 7
+        }
+      ],
+      "items": 8
+    },
+    {
+      "i": 6,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "PROJECT APPLICATION"
+        },
+        {
+          "sid": 85,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "现状分析与问题诊断",
+          "cap": 9
+        },
+        {
+          "sid": 59,
+          "role": "subtitle",
+          "sample": "现有系统/业务现状梳理",
+          "cap": 11
+        },
+        {
+          "sid": 68,
+          "role": "item_body",
+          "sample": "核心问题与风险识别",
+          "cap": 10,
+          "idx": 0
+        },
+        {
+          "sid": 75,
+          "role": "item_body",
+          "sample": "差距评估与对标分析",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 86,
+          "role": "item_body",
+          "sample": "项目立项汇报名称标题添加在这里",
+          "cap": 15,
+          "idx": 2
+        }
+      ]
+    },
+    {
+      "i": 7,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "现状分析与问题诊断",
+          "cap": 10
+        },
+        {
+          "sid": 20,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "现有系统/业务现状梳理",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "现状1 添加项标题",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 142,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "单击此处添加正文，文字是您思想的提炼，请简意的阐",
+          "cap": 34,
+          "idx": 1
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "现状2 添加项标题",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 148,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 3,
+          "role": "item_body",
+          "sample": "添加正文，文字是您思想的提炼请简意的阐述您的观点",
+          "cap": 34,
+          "idx": 2
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "现状3 添加项标题",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 144,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "添加正文，文字是您思想的提炼，请简意的阐述您的观",
+          "cap": 34,
+          "idx": 3
+        },
+        {
+          "sid": 8,
+          "role": "item_head",
+          "sample": "现状4 添加项标题",
+          "cap": 14,
+          "idx": 4
+        },
+        {
+          "sid": 146,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "单击此处添加正文，文字是您思想的提炼请简意的阐述",
+          "cap": 34,
+          "idx": 4
+        },
+        {
+          "sid": 18,
+          "role": "item_head",
+          "sample": "现状5 添加项标题",
+          "cap": 14,
+          "idx": 5
+        },
+        {
+          "sid": 4,
+          "role": "no",
+          "sample": "05"
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "单击此处添加正文，文字是您思想的提炼，请简意的阐",
+          "cap": 34,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 8,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "现状分析与问题诊断",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 2,
+          "role": "item_head",
+          "sample": "核心问题与风险识别",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文的字，以",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 14,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 17,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 18,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "单击此处添加标题",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 22,
+          "role": "no",
+          "sample": "06"
+        },
+        {
+          "sid": 23,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 80,
+          "idx": 4
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 80,
+          "idx": 5
+        },
+        {
+          "sid": 19,
+          "role": "no",
+          "sample": "05"
+        },
+        {
+          "sid": 21,
+          "role": "no",
+          "sample": "04"
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 9,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "现状分析与问题诊断",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 2,
+          "role": "item_head",
+          "sample": "差距评估与对标分析",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 79,
+          "role": "item_body",
+          "sample": "描述概括这里添加一段文字，与行业标杆/标准的差距",
+          "cap": 27,
+          "idx": 0
+        },
+        {
+          "sid": 47,
+          "role": "item_head",
+          "sample": "行业标准",
+          "cap": 5,
+          "idx": 1
+        },
+        {
+          "sid": 61,
+          "role": "item_head",
+          "sample": "现实情况",
+          "cap": 5,
+          "idx": 2
+        },
+        {
+          "sid": 5,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文的字，以",
+          "cap": 60,
+          "idx": 1
+        },
+        {
+          "sid": 58,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文的字，以",
+          "cap": 60,
+          "idx": 2
+        },
+        {
+          "sid": 48,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文的字，以",
+          "cap": 60,
+          "idx": 3
+        },
+        {
+          "sid": 62,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文的字，以",
+          "cap": 60,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 10,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "PROJECT APPLICATION"
+        },
+        {
+          "sid": 85,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "建设目标与总体思路",
+          "cap": 9
+        },
+        {
+          "sid": 94,
+          "role": "subtitle",
+          "sample": "总体建设目标",
+          "cap": 11
+        },
+        {
+          "sid": 101,
+          "role": "item_body",
+          "sample": "核心建设原则与指导思想",
+          "cap": 12,
+          "idx": 0
+        },
+        {
+          "sid": 108,
+          "role": "item_body",
+          "sample": "预期达成指标",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 87,
+          "role": "item_body",
+          "sample": "项目立项汇报名称标题添加在这里",
+          "cap": 15,
+          "idx": 2
+        }
+      ]
+    },
+    {
+      "i": 11,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "建设目标与总体思路",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 2,
+          "role": "item_head",
+          "sample": "总体建设目标",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 69,
+          "role": "item_head",
+          "sample": "总体建设目标的内容",
+          "cap": 13,
+          "idx": 1
+        },
+        {
+          "sid": 42,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 49,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 55,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 58,
+          "role": "item_head",
+          "sample": "研究目标与内容",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 63,
+          "role": "item_head",
+          "sample": "研究目标与内容",
+          "cap": 8,
+          "idx": 3
+        },
+        {
+          "sid": 67,
+          "role": "item_head",
+          "sample": "研究目标与内容",
+          "cap": 8,
+          "idx": 4
+        },
+        {
+          "sid": 60,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 50,
+          "idx": 2
+        },
+        {
+          "sid": 64,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 50,
+          "idx": 1
+        },
+        {
+          "sid": 68,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 50,
+          "idx": 0
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 12,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "建设目标与总体思路",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "核心建设原则与指导思想",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 84,
+          "role": "item_head",
+          "sample": "指导思想2",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 90,
+          "role": "item_head",
+          "sample": "指导思想1",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 72,
+          "role": "item_head",
+          "sample": "建设原则1",
+          "cap": 7,
+          "idx": 3
+        },
+        {
+          "sid": 79,
+          "role": "item_head",
+          "sample": "建设原则2",
+          "cap": 7,
+          "idx": 4
+        },
+        {
+          "sid": 70,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 60,
+          "idx": 3
+        },
+        {
+          "sid": 78,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 60,
+          "idx": 4
+        },
+        {
+          "sid": 83,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 60,
+          "idx": 2
+        },
+        {
+          "sid": 89,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 60,
+          "idx": 1
+        },
+        {
+          "sid": 103,
+          "role": "item_head",
+          "sample": "原则思想",
+          "cap": 4,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 13,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "建设目标与总体思路",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "预期达成指标",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 171,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 175,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 179,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 183,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 170,
+          "role": "item_body",
+          "sample": "达成目标主要内容；单击此处添加文本内容，根据需要",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 174,
+          "role": "item_body",
+          "sample": "达成目标主要内容；单击此处添加文本内容，根据需要",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 178,
+          "role": "item_body",
+          "sample": "达成目标主要内容；单击此处添加文本内容，根据需要",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 182,
+          "role": "item_body",
+          "sample": "达成目标主要内容；单击此处添加文本内容，根据需要",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 14,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 24,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 36,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 42,
+          "role": "item_head",
+          "sample": "达成目标内容标题",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "达成目标内容标题",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 21,
+          "role": "item_head",
+          "sample": "达成目标内容标题",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 34,
+          "role": "item_head",
+          "sample": "达成目标内容标题",
+          "cap": 14,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 14,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "PROJECT APPLICATION"
+        },
+        {
+          "sid": 85,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "建设内容与总体方案",
+          "cap": 9
+        },
+        {
+          "sid": 94,
+          "role": "subtitle",
+          "sample": "建设范围",
+          "cap": 11
+        },
+        {
+          "sid": 101,
+          "role": "item_body",
+          "sample": "总体架构与技术路线",
+          "cap": 12,
+          "idx": 0
+        },
+        {
+          "sid": 108,
+          "role": "item_body",
+          "sample": "核心功能模块",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 114,
+          "role": "item_body",
+          "sample": "建设内容",
+          "cap": 10,
+          "idx": 2
+        },
+        {
+          "sid": 121,
+          "role": "item_body",
+          "sample": "关键技术与创新点",
+          "cap": 10,
+          "idx": 3
+        },
+        {
+          "sid": 86,
+          "role": "item_body",
+          "sample": "项目立项汇报名称标题添加在这里",
+          "cap": 15,
+          "idx": 4
+        }
+      ]
+    },
+    {
+      "i": 15,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "建设内容与总体方案",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 2,
+          "role": "item_head",
+          "sample": "建设范围",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "范围",
+          "cap": 3,
+          "idx": 1
+        },
+        {
+          "sid": 16,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 36,
+          "idx": 0
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "范围",
+          "cap": 3,
+          "idx": 2
+        },
+        {
+          "sid": 20,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 17,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 36,
+          "idx": 2
+        },
+        {
+          "sid": 30,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 79,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "范围",
+          "cap": 3,
+          "idx": 3
+        },
+        {
+          "sid": 23,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 36,
+          "idx": 3
+        },
+        {
+          "sid": 38,
+          "role": "item_head",
+          "sample": "范围",
+          "cap": 3,
+          "idx": 4
+        },
+        {
+          "sid": 59,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 36,
+          "idx": 4
+        },
+        {
+          "sid": 80,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 66,
+          "idx": 1
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 16,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "建设内容与总体方案",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "总体架构与技术路线",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 127,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 130,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 7,
+          "idx": 3
+        },
+        {
+          "sid": 145,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 7,
+          "idx": 4
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "技术\n路线",
+          "cap": 6,
+          "idx": 5
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 8,
+          "idx": 6
+        },
+        {
+          "sid": 136,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 7,
+          "idx": 7
+        },
+        {
+          "sid": 148,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 7,
+          "idx": 8
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 8,
+          "idx": 9
+        },
+        {
+          "sid": 139,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 7,
+          "idx": 10
+        },
+        {
+          "sid": 154,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 7,
+          "idx": 11
+        },
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 8,
+          "idx": 12
+        },
+        {
+          "sid": 157,
+          "role": "item_head",
+          "sample": "输入相关文字",
+          "cap": 7,
+          "idx": 13
+        }
+      ],
+      "items": 14
+    },
+    {
+      "i": 17,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "建设内容与总体方案",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "核心功能模块",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 45,
+          "role": "item_head",
+          "sample": "功能模块标题",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 59,
+          "role": "item_head",
+          "sample": "功能模块标题",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 36,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 64,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 64,
+          "idx": 2
+        },
+        {
+          "sid": 54,
+          "role": "item_head",
+          "sample": "功能模块标题",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "功能模块标题",
+          "cap": 6,
+          "idx": 4
+        },
+        {
+          "sid": 56,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 64,
+          "idx": 3
+        },
+        {
+          "sid": 66,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 64,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 18,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "建设内容与总体方案",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "建设内容",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 123,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 65,
+          "idx": 0
+        },
+        {
+          "sid": 125,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 65,
+          "idx": 1
+        },
+        {
+          "sid": 64,
+          "role": "decor",
+          "sample": "STEP"
+        },
+        {
+          "sid": 108,
+          "role": "decor",
+          "sample": "STEP"
+        },
+        {
+          "sid": 114,
+          "role": "decor",
+          "sample": "STEP"
+        },
+        {
+          "sid": 120,
+          "role": "decor",
+          "sample": "STEP"
+        },
+        {
+          "sid": 65,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 109,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 115,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 121,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 79,
+          "role": "item_head",
+          "sample": "项目的\n建设内容",
+          "cap": 12,
+          "idx": 1
+        },
+        {
+          "sid": 107,
+          "role": "item_head",
+          "sample": "项目的\n建设内容",
+          "cap": 12,
+          "idx": 2
+        },
+        {
+          "sid": 113,
+          "role": "item_head",
+          "sample": "项目的\n建设内容",
+          "cap": 12,
+          "idx": 3
+        },
+        {
+          "sid": 119,
+          "role": "item_head",
+          "sample": "项目的\n建设内容",
+          "cap": 12,
+          "idx": 4
+        },
+        {
+          "sid": 122,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 65,
+          "idx": 2
+        },
+        {
+          "sid": 124,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 65,
+          "idx": 3
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 19,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 26,
+          "role": "title",
+          "sample": "建设内容与总体方案",
+          "cap": 10
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "5"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "关键技术与创新点",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 106,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 76,
+          "idx": 0
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "关键\n技术\n创新",
+          "cap": 9,
+          "idx": 1
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "关键\n技术\n创新",
+          "cap": 9,
+          "idx": 2
+        },
+        {
+          "sid": 107,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 70,
+          "idx": 2
+        },
+        {
+          "sid": 85,
+          "role": "item_head",
+          "sample": "名称",
+          "cap": 2,
+          "idx": 3
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "关键\n技术\n创新",
+          "cap": 9,
+          "idx": 4
+        },
+        {
+          "sid": 128,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 70,
+          "idx": 4
+        },
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "关键\n技术\n创新",
+          "cap": 9,
+          "idx": 5
+        },
+        {
+          "sid": 129,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 76,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 20,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "PROJECT APPLICATION"
+        },
+        {
+          "sid": 85,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "5"
+        },
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "实施计划与人员安排",
+          "cap": 9
+        },
+        {
+          "sid": 94,
+          "role": "subtitle",
+          "sample": "实施计划",
+          "cap": 11
+        },
+        {
+          "sid": 101,
+          "role": "item_body",
+          "sample": "人员安排",
+          "cap": 12,
+          "idx": 0
+        },
+        {
+          "sid": 86,
+          "role": "item_body",
+          "sample": "项目立项汇报名称标题添加在这里",
+          "cap": 15,
+          "idx": 1
+        }
+      ]
+    },
+    {
+      "i": 21,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "title",
+          "sample": "实施计划与人员安排",
+          "cap": 9
+        },
+        {
+          "sid": 7,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "实施计划",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 46,
+          "role": "item_head",
+          "sample": "第一\n阶段",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 53,
+          "role": "item_head",
+          "sample": "第二\n阶段",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 64,
+          "role": "item_head",
+          "sample": "第三\n阶段",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 69,
+          "role": "item_head",
+          "sample": "第四\n阶段",
+          "cap": 6,
+          "idx": 4
+        },
+        {
+          "sid": 47,
+          "role": "item_head",
+          "sample": "20XX.02",
+          "cap": 7,
+          "idx": 5
+        },
+        {
+          "sid": 48,
+          "role": "item_head",
+          "sample": "20XX.02",
+          "cap": 7,
+          "idx": 6
+        },
+        {
+          "sid": 65,
+          "role": "item_head",
+          "sample": "20XX.02",
+          "cap": 7,
+          "idx": 7
+        },
+        {
+          "sid": 70,
+          "role": "item_head",
+          "sample": "20XX.02",
+          "cap": 7,
+          "idx": 8
+        },
+        {
+          "sid": 72,
+          "role": "item_body",
+          "sample": "项目立项的依据、课题研究的基本内容、重点和难点、",
+          "cap": 72,
+          "idx": 5
+        },
+        {
+          "sid": 73,
+          "role": "item_body",
+          "sample": "项目立项的依据、课题研究的基本内容、重点和难点、",
+          "cap": 72,
+          "idx": 6
+        },
+        {
+          "sid": 76,
+          "role": "item_body",
+          "sample": "项目立项的依据、课题研究的基本内容、重点和难点、",
+          "cap": 72,
+          "idx": 7
+        },
+        {
+          "sid": 77,
+          "role": "item_body",
+          "sample": "项目立项的依据、课题研究的基本内容、重点和难点、",
+          "cap": 72,
+          "idx": 8
+        }
+      ],
+      "items": 9
+    },
+    {
+      "i": 22,
+      "kind": "table",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "title",
+          "sample": "实施计划与人员安排",
+          "cap": 9
+        },
+        {
+          "sid": 7,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "实施计划",
+          "cap": 11,
+          "idx": 0
+        }
+      ]
+    },
+    {
+      "i": 23,
+      "kind": "table",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "title",
+          "sample": "实施计划与人员安排",
+          "cap": 9
+        },
+        {
+          "sid": 7,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "人员安排",
+          "cap": 11,
+          "idx": 0
+        }
+      ]
+    },
+    {
+      "i": 24,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "title",
+          "sample": "实施计划与人员安排",
+          "cap": 9
+        },
+        {
+          "sid": 7,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "人员安排",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 18,
+          "role": "item_head",
+          "sample": "Angles\n职称添加",
+          "cap": 11,
+          "idx": 1
+        },
+        {
+          "sid": 44,
+          "role": "item_head",
+          "sample": "项目经理",
+          "cap": 5,
+          "idx": 2
+        },
+        {
+          "sid": 51,
+          "role": "item_head",
+          "sample": "组员",
+          "cap": 4,
+          "idx": 3
+        },
+        {
+          "sid": 68,
+          "role": "item_head",
+          "sample": "组员",
+          "cap": 4,
+          "idx": 4
+        },
+        {
+          "sid": 73,
+          "role": "item_head",
+          "sample": "组员",
+          "cap": 4,
+          "idx": 5
+        },
+        {
+          "sid": 54,
+          "role": "item_head",
+          "sample": "职责：添加职责内容分工",
+          "cap": 14,
+          "idx": 6
+        },
+        {
+          "sid": 85,
+          "role": "item_head",
+          "sample": "职责：添加职责内容分工",
+          "cap": 14,
+          "idx": 7
+        },
+        {
+          "sid": 132,
+          "role": "item_head",
+          "sample": "职责：添加职责内容分工",
+          "cap": 14,
+          "idx": 8
+        },
+        {
+          "sid": 34,
+          "role": "item_head",
+          "sample": "职责：添加职责内容分工",
+          "cap": 12,
+          "idx": 9
+        },
+        {
+          "sid": 52,
+          "role": "item_head",
+          "sample": "Angles\n职称添加",
+          "cap": 11,
+          "idx": 10
+        },
+        {
+          "sid": 69,
+          "role": "item_head",
+          "sample": "Angles\n职称添加",
+          "cap": 11,
+          "idx": 11
+        },
+        {
+          "sid": 83,
+          "role": "item_head",
+          "sample": "Angles\n职称添加",
+          "cap": 11,
+          "idx": 12
+        }
+      ],
+      "items": 13
+    },
+    {
+      "i": 25,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "decor",
+          "sample": "PROJECT APPLICATION"
+        },
+        {
+          "sid": 85,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "6"
+        },
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "项目经费与效益",
+          "cap": 9
+        },
+        {
+          "sid": 59,
+          "role": "subtitle",
+          "sample": "项目经费",
+          "cap": 8
+        },
+        {
+          "sid": 68,
+          "role": "item_body",
+          "sample": "经济效益",
+          "cap": 8,
+          "idx": 0
+        },
+        {
+          "sid": 75,
+          "role": "item_body",
+          "sample": "社会效益",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 86,
+          "role": "item_body",
+          "sample": "项目立项汇报名称标题添加在这里",
+          "cap": 15,
+          "idx": 2
+        }
+      ]
+    },
+    {
+      "i": 26,
+      "kind": "table",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "title",
+          "sample": "项目经费与效益",
+          "cap": 9
+        },
+        {
+          "sid": 46,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 41,
+          "role": "item_head",
+          "sample": "项目经费",
+          "cap": 8,
+          "idx": 0
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "单位：万",
+          "cap": 7,
+          "idx": 1
+        }
+      ]
+    },
+    {
+      "i": 27,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "title",
+          "sample": "项目经费与效益",
+          "cap": 9
+        },
+        {
+          "sid": 46,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 41,
+          "role": "item_head",
+          "sample": "经济效益",
+          "cap": 8,
+          "idx": 0
+        },
+        {
+          "sid": 59,
+          "role": "item_body",
+          "sample": "项目立项的依据、课题研究的基本内容、重点和难点、",
+          "cap": 55,
+          "idx": 2
+        },
+        {
+          "sid": 60,
+          "role": "item_head",
+          "sample": "主要目标添加内容描述这里",
+          "cap": 12,
+          "idx": 1
+        },
+        {
+          "sid": 66,
+          "role": "item_head",
+          "sample": "主要目标添加内容描述这里",
+          "cap": 12,
+          "idx": 2
+        },
+        {
+          "sid": 65,
+          "role": "item_body",
+          "sample": "项目立项的依据、课题研究的基本内容、重点和难点、",
+          "cap": 69,
+          "idx": 3
+        },
+        {
+          "sid": 72,
+          "role": "item_head",
+          "sample": "主要目标添加内容描述这里",
+          "cap": 12,
+          "idx": 3
+        },
+        {
+          "sid": 71,
+          "role": "item_body",
+          "sample": "项目立项的依据、课题研究的基本内容、重点和难点、",
+          "cap": 55,
+          "idx": 1
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 28,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 23,
+          "role": "title",
+          "sample": "项目经费与效益",
+          "cap": 9
+        },
+        {
+          "sid": 46,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 41,
+          "role": "item_head",
+          "sample": "社会效益",
+          "cap": 8,
+          "idx": 0
+        },
+        {
+          "sid": 42,
+          "role": "item_head",
+          "sample": "对社会而言",
+          "cap": 5,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "对公司而言",
+          "cap": 5,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "对行业而言",
+          "cap": 5,
+          "idx": 3
+        },
+        {
+          "sid": 45,
+          "role": "item_head",
+          "sample": "对个人而言",
+          "cap": 5,
+          "idx": 4
+        },
+        {
+          "sid": 38,
+          "role": "item_body",
+          "sample": "提高患者满意度，增加社会效应，提升医院的整体品牌",
+          "cap": 45,
+          "idx": 1
+        },
+        {
+          "sid": 39,
+          "role": "item_body",
+          "sample": "促进患者积极配合，确保治疗和护理的顺利实施，促进",
+          "cap": 45,
+          "idx": 2
+        },
+        {
+          "sid": 40,
+          "role": "item_body",
+          "sample": "增加团队凝聚力，改善工作效率和品质，提高病区整体",
+          "cap": 45,
+          "idx": 3
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "提高个人专业能力，增加患者对医护人员的信任，体现",
+          "cap": 45,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 29,
+      "kind": "closing",
+      "slots": [
+        {
+          "sid": 2,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 9,
+          "role": "title",
+          "sample": "汇报完毕 谢谢大家",
+          "cap": 9
+        },
+        {
+          "sid": 10,
+          "role": "subtitle",
+          "sample": "不足之处请专家批评指正",
+          "cap": 11
+        },
+        {
+          "sid": 35,
+          "role": "decor",
+          "sample": "PROJECT APPLICATION"
+        }
+      ]
+    }
+  ]
+}

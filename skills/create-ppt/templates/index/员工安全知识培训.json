@@ -1,0 +1,1331 @@
+{
+  "template": "员工安全知识培训",
+  "source": "assets/员工安全知识培训.pptx",
+  "slides": [
+    {
+      "i": 0,
+      "kind": "cover",
+      "slots": [
+        {
+          "sid": 25,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 2,
+          "role": "title",
+          "sample": "员工安全知识培训",
+          "cap": 8
+        },
+        {
+          "sid": 24,
+          "role": "subtitle",
+          "sample": "化工安全知识培训",
+          "cap": 8
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "kind": "toc",
+      "slots": [
+        {
+          "sid": 214,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 193,
+          "role": "item_head",
+          "sample": "化工安全的重要性",
+          "cap": 12,
+          "idx": 0
+        },
+        {
+          "sid": 215,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 194,
+          "role": "item_head",
+          "sample": "化工安全培训的目的",
+          "cap": 12,
+          "idx": 1
+        },
+        {
+          "sid": 192,
+          "role": "decor",
+          "sample": "目录\nCONTENTS"
+        },
+        {
+          "sid": 216,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 195,
+          "role": "item_head",
+          "sample": "化工安全培训的内容",
+          "cap": 12,
+          "idx": 2
+        },
+        {
+          "sid": 217,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 196,
+          "role": "item_head",
+          "sample": "化工事故案例分析",
+          "cap": 12,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 2,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 14,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 15,
+          "role": "title",
+          "sample": "化工安全的重要性",
+          "cap": 8
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 25,
+          "role": "title",
+          "sample": "化工安全的重要性",
+          "cap": 9
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "单击此处编辑标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 52,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，请尽量",
+          "cap": 80,
+          "idx": 0
+        }
+      ],
+      "items": 1
+    },
+    {
+      "i": 4,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 25,
+          "role": "title",
+          "sample": "化工安全的重要性",
+          "cap": 9
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "单击此处添加文本具体内容，简明扼要地阐述您的观点",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "单击此处添加文本具体内容，简明扼要地阐述您的观点",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "单击此处添加文本具体内容，简明扼要地阐述您的观点",
+          "cap": 80,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 5,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 25,
+          "role": "title",
+          "sample": "化工安全的重要性",
+          "cap": 9
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 3,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼，请尽",
+          "cap": 60,
+          "idx": 0
+        },
+        {
+          "sid": 4,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 6,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼，请尽",
+          "cap": 60,
+          "idx": 1
+        },
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 27,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 4
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼，请尽",
+          "cap": 60,
+          "idx": 3
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼，请尽",
+          "cap": 60,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 6,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 25,
+          "role": "title",
+          "sample": "化工安全的重要性",
+          "cap": 9
+        },
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "单击添加标题",
+          "cap": 10,
+          "idx": 0
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "单击此处添加文本，简明扼要地阐述您的观点。根据需",
+          "cap": 60,
+          "idx": 0
+        },
+        {
+          "sid": 32,
+          "role": "item_body",
+          "sample": "单击此处添加文本，简明扼要地阐述您的观点。根据需",
+          "cap": 60,
+          "idx": 1
+        },
+        {
+          "sid": 31,
+          "role": "item_head",
+          "sample": "单击添加标题",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "单击此处添加文本，简明扼要地阐述您的观点。根据需",
+          "cap": 60,
+          "idx": 2
+        },
+        {
+          "sid": 36,
+          "role": "item_head",
+          "sample": "单击添加标题",
+          "cap": 10,
+          "idx": 2
+        },
+        {
+          "sid": 28,
+          "role": "item_body",
+          "sample": "单击此处添加你的标题具体内容",
+          "cap": 36,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 7,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 15,
+          "role": "title",
+          "sample": "化工安全培训的目的",
+          "cap": 9
+        },
+        {
+          "sid": 14,
+          "role": "no",
+          "sample": "02"
+        }
+      ]
+    },
+    {
+      "i": 8,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 41,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 42,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 43,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 39,
+          "role": "title",
+          "sample": "化工安全培训的目的",
+          "cap": 10
+        },
+        {
+          "sid": 25,
+          "role": "item_head",
+          "sample": "请添加标题",
+          "cap": 7,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "item_head",
+          "sample": "请添加标题",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 35,
+          "role": "item_head",
+          "sample": "请添加标题",
+          "cap": 7,
+          "idx": 2
+        },
+        {
+          "sid": 26,
+          "role": "decor",
+          "sample": "REPORT INTRODUCTION"
+        },
+        {
+          "sid": 13,
+          "role": "decor",
+          "sample": "REPORT INTRODUCTION"
+        },
+        {
+          "sid": 14,
+          "role": "decor",
+          "sample": "REPORT INTRODUCTION"
+        },
+        {
+          "sid": 27,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 32,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 28,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 33,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 4
+        },
+        {
+          "sid": 40,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 9,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 39,
+          "role": "title",
+          "sample": "化工安全培训的目的",
+          "cap": 10
+        },
+        {
+          "sid": 2,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼，请尽",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 4,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 14,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼，请尽",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼，请尽",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 9,
+          "role": "no",
+          "sample": "03"
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 10,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 39,
+          "role": "title",
+          "sample": "化工安全培训的目的",
+          "cap": 10
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "单击此处输入项正文，文字是思想的提炼请尽量言简意",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "单击此处输入项正文，文字是思想的提炼请尽量言简意",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 8,
+          "role": "item_head",
+          "sample": "单击此处\n添加标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 26,
+          "role": "item_body",
+          "sample": "单击此处输入项正文，文字是思想的提炼请尽量言简意",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 28,
+          "role": "item_body",
+          "sample": "单击此处输入项正文，文字是思想的提炼请尽量言简意",
+          "cap": 80,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 11,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 39,
+          "role": "title",
+          "sample": "化工安全培训的目的",
+          "cap": 10
+        },
+        {
+          "sid": 14,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，请尽量言简意赅的阐述观点",
+          "cap": 78,
+          "idx": 0
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，请尽量言简意赅的阐述观点",
+          "cap": 78,
+          "idx": 1
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，请尽量言简意赅的阐述观点",
+          "cap": 78,
+          "idx": 2
+        },
+        {
+          "sid": 46,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 48,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 3,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，请尽量言简意赅的阐述观点",
+          "cap": 78,
+          "idx": 3
+        },
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 50,
+          "role": "item_head",
+          "sample": "单击此处\n添加标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 44,
+          "role": "no",
+          "sample": "04"
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 12,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 15,
+          "role": "title",
+          "sample": "化工安全培训的内容",
+          "cap": 9
+        },
+        {
+          "sid": 14,
+          "role": "no",
+          "sample": "03"
+        }
+      ]
+    },
+    {
+      "i": 13,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 21,
+          "role": "title",
+          "sample": "化工安全培训的内容",
+          "cap": 13
+        },
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "内容",
+          "cap": 4,
+          "idx": 0
+        },
+        {
+          "sid": 17,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 36,
+          "idx": 0
+        },
+        {
+          "sid": 28,
+          "role": "item_head",
+          "sample": "内容",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 30,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 22,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 36,
+          "idx": 1
+        },
+        {
+          "sid": 40,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 79,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 39,
+          "role": "item_head",
+          "sample": "内容",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 37,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 36,
+          "idx": 2
+        },
+        {
+          "sid": 43,
+          "role": "item_head",
+          "sample": "内容",
+          "cap": 8,
+          "idx": 3
+        },
+        {
+          "sid": 59,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 36,
+          "idx": 3
+        },
+        {
+          "sid": 80,
+          "role": "item_body",
+          "sample": "单击此处添加文本内容，根据需要酌情增减文字，以便",
+          "cap": 64,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 14,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 21,
+          "role": "title",
+          "sample": "化工安全培训的内容",
+          "cap": 13
+        },
+        {
+          "sid": 45,
+          "role": "item_head",
+          "sample": "功能模块标题",
+          "cap": 7,
+          "idx": 0
+        },
+        {
+          "sid": 59,
+          "role": "item_head",
+          "sample": "功能模块标题",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 36,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "内容\n标题",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 54,
+          "role": "item_head",
+          "sample": "功能模块标题",
+          "cap": 7,
+          "idx": 3
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "功能模块标题",
+          "cap": 7,
+          "idx": 4
+        },
+        {
+          "sid": 56,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 66,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 15,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 21,
+          "role": "title",
+          "sample": "化工安全培训的内容",
+          "cap": 13
+        },
+        {
+          "sid": 7,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 33,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "单击此处输入你的智能图形项正文，文字是您思想的提",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "内容\n标题",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 12,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "单击此处输入你的智能图形项正文，文字是您思想的提",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 24,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 3,
+          "role": "item_body",
+          "sample": "单击此处输入你的智能图形项正文，文字是您思想的提",
+          "cap": 80,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 16,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 21,
+          "role": "title",
+          "sample": "化工安全培训的内容",
+          "cap": 13
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "内容标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "item_head",
+          "sample": "添加项目标题",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "添加项目标题",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "添加项目标题",
+          "cap": 8,
+          "idx": 3
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "单击此处添加正文，文字是您思想的提炼，请言简意赅",
+          "cap": 44,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "单击此处编辑添加正文内容，为了最终演示发布的良好",
+          "cap": 44,
+          "idx": 2
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "单击此处添加正文，文字是您思想的提炼，请言简意赅",
+          "cap": 44,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 17,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "化工安全培训的内容",
+          "cap": 13
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 10,
+          "idx": 0
+        },
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼",
+          "cap": 56,
+          "idx": 0
+        },
+        {
+          "sid": 22,
+          "role": "item_body",
+          "sample": "根据需要可酌情增减文字，以便观者准确地理解您传达",
+          "cap": 60,
+          "idx": 1
+        },
+        {
+          "sid": 21,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 10,
+          "idx": 2
+        },
+        {
+          "sid": 29,
+          "role": "item_head",
+          "sample": "内容标题",
+          "cap": 5,
+          "idx": 3
+        },
+        {
+          "sid": 28,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 10,
+          "idx": 4
+        },
+        {
+          "sid": 20,
+          "role": "item_body",
+          "sample": "根据需要可酌情增减文字，以便观者准确地理解您传达",
+          "cap": 56,
+          "idx": 2
+        },
+        {
+          "sid": 27,
+          "role": "item_body",
+          "sample": "单击此处输入你的项正文，文字是您思想的提炼",
+          "cap": 60,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 18,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 14,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 15,
+          "role": "title",
+          "sample": "化工事故案例分析",
+          "cap": 8
+        }
+      ]
+    },
+    {
+      "i": 19,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 24,
+          "role": "title",
+          "sample": "化工事故案例分析",
+          "cap": 13
+        },
+        {
+          "sid": 106,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 5,
+          "role": "item_head",
+          "sample": "案例名称",
+          "cap": 6,
+          "idx": 0
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "案例名称",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 107,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 76,
+          "idx": 3
+        },
+        {
+          "sid": 85,
+          "role": "item_head",
+          "sample": "案例",
+          "cap": 3,
+          "idx": 2
+        },
+        {
+          "sid": 7,
+          "role": "item_head",
+          "sample": "案例名称",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 128,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 76,
+          "idx": 4
+        },
+        {
+          "sid": 20,
+          "role": "item_head",
+          "sample": "案例名称",
+          "cap": 6,
+          "idx": 4
+        },
+        {
+          "sid": 129,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 2
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 20,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 77,
+          "role": "title",
+          "sample": "化工事故案例分析",
+          "cap": 13
+        },
+        {
+          "sid": 51,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 50,
+          "role": "item_head",
+          "sample": "添加案例标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 42,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 52,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 78,
+          "idx": 1
+        },
+        {
+          "sid": 43,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 53,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 78,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 21,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 77,
+          "role": "title",
+          "sample": "化工事故案例分析",
+          "cap": 13
+        },
+        {
+          "sid": 32,
+          "role": "item_head",
+          "sample": "单击此处添加标题",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 31,
+          "role": "item_body",
+          "sample": "单击此处添加文本具体内容，简明扼要地阐述您的观点",
+          "cap": 80,
+          "idx": 0
+        }
+      ],
+      "items": 1
+    },
+    {
+      "i": 22,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 77,
+          "role": "title",
+          "sample": "化工事故案例分析",
+          "cap": 13
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "单击此处添加文本具体内容，简明扼要的阐述您的观点",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 8,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "单击添加标题",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "单击添加标题",
+          "cap": 9,
+          "idx": 1
+        },
+        {
+          "sid": 15,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "单击添加标题",
+          "cap": 9,
+          "idx": 2
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "单击此处添加正文具体内容内容，请言简意赅阐述你的",
+          "cap": 33,
+          "idx": 1
+        },
+        {
+          "sid": 14,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼为了最终",
+          "cap": 33,
+          "idx": 2
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "单击此处添加正文具体内容内容，请言简意赅阐述你的",
+          "cap": 33,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 23,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 77,
+          "role": "title",
+          "sample": "化工事故案例分析",
+          "cap": 13
+        },
+        {
+          "sid": 4,
+          "role": "item_body",
+          "sample": "单击添加标题，文字是您思想的提炼\n为了最终演示发",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 50,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 6,
+          "idx": 0
+        },
+        {
+          "sid": 56,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 61,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 51,
+          "role": "item_body",
+          "sample": "单击添加正文，文字是您思想的提炼，请尽量言简意赅",
+          "cap": 40,
+          "idx": 0
+        },
+        {
+          "sid": 57,
+          "role": "item_body",
+          "sample": "添加正文，文字是您主要思想的提炼，请尽量言简意赅",
+          "cap": 40,
+          "idx": 2
+        },
+        {
+          "sid": 62,
+          "role": "item_body",
+          "sample": "单击添加正文，文字是您思想的提炼，请尽量言简意赅",
+          "cap": 40,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 24,
+      "kind": "closing",
+      "slots": [
+        {
+          "sid": 25,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 2,
+          "role": "title",
+          "sample": "谢谢您的欣赏",
+          "cap": 8
+        }
+      ]
+    }
+  ]
+}
