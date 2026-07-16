@@ -27,6 +27,6 @@ rm -f "$out"
 # 从 skills/ 下打包，使 zip 内顶层目录为 <skill-name>/
 cd "$root/skills"
 zip -qr "$out" "$name" \
-  -x "*/__pycache__/*" "*.pyc" "*/.DS_Store" ".DS_Store"
+  -x "$name/tests/*" "*/__pycache__/*" "*.pyc" "*/.DS_Store" ".DS_Store"
 
 echo "已打包: dist/$name.zip"
