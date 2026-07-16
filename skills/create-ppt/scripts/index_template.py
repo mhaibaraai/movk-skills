@@ -5,7 +5,7 @@
 """把一个设计好的 .pptx 索引成「页型 + 文本槽位」，供 build_pptx.py 克隆回填。
 
 用法：
-    uv run scripts/index_template.py assets/员工安全知识培训.pptx > templates/index/员工安全知识培训.json
+    uv run scripts/index_template.py assets/employee-safety-training.pptx > templates/index/employee-safety-training.json
 
 输出为草稿：kind / role 由启发式推断，需人工或模型复核后落盘。
 槽位一律按 shape id 定位——模板里 shape name 大量重复，不可作为标识。

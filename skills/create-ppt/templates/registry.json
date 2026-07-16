@@ -1,36 +1,36 @@
 {
   "员工安全知识培训": {
     "label": "安全生产培训 / 危化品管理",
-    "source": "assets/员工安全知识培训.pptx",
-    "index": "templates/index/员工安全知识培训.json",
+    "source": "assets/employee-safety-training.pptx",
+    "index": "templates/index/employee-safety-training.json",
     "aliases": ["安全生产培训", "安全培训", "危化品管理", "危化品", "HSE 培训", "员工培训", "政策宣贯"],
     "sections": ["安全方针与责任", "风险辨识与管控", "操作规程要点", "应急处置与案例"]
   },
   "项目立项汇报模版": {
     "label": "项目立项 / 申报评审",
-    "source": "assets/项目立项汇报模版.pptx",
-    "index": "templates/index/项目立项汇报模版.json",
+    "source": "assets/project-proposal.pptx",
+    "index": "templates/index/project-proposal.json",
     "aliases": ["项目申报", "项目立项", "立项", "课题答辩", "项目汇报", "申报评审"],
     "sections": ["项目背景与立项依据", "现状分析与问题诊断", "建设目标与总体思路", "建设内容与总体方案", "实施计划与人员安排", "项目经费与效益"]
   },
   "年终安全工作汇报模版": {
     "label": "年终总结 / 工作汇报",
-    "source": "assets/年终安全工作汇报模版.pptx",
-    "index": "templates/index/年终安全工作汇报模版.json",
+    "source": "assets/annual-safety-report.pptx",
+    "index": "templates/index/annual-safety-report.json",
     "aliases": ["年终总结", "年度总结", "工作汇报", "安全汇报", "工作总结", "年终汇报"],
     "sections": ["年度工作总览", "安全制度建设", "典型问题分析", "不足与风险", "下年度计划"]
   },
   "重大事件专项汇报": {
     "label": "专项汇报 / 应急事件",
-    "source": "assets/重大事件专项汇报.pptx",
-    "index": "templates/index/重大事件专项汇报.json",
+    "source": "assets/major-incident-report.pptx",
+    "index": "templates/index/major-incident-report.json",
     "aliases": ["专项汇报", "事故汇报", "应急事件", "重大事件", "事件汇报", "事故调查"],
     "sections": ["事件概述", "应急响应情况", "影响范围与风险评估", "事件原因及性质", "责任分析与处理结果", "防范与整改措施"]
   },
   "通用模板": {
     "label": "通用 / 任意主题",
-    "source": "assets/PPT制作培训与模板.pptx",
-    "index": "templates/index/通用模板.json",
+    "source": "assets/general-template.pptx",
+    "index": "templates/index/general-template.json",
     "aliases": ["通用", "自定义", "其他", "不限", "任意主题", "自由主题"],
     "sections": ["背景与目标", "现状分析", "实施方案", "计划安排", "总结展望"]
   }
