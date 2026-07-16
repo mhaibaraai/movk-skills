@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
-"""生成大纲骨架，或把大纲渲染成 Markdown 分页预览。纯标准库。
+"""生成大纲骨架、渲染 Markdown 分页预览、从预览卡片重建大纲，或对大纲做定点改写。纯标准库。
 
 用法：
     uv run scripts/make_outline.py --template 员工安全知识培训 --pages 14 \
         --title "动火作业安全培训" --sections "风险辨识,作业票证,监护要求,应急处置" > outline.json
     uv run scripts/make_outline.py --preview outline.json
+    uv run scripts/make_outline.py --patch outline.json \
+        --ops '[{"page":4,"field":"items[0].body","value":"作业前完成气体检测"}]'
+    uv run scripts/make_outline.py --from-preview card.md --out outline.json
 
 骨架里的每一页都已绑定模板真实页（src）与该页的要点容量（items 数），
 模型只负责把 {占位} 换成真实文案——不要增删要点条数，多一条就会溢出版式。
+门② 修改用 --patch 定点改写 outline.json（结构不变，只换文本），不必重出完整大纲。
+
+分页卡片是正式的序列化格式：--preview 的输出文法即 --from-preview 的解析文法。
+outline.json 丢失时（如跨轮沙箱失效、跨节点交接），把最近一轮卡片文本喂给
+--from-preview 即可无损重建——src/caps 由确定性重排还原，文本从卡片回填。
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from itertools import cycle
 from pathlib import Path
@@ -137,7 +146,12 @@ def allocate(index: dict, total: int, title: str, sections: list[str]) -> list[d
 
 
 def preview(outline: dict) -> str:
-    """分页 Markdown 卡片：每页一块，供确认门直接渲染，用户按页核对。"""
+    """分页 Markdown 卡片：每页一块，供确认门直接渲染，用户按页核对。
+
+    卡片同时是大纲的无损序列化：文本槽全部在卡片里（src/caps 可确定性重排还原），
+    末尾以分隔线终止，卡片后追加的引导语/标记不会污染最后一页的解析。
+    改动此处的输出文法时，必须同步 parse_page 的解析文法。
+    """
     pages = outline["pages"]
     lines = [f"**{outline['title']}**　模板：{outline['template']}　共 {len(pages)} 页"]
     section_no = 0
@@ -152,18 +166,12 @@ def preview(outline: dict) -> str:
             lines.append(f"**第 {n} 页**　`{label}`")
             lines.append(f"### {section_no:02d} · {title}")
             continue
-        if kind == "cover":
+        if kind in ("cover", "closing"):
             lines.append(f"**第 {n} 页**　`{label}`")
             lines.append(f"# {title}")
             if page.get("subtitle"):
                 lines.append(page["subtitle"])
-            lines += [f"　{it['body']}" for it in items if it.get("body")]
-            continue
-        if kind == "closing":
-            lines.append(f"**第 {n} 页**　`{label}`")
-            lines.append(f"# {title}")
-            if page.get("subtitle"):
-                lines.append(page["subtitle"])
+            lines += [f"- {it['body']}" for it in items if it.get("body")]
             continue
         head = f"**第 {n} 页**　`{label}`"
         if title:
@@ -182,12 +190,225 @@ def preview(outline: dict) -> str:
                     lines.append(f"- **{h}**")
                 elif b:
                     lines.append(f"- {b}")
+    lines.append("\n---\n")
     return "\n".join(lines)
+
+
+LABEL_KIND = {v: k for k, v in KIND_LABEL.items()}
+CARD_HEAD_RE = re.compile(r"^\*\*(.+)\*\*　模板：(.+)　共 (\d+) 页$")
+CARD_PAGE_RE = re.compile(r"^\*\*第 \d+ 页\*\*　`([^`]+)`(?:　(.*))?$")
+CARD_SECTION_RE = re.compile(r"^### \d+ · (.+)$")
+CARD_ITEM_RE = re.compile(r"^- \*\*(.+?)\*\*(?: — (.*))?$")
+
+
+def parse_page(block: list[str]) -> dict | None:
+    """解析一个卡片块。首行不是页头说明卡片已结束（引导语/变更摘要），返回 None。"""
+    head = CARD_PAGE_RE.match(block[0])
+    if not head:
+        return None
+    kind = LABEL_KIND.get(head.group(1))
+    if kind is None:
+        raise SystemExit(f"--from-preview: 未知页型标签 `{head.group(1)}`")
+    page = {"kind": kind, "title": head.group(2) or "", "subtitle": "", "items": []}
+    for line in block[1:]:
+        if kind == "section":
+            if m := CARD_SECTION_RE.match(line):
+                page["title"] = m.group(1)
+        elif kind in ("cover", "closing"):
+            if line.startswith("# "):
+                page["title"] = line[2:]
+            elif line.startswith("- "):
+                page["items"].append({"body": line[2:]})
+            elif not page["subtitle"]:
+                page["subtitle"] = line
+        elif kind == "toc":
+            if line.startswith("- "):
+                page["items"].append({"head": line[2:]})
+        else:
+            if m := CARD_ITEM_RE.match(line):
+                page["items"].append({"head": m.group(1), "body": m.group(2) or ""})
+            elif line.startswith("- "):
+                page["items"].append({"head": "", "body": line[2:]})
+            elif len(line) > 2 and line.startswith("*") and line.endswith("*"):
+                page["subtitle"] = line[1:-1]
+    if kind == "section" and not page["title"]:
+        raise SystemExit("--from-preview: 章节页缺少「### 序号 · 标题」行")
+    return page
+
+
+def parse_preview(text: str) -> dict:
+    """把分页卡片文本解析回 {template, title, pages}（pages 仅含页型与文本，无 src/caps）。"""
+    lines = [line.rstrip() for line in text.splitlines()]
+    for start, line in enumerate(lines):
+        if head := CARD_HEAD_RE.match(line):
+            break
+    else:
+        raise SystemExit("--from-preview: 找不到卡片头行（**标题**　模板：X　共 N 页）")
+    title, template, total = head.group(1), head.group(2), int(head.group(3))
+    pages: list[dict] = []
+    block: list[str] = []
+    for line in lines[start + 1 :] + ["---"]:
+        if line.strip() == "---":
+            if block:
+                page = parse_page(block)
+                if page is None:
+                    break
+                pages.append(page)
+                block = []
+            continue
+        if line:
+            block.append(line)
+    if len(pages) != total:
+        raise SystemExit(f"--from-preview: 头行声明共 {total} 页，实际解析到 {len(pages)} 页")
+    return {"template": template, "title": title, "pages": pages}
+
+
+def align_page(sk: dict, pv: dict, n: int, index: dict, pool: list[dict], picked: dict[int, int]) -> dict:
+    """让骨架页与卡片页对齐：页型必须一致；条数不一致时确定性换选同容量的模板页。"""
+    if sk["kind"] != pv["kind"]:
+        raise SystemExit(f"--from-preview: 第 {n} 页页型对不上（重排为 {sk['kind']}，卡片是 {pv['kind']}）")
+    need, have = len(pv["items"]), len(sk.get("items", []))
+    if need == have:
+        return sk
+    if sk["kind"] == "content":
+        fit = [s for s in pool if s.get("items", 0) == need]
+        fit = [s for s in fit if caps_of(s).get("title", 99) >= len(pv["title"])] or fit
+        if fit:
+            k = picked.get(need, 0)
+            picked[need] = k + 1
+            return blank_page(fit[k % len(fit)], pv["title"])
+        if need < have:
+            return sk  # 空余槽位留空，preview 会自然略过
+        raise SystemExit(f"--from-preview: 第 {n} 页有 {need} 条要点，模板没有能容纳的内容页")
+    if sk["kind"] == "toc":
+        toc = min(pick(index["slides"], "toc"), key=lambda s: abs(s.get("items", 0) - need))
+        page = blank_page(toc, "目录")
+        if len(page.get("items", [])) < need:
+            raise SystemExit(f"--from-preview: 目录 {need} 条超出模板目录页容量")
+        return page
+    if need > have:
+        raise SystemExit(f"--from-preview: 第 {n} 页（{sk['kind']}）有 {need} 条条目，超出模板该页容量 {have}")
+    return sk
+
+
+def fill_page(page: dict, pv: dict, n: int) -> dict:
+    """把卡片文本回填进骨架页：只写文本槽，src/caps/条数保持骨架原样。"""
+    page["title"] = pv["title"]
+    if "subtitle" in page or pv["subtitle"]:
+        page["subtitle"] = pv["subtitle"]
+    slots = page.get("items", [])
+    if len(pv["items"]) > len(slots):
+        raise SystemExit(f"--from-preview: 第 {n} 页条目多于版式槽位（{len(pv['items'])} > {len(slots)}）")
+    for i, slot in enumerate(slots):
+        parsed_item = pv["items"][i] if i < len(pv["items"]) else {}
+        for field in slot:
+            slot[field] = parsed_item.get(field, "")
+    return page
+
+
+def warn_caps(pages: list[dict]) -> None:
+    """全量 caps 核对，超限走 stderr 告警（与 patch 同款，不阻断）。"""
+    for n, page in enumerate(pages, 1):
+        caps = page.get("caps", {})
+        checks = [("title", page.get("title", "")), ("subtitle", page.get("subtitle", ""))]
+        for it in page.get("items", []):
+            checks += [("item_head", it.get("head", "")), ("item_body", it.get("body", ""))]
+        for role, text in checks:
+            cap = caps.get(role)
+            if cap and text and not text.startswith("{") and len(text) > cap:
+                print(
+                    f"警告：第 {n} 页 {role}「{text}」{len(text)} 字，超出该版式上限 {cap} 字。"
+                    f"请改短，否则会溢出版式。",
+                    file=sys.stderr,
+                )
+
+
+def rebuild(parsed: dict) -> dict:
+    """卡片 → outline：allocate 是 (模板, 页数, 标题, 章节) 的确定性函数，
+    从卡片解析出这四个参数重排即可还原 src/caps 骨架，再逐页回填文本。"""
+    key, _ = resolve_template(parsed["template"])
+    index = load_index(key)
+    pages = parsed["pages"]
+    sections = [p["title"] for p in pages if p["kind"] == "section"]
+    if not sections:  # 模板无章节分隔页时，从内容页页眉按序去重兜底
+        sections = list(dict.fromkeys(p["title"] for p in pages if p["kind"] == "content" and p["title"]))
+    if not sections:
+        raise SystemExit("--from-preview: 卡片里没有章节页，也无法从内容页页眉推出章节")
+    skeleton = allocate(index, len(pages), parsed["title"], sections)
+    if len(skeleton) != len(pages):
+        raise SystemExit(f"--from-preview: 按卡片参数重排出 {len(skeleton)} 页，与卡片 {len(pages)} 页对不上")
+    pool = content_pool(index["slides"])
+    picked: dict[int, int] = {}
+    rebuilt = [
+        fill_page(align_page(sk, pv, n, index, pool, picked), pv, n)
+        for n, (sk, pv) in enumerate(zip(skeleton, pages), 1)
+    ]
+    return {"template": key, "title": parsed["title"], "pages": rebuilt}
+
+
+def from_preview(text: str) -> dict:
+    """从卡片文本重建 outline，并以「重建结果的预览可再解析回同一结构」做无损自检。"""
+    parsed = parse_preview(text)
+    outline = rebuild(parsed)
+    if parse_preview(preview(outline)) != parsed:
+        raise SystemExit("--from-preview: 重建结果的预览与输入卡片不一致，卡片可能被改坏")
+    warn_caps(outline["pages"])
+    return outline
+
+
+FIELD_RE = re.compile(r"^items\[(\d+)\]\.(head|body)$")
+CAP_ROLE = {"title": "title", "subtitle": "subtitle", "head": "item_head", "body": "item_body"}
+
+
+def apply_op(pages: list[dict], op: dict) -> tuple[int, str, str]:
+    """把一条定点改写落到目标页字段。只换文本，不动 src/kind/caps/items 条数。"""
+    page_no, field, value = op.get("page"), op.get("field"), op.get("value")
+    if not isinstance(page_no, int) or not 1 <= page_no <= len(pages):
+        raise SystemExit(f"--patch: page 越界或非法：{page_no!r}（共 {len(pages)} 页）")
+    if not isinstance(value, str):
+        raise SystemExit(f"--patch: value 必须是字符串：{value!r}")
+    page = pages[page_no - 1]
+    if field in ("title", "subtitle"):
+        page[field] = value
+        return page_no, field, value
+    match = FIELD_RE.match(field or "")
+    if not match:
+        raise SystemExit(
+            f"--patch: 非法字段 {field!r}，仅支持 title / subtitle / items[N].head / items[N].body"
+        )
+    idx, sub = int(match.group(1)), match.group(2)
+    items = page.get("items", [])
+    if idx >= len(items):
+        raise SystemExit(
+            f"--patch: 第 {page_no} 页要点序号 {idx} 越界（该页 {len(items)} 条，不可增删，"
+            f"要更多要点请改页数重跑 make_outline）"
+        )
+    items[idx][sub] = value
+    return page_no, CAP_ROLE[sub], value
+
+
+def patch(outline: dict, ops: list[dict]) -> dict:
+    """按 ops 定点改写大纲，超 caps 的字段走 stderr 告警（不阻断，与 warn_too_long 同款）。"""
+    pages = outline["pages"]
+    for op in ops:
+        page_no, cap_role, value = apply_op(pages, op)
+        cap = pages[page_no - 1].get("caps", {}).get(cap_role)
+        if cap and len(value) > cap:
+            print(
+                f"警告：第 {page_no} 页 {cap_role}「{value}」{len(value)} 字，超出该版式上限 {cap} 字。"
+                f"请改短，否则会溢出版式。",
+                file=sys.stderr,
+            )
+    return outline
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preview", metavar="OUTLINE", help="把大纲渲染成 Markdown 预览")
+    parser.add_argument("--patch", metavar="OUTLINE", help="对大纲做定点文本改写（原地回写）")
+    parser.add_argument("--ops", help="--patch 的操作数组（JSON），每项 {page, field, value}")
+    parser.add_argument("--from-preview", metavar="CARD", help="从分页卡片文本重建大纲（- 读 stdin）")
+    parser.add_argument("--out", metavar="OUTLINE", help="--from-preview 的落盘路径，缺省打印 stdout")
     parser.add_argument("--template")
     parser.add_argument("--pages", type=int, default=14)
     parser.add_argument("--title", default="{标题}")
@@ -196,6 +417,33 @@ def main() -> None:
 
     if args.preview:
         print(preview(json.loads(Path(args.preview).read_text(encoding="utf-8"))))
+        return
+    if args.from_preview:
+        text = (
+            sys.stdin.read()
+            if args.from_preview == "-"
+            else Path(args.from_preview).read_text(encoding="utf-8")
+        )
+        dump = json.dumps(from_preview(text), ensure_ascii=False, indent=2)
+        if args.out:
+            Path(args.out).write_text(dump + "\n", encoding="utf-8")
+        else:
+            print(dump)
+        return
+    if args.patch:
+        if not args.ops:
+            raise SystemExit("--patch 需配合 --ops 传操作数组（JSON）")
+        try:
+            ops = json.loads(args.ops)
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"--ops 不是合法 JSON：{exc}")
+        if not isinstance(ops, list):
+            raise SystemExit("--ops 必须是 JSON 数组")
+        path = Path(args.patch)
+        outline = patch(json.loads(path.read_text(encoding="utf-8")), ops)
+        text = json.dumps(outline, ensure_ascii=False, indent=2)
+        path.write_text(text + "\n", encoding="utf-8")
+        print(text)
         return
     if not args.template:
         raise SystemExit(f"--template 必填。可选：{'、'.join(load_registry())}")

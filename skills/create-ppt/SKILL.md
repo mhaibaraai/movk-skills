@@ -24,25 +24,33 @@ metadata:
       用选定模板生成骨架，用其提供的内容填充并优化，直接进入大纲确认门。
     - 主题路径：用户只给了一句话主题 → 走意图确认门。
 
-    【阶段 outline】只生成大纲，不渲染 pptx
+    【阶段 outline】只生成大纲，不渲染 pptx。outline.json 是唯一事实源：骨架落盘 → 填充写盘 →
+    修改用 --patch 改盘 → --preview 读盘。每一轮回复都只含分页卡片，任何轮次都不输出大纲 JSON。
     1. 意图确认门（仅主题路径）：抽取 制作目标 / 目标受众 / 选用模板 / 页数规模 / 补充说明，
        选用模板直接填当前模板值，其余缺失项按默认值补全并明示，以编号卡片复述。
        卡片末尾追加一行引导：「请回复『确认』继续，或直接提出修改（如『改成 12 页』『受众换成管理层』）；
        如需换模板，回复『切换到 X』。」等用户确认。
        直接文本/大纲路径跳过本门，开头点明「已根据你上传/粘贴的素材直接生成大纲预览，如需先调整意图或页数请告知」。
-    2. uv run scripts/make_outline.py --template <当前模板> --pages <页数> --title "<主题>" --sections "<章节>"
-       生成骨架（每页已绑定模板真实页 src 与要点容量 items）。
-    3. 按 references/writing-guide.md 把占位换成真实文案；直接文本路径则以上传/粘贴内容为素材填充。
-       要点条数不得增删，每条不得超过槽位 cap 字数。
+    2. uv run scripts/make_outline.py --template <当前模板> --pages <页数> --title "<主题>" --sections "<章节>" > outline.json
+       生成骨架并落盘（每页已绑定模板真实页 src 与要点容量 items）。
+    3. 按 references/writing-guide.md 把 outline.json 里的占位换成真实文案（直接改写这个文件）；
+       直接文本路径则以上传/粘贴内容为素材填充。要点条数不得增删，每条不得超过槽位 cap 字数。
     4. uv run scripts/make_outline.py --preview outline.json 输出分页 Markdown 卡片预览。
-    5. 大纲确认门：回复固定格式——先分页卡片预览，再一个完整的 ```json 大纲块，末尾追加引导：
-       「以上为《标题》共 N 页大纲预览。要修改：直接指出改哪页/哪条（如『第 4 页加一条应急处置』
-       『第 2 章标题换成…』），我据此重出大纲，轮次不限；要生成：回复『生成吧 / 就这样 / 可以了 / 开始做』，
+    5. 大纲确认门（首轮）：回复只含分页卡片预览，末尾追加引导：
+       「以上为《标题》共 N 页大纲预览。要修改：直接指出改哪页/哪条（如『第 4 页第 1 条正文换成…』
+       『第 2 章标题换成…』），我据此就地改，轮次不限；要生成：回复『生成吧 / 就这样 / 可以了 / 开始做』，
        我立即渲染。在你明确要生成前不会渲染，可放心多轮打磨。」等用户确认。
+    5a. 修改轮：文本级改动用
+        uv run scripts/make_outline.py --patch outline.json --ops '[{"page":N,"field":"items[0].body","value":"…"}]'
+        （field 支持 title / subtitle / items[N].head / items[N].body；改盘不动 src/caps/items 条数）就地改写；
+        页数增减、章节增减/重排等结构性改动才重跑 make_outline 生成新骨架再填充。
+        改后重跑 --preview，回复只含分页卡片 + 一行变更摘要。
+    5b. 生成轮：用户明确要生成时直接进入阶段 render，无需重贴大纲。
 
     【阶段 render】只渲染，不改大纲
-    6. 把已确认的 JSON 原样写入 outline.json，
-       uv run scripts/build_pptx.py --outline outline.json --out <主题>.pptx
+    6. 读盘渲染：uv run scripts/build_pptx.py --outline outline.json --out <主题>.pptx
+       若 outline.json 不存在（跨轮沙箱失效或跨节点交接），先把最近一轮分页卡片文本存为 preview.md，
+       uv run scripts/make_outline.py --from-preview preview.md --out outline.json 无损重建后再渲染。
     7. uv run scripts/check_pptx.py --outline outline.json <主题>.pptx 自检；
        报溢出就改短对应文案重渲，通过后再给下载路径。
 
@@ -92,7 +100,7 @@ metadata:
 
 ### 门 ② 大纲确认
 
-生成骨架 → 填充文案 → 输出分页卡片预览，等用户确认后才渲染。
+`outline.json` 是本门唯一事实源：生成骨架落盘 → 填充文案（改写这个文件）→ 输出分页卡片预览，等用户确认后才渲染。
 
 ```bash
 uv run scripts/make_outline.py --template 员工安全知识培训 --pages 14 \
@@ -109,10 +117,35 @@ uv run scripts/make_outline.py --template 员工安全知识培训 --pages 14 \
 uv run scripts/make_outline.py --preview outline.json
 ```
 
+**多轮修改就地改盘，不重出整份大纲。** 用户提的文本级改动用 `--patch` 定点改写 `outline.json`：
+
+```bash
+uv run scripts/make_outline.py --patch outline.json \
+  --ops '[{"page":4,"field":"items[0].body","value":"作业前 30 分钟内完成气体检测并留档"},
+          {"page":2,"field":"title","value":"作业票证管理"}]'
+```
+
+`field` 支持 `title` / `subtitle` / `items[N].head` / `items[N].body`（`N` 为 0 起的要点序号），
+只换文本、不动 `src`/`caps`/`items` 条数；越界或非法字段直接报错，超 `caps` 走 stderr 告警。
+页数增减、章节增减/顺序调整这类**结构性改动**要重排 `src` 与序号，改走重跑 `make_outline.py`。
+改完重跑 `--preview` 给卡片即可。
+
 ## 输出契约
 
-阶段 `outline` 的回复固定为两段：先分页 Markdown 卡片预览（给用户看，`--preview` 产出，每页一块，含页型标签、标题与要点），再一个完整的 ```json 大纲块（给下一阶段读）。
-两个阶段之间唯一的传递物就是这段 JSON——工作流编排时它会被存进变量再传回来，所以必须完整、可直接落盘。
+阶段 `outline` 的每一轮回复都只含分页 Markdown 卡片预览（`--preview` 产出，每页一块，含页型标签、
+标题与要点）；修改轮另附一行变更摘要。**任何轮次都不输出大纲 JSON**——大纲状态活在 `outline.json` 里，
+靠 `--patch` 就地改写，没有人需要在对话里读 JSON。
+
+分页卡片是大纲的**无损序列化**：文本槽全部在卡片里，`src`/`caps` 由 `--from-preview` 确定性重排还原。
+卡片因此就是跨轮、跨节点的数据通道——`outline.json` 丢失（沙箱失效）或需要在工作流节点间交接时，
+把最近一轮卡片文本喂回去即可重建：
+
+```bash
+uv run scripts/make_outline.py --from-preview preview.md --out outline.json
+```
+
+卡片外的多余文本（引导语、`[[READY]]` 标记、变更摘要）会被解析器自动忽略；重建自带 round-trip
+自检（重建结果的预览必须能解析回同一结构），改坏的卡片直接报错而不是渲出错版。
 
 ## 渲染与自检
 
