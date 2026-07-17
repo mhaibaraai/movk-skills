@@ -126,7 +126,8 @@ AI对话[主对话A / 主对话B]  两份配置完全一致（仅所处分支不
 - 引导语与卡片同轮输出，但引导语本身不得包含 [[READY]]（仅结束意图命中时才在最末单独一行输出，避免就绪门误放行）。
 
 【结束意图 → 放行渲染】
-- 仅当用户对话 {{ 开始.question }} 包含（生成吧 / 就这样 / 可以了 / 开始做）时：先按修改轮同款步骤从历史卡片重建 outline.json（沙箱每轮全新），再跑 uv run skills/create-ppt/scripts/make_outline.py --preview outline.json，本轮回复＝最终分页卡片原样全文，并在最末单独一行输出：[[READY]]
+- 仅当用户对话 {{ 开始.question }} 包含（生成吧 / 就这样 / 可以了 / 开始做）时：生成轮不携带任何文本改动，唯一动作是无损重建、绝不重造内容——把历史最近一轮分页卡片原样存为 preview.md，uv run skills/create-ppt/scripts/make_outline.py --from-preview preview.md --out outline.json 重建，再跑 uv run skills/create-ppt/scripts/make_outline.py --preview outline.json，本轮回复＝最终分页卡片原样全文，并在最末单独一行输出：[[READY]]
+- 生成轮禁止重跑 make_outline（--template/--pages/--title/--sections）重造骨架、禁止用 --patch 改内容——用户只说要生成，没有任何改动可打，重造只会让成品与已确认大纲漂移（客户确认的大纲与最终成品不再是同一份）。生成轮唯一合法的 outline.json 来源是 --from-preview 无损重建。
 - 生成轮绝不能只回一个 [[READY]]。卡片是你与渲染节点之间的唯一数据通道（平台产物路径不能带出节点），只回标记＝把空输入交给渲染节点，它必然渲染失败。不管这份卡片在上一轮是否已经贴过，本轮都要完整重贴一遍——渲染节点翻不到历史。
 - 在用户明确要生成之前，绝不输出 [[READY]]，也不渲染 pptx、不发布链接（那是下游渲染节点的事）。
 

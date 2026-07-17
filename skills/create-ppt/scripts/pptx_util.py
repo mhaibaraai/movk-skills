@@ -98,6 +98,20 @@ PARTNAME_TMPL_RE = re.compile(r"^(.*?)(\d+)(\.[^.]+)$")
 SHAREABLE = ("/image", "/video", "/audio", "/media")
 
 
+def _relate_as(part, rid: str, target, reltype: str, is_external: bool = False) -> None:
+    """在 part 上新建一条关系并沿用源 rId。
+
+    不能用 relate_to：它按 _next_rId 重新发号，而部件 blob 内部的 r:id 引用
+    （如 chart 的 <c:externalData r:id="rIdN">）是照抄过来的，重号后就指错部件，
+    PowerPoint 会判「内容有问题」。新部件的 rels 是空的，沿用源 rId 不会冲突。
+    """
+    from pptx.opc.constants import RELATIONSHIP_TARGET_MODE as RTM
+    from pptx.opc.package import _Relationship
+
+    mode = RTM.EXTERNAL if is_external else RTM.INTERNAL
+    part.rels._rels[rid] = _Relationship(part.rels._base_uri, rid, reltype, mode, target)
+
+
 def _dup_part(package, src_part, depth: int = 0):
     """把部件连同其子关系复制成一份独立的新部件——克隆页各用各的，不共享。"""
     from pptx.opc.package import Part
@@ -107,13 +121,13 @@ def _dup_part(package, src_part, depth: int = 0):
         return src_part
     tmpl = f"{match.group(1)}%d{match.group(3)}"
     new = Part(package.next_partname(tmpl), src_part.content_type, package, src_part.blob)
-    for rel in src_part.rels.values():
+    for rid, rel in src_part.rels.items():
         if rel.is_external:
-            new.relate_to(rel.target_ref, rel.reltype, is_external=True)
+            _relate_as(new, rid, rel.target_ref, rel.reltype, is_external=True)
         elif any(tag in rel.reltype for tag in SHAREABLE):
-            new.relate_to(rel.target_part, rel.reltype)
+            _relate_as(new, rid, rel.target_part, rel.reltype)
         else:
-            new.relate_to(_dup_part(package, rel.target_part, depth + 1), rel.reltype)
+            _relate_as(new, rid, _dup_part(package, rel.target_part, depth + 1), rel.reltype)
     return new
 
 

@@ -61,7 +61,12 @@ metadata:
         （field 支持 title / subtitle / items[N].head / items[N].body；改盘不动 src/caps/items 条数）就地改写；
         页数增减、章节增减/重排等结构性改动才重跑 make_outline 生成新骨架再填充。
         改后重跑 --preview，回复只含分页卡片 + 一行变更摘要。
-    5b. 生成轮：用户明确要生成时，先按 5a 同款步骤重建 outline.json，重跑 --preview，
+    5b. 生成轮：用户只说「生成吧」，不携带任何文本改动——本轮唯一动作是无损重建，绝不重造内容。
+        只做：把历史最近一轮分页卡片原样存为 preview.md，
+        uv run skills/create-ppt/scripts/make_outline.py --from-preview preview.md --out outline.json 重建，
+        再 uv run skills/create-ppt/scripts/make_outline.py --preview outline.json 输出卡片。
+        禁止重跑 make_outline（--template/--pages/--title/--sections）重造骨架、禁止用 --patch 改内容——
+        生成轮没有改动可打，重造只会让成品与用户已确认的大纲漂移。
         本轮回复必须原样含完整分页卡片——渲染可能由下游独立节点承担，它翻不到你的历史、
         只能读到你的回复正文，卡片就是唯一通道。贴完卡片再按编排进入阶段 render 或交由下游渲染。
 

@@ -45,6 +45,9 @@ RID_DECL_RE = re.compile(r"Id=\"(rId\d+)\"")
 TARGET_RE = re.compile(r"Target=\"([^\"]+)\"(?:\s+TargetMode=\"(External)\")?")
 # 图片可多页共用，模板自己就这么干；tags/chart 这类每形状私有的部件被共享就是损坏
 SHAREABLE_PREFIX = ("ppt/media/",)
+CHART_RE = re.compile(r"ppt/charts/chart\d+\.xml$")
+EXTDATA_RID_RE = re.compile(r"externalData\s+r:id=\"(rId\d+)\"")
+REL_LINE_RE = re.compile(r"Id=\"(rId\d+)\"[^>]*?Type=\"([^\"]+)\"")
 
 
 def check_package(path: Path) -> list[str]:
@@ -92,6 +95,19 @@ def check_package(path: Path) -> list[str]:
             if count > 1 and part.startswith("ppt/") and not part.startswith(SHAREABLE_PREFIX):
                 if re.search(r"/(tags|charts|embeddings|diagrams)/", part):
                     issues.append(f"  [部件被 {count} 处共享] {part} — 该部件每形状私有，共享会被判损坏")
+
+        # 图表 externalData 必须指向嵌入工作簿（package）：克隆重编号后若指到 chartStyle/
+        # chartColorStyle，PowerPoint 会判「内容有问题」。rId 声明了但类型不对，悬空检查逮不到。
+        for name in sorted(n for n in names if CHART_RE.match(n)):
+            m = EXTDATA_RID_RE.search(z.read(name).decode("utf-8", "ignore"))
+            if not m:
+                continue
+            rels_name = f"ppt/charts/_rels/{name.split('/')[-1]}.rels"
+            types = dict(REL_LINE_RE.findall(z.read(rels_name).decode("utf-8", "ignore")))
+            reltype = types.get(m.group(1), "")
+            if not reltype.endswith("/package"):
+                tail = reltype.rsplit("/", 1)[-1] or "缺失"
+                issues.append(f"  [图表数据引用错位] {name}：externalData 指向 {tail}，应为嵌入工作簿")
     return issues
 
 
