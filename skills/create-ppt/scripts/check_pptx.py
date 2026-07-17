@@ -4,6 +4,8 @@
 # ///
 """成品自检：OOXML 合法性、残留占位与文本溢出。渲染后跑一遍，有问题就修好再重渲。
 
+另会列出含待补槽（`__`）的页码——那是用户确认过留空的数据位，不是问题，只提示不阻断。
+
 用法：
     uv run scripts/check_pptx.py --outline outline.json 输出.pptx
 
@@ -33,6 +35,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pptx_util import iter_text_shapes, load_index  # noqa: E402
 
 PLACEHOLDER_HINTS = ("单击此处", "单击添加", "此处添加", "本模板内", "请添加", "请自行替换", "XXXX", "{")
+# 待补槽：连写的下划线算一处，`____` 不该报成两处
+TODO_RE = re.compile(r"_{2,}")
 TOLERANCE = 1.15  # 允许超 15%：cap 是估算值，卡太死会报一堆假警
 SLIDE_RE = re.compile(r"ppt/slides/slide\d+\.xml$")
 CNVPR_ID_RE = re.compile(r"<p:cNvPr[^>]*\bid=\"(\d+)\"")
@@ -95,6 +99,7 @@ def check(outline: dict, path: Path) -> int:
     index = {s["i"]: s for s in load_index(outline["template"])["slides"]}
     prs = Presentation(str(path))
     issues: list[str] = check_package(path)
+    todo: collections.Counter = collections.Counter()
 
     for n, (page, slide) in enumerate(zip(outline["pages"], prs.slides), 1):
         caps = {
@@ -108,13 +113,17 @@ def check(outline: dict, path: Path) -> int:
                 continue
             if any(hint in text for hint in PLACEHOLDER_HINTS):
                 issues.append(f"  [残留占位] 第 {n} 页：{text[:24]}")
+            todo[n] += len(TODO_RE.findall(text))
             cap = caps.get(shape.shape_id)
             if cap and len(text) > cap * TOLERANCE:
                 issues.append(f"  [文本溢出] 第 {n} 页：{len(text)} 字 / 上限 {cap} 字 — {text[:24]}")
 
     print(f"{path.name}：{len(prs.slides)} 页")
     print("\n".join(issues) if issues else "  通过：结构合法、无残留占位、无文本溢出")
-    return len(issues)
+    if pages := sorted(n for n, c in todo.items() if c):
+        joined = "、".join(str(n) for n in pages)
+        print(f"  待补数据：第 {joined} 页（共 {sum(todo.values())} 处 __ 槽位）— 提示，不阻断发布")
+    return len(issues)  # 待补槽不计入：非零返回值会被 main 变成阻断
 
 
 def main() -> None:

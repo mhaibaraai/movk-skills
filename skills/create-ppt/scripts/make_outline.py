@@ -85,7 +85,18 @@ def blank_page(slide: dict, title: str) -> dict:
         sample = hints(slide)
         page["items"] = [{"body": "{%s}" % sample.get(i, "署名")} for i in range(items)]
     else:
-        page["items"] = [{"head": "{要点}", "body": "{说明}"} for _ in range(items)]
+        # 按该页真实存在的槽位 idx 建条目：模板常有非对称版式（1 标题带 4 段正文、
+        # 3 标签无正文），若一律给 head+body，多出来的字段在 build 时无槽可落、被静默丢弃。
+        head_idxs = {s["idx"] for s in slide["slots"] if s["role"] == "item_head" and "idx" in s}
+        body_idxs = {s["idx"] for s in slide["slots"] if s["role"] == "item_body" and "idx" in s}
+        page["items"] = []
+        for i in range(items):
+            item = {}
+            if i in head_idxs:
+                item["head"] = "{要点}"
+            if i in body_idxs:
+                item["body"] = "{说明}"
+            page["items"].append(item or {"body": "{说明}"})
     return page
 
 
