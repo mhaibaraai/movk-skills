@@ -436,6 +436,12 @@ def main() -> None:
 
     if args.preview:
         print(preview(json.loads(Path(args.preview).read_text(encoding="utf-8"))))
+        # 走 stderr：提醒只给模型看，不进 stdout，才不会被复制进卡片污染 --from-preview
+        print(
+            "提醒：以上卡片必须原样粘贴进你的回复正文。工具执行的 stdout 只有你自己看得见，"
+            "用户与下游节点只能读到你的回复正文——跑过 --preview 不等于回复里有卡片。",
+            file=sys.stderr,
+        )
         return
     if args.from_preview:
         text = (
