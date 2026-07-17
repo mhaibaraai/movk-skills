@@ -20,41 +20,47 @@ metadata:
     1. 先判断任务类型：已有 URL 直接 fetch；否则先发现候选 URL 再 fetch。
     2. 发现候选，两个通道按下述优先级选：
        a) 首选 sitemap（枚举全站某类内容、取最新一期、按时间段筛）：
-          uv run scripts/sitemap.py --site <域名> --match <URL 过滤正则> --since YYYY-MM-DD
+          uv run skills/web-fetch/scripts/sitemap.py --site <域名> --match <URL 过滤正则> --since YYYY-MM-DD
           固定走 http 层，一个请求拿到，结果带 lastmod 且按其降序（最新在前）。
           kind=no_sitemap 说明该站没有 sitemap，回落到 b。
        b) 回落 search（模糊关键词匹配，或站点无 sitemap 时）：
-          uv run scripts/search.py --query "<关键词>" --site <域名，可选> --max-results 10
+          uv run skills/web-fetch/scripts/search.py --query "<关键词>" --site <域名，可选> --max-results 10
        两者输出同构 {"results":[...],"errors":[{kind,detail}]}。
        kind=no_match 才是真的无结果（罕见），可换关键词重试；
        kind=blocked 说明两层引擎都没能过关——360 是 IP 层拦截，被拉黑的出口 IP 连真实浏览器
        也过不去，这是环境限制、不是「该查询没有结果」，须如实告知，不要编造内容替代。
        c) 两个通道都失效时（sitemap 报 no_sitemap 且 search 报 blocked）的兜底：直接抓入口页，
           从锚文本定位目标。
-          uv run scripts/fetch.py --urls '["https://www.<域名>/"]' --links
+          uv run skills/web-fetch/scripts/fetch.py --urls '["https://www.<域名>/"]' --links
           engine=auto 会自动升级到 browser 越过反爬。从 attachments[].text（附件锚文本）或
           links[].text（同域页面锚文本）里找目标，再抓那条 URL；找不到就顺着栏目页锚文本逐级跳。
           锚文本是唯一的判别依据——同页十余份 PDF 的 URL 常是拼音缩写（qyshzrbg/ndbg），
           单看 URL 分不出哪份是目标，仍然绝不允许按 URL 命名规律去猜。
-    3. 抓取：uv run scripts/fetch.py --urls '["url1","url2"]' --max-chars 8000
+    3. 抓取：uv run skills/web-fetch/scripts/fetch.py --urls '["url1","url2"]' --max-chars 8000
        输出数组，每条含 engine_used/type(html|pdf)/title/length/degraded/text，
        失败则含 error/attempts。
        degraded=true 表示该 URL 必须靠浏览器渲染才拿得到，环境装不了浏览器时这类会失败。
        失败时直接引用 attempts 里的逐层 kind/detail 说明原因，不要自己猜。
        PDF 结果里 low_confidence=true 表示疑似加密或扫描件，抽取不可靠，如实告知用户而非当作正文使用。
     4. 遇到列表页/索引页状态码非 200 但仍需要具体条目时，不要固定抓该列表页，改用 sitemap.py
-       或 search.py 拿更精确的条目 URL（见 references/engine-notes.md 的 IEA 案例）。
+       或 search.py 拿更精确的条目 URL（见 skills/web-fetch/references/engine-notes.md 的 IEA 案例）。
 
     【规范】不臆造抓取失败的原因，直接引用 error/attempts[].detail 原文；PDF 低置信度结果必须
-    标注不确定性，不得当作可靠正文分析；被其他技能调用时用相对路径引用本技能脚本，不做代码级
-    import（保持技能间松耦合）。所有 uv run 命令不得加 timeout 参数。
+    标注不确定性，不得当作可靠正文分析；被其他技能调用时用 skills/web-fetch/ 前缀引用本技能脚本，
+    不做代码级 import（保持技能间松耦合）。所有 uv run 命令不得加 timeout 参数。
+    技能解压在工作目录 skills/web-fetch/ 下，脚本一律用该前缀调用，输出文件写在当前工作目录；
+    若该前缀不存在，先 find / -name fetch.py -not -path '*__pycache__*' 2>/dev/null | head -1
+    定位后改用其所在前缀。
 ---
 
 # 网页抓取基座
 
 给 URL 批量返回清洗后的正文（HTML/PDF），给域名或关键词返回候选 URL。两层引擎自动降级，尽量在任意部署环境下都能工作。设计动机：技能可能部署在不提供内置 WebSearch/WebFetch 的沙箱上，抓取与发现能力必须内化进脚本本身。
 
-运行约定：所有 `uv run` 命令都不要加 timeout 参数，沙箱后端不支持 per-command timeout override，加了必定报错。
+运行约定：
+
+- 所有 `uv run` 命令都不要加 timeout 参数，沙箱后端不支持 per-command timeout override，加了必定报错。
+- 沙箱 cwd 不是技能根目录：技能解压在工作目录的 `skills/web-fetch/` 下，脚本一律用该前缀调用；输出文件写在当前工作目录。若该前缀不存在，先 `find / -name fetch.py -not -path '*__pycache__*' 2>/dev/null | head -1` 定位后改用其所在前缀。
 
 ## 两层引擎
 
@@ -64,7 +70,7 @@ metadata:
 
 **`browser` 层要有耐心**：瑞数一类的 JS 挑战首跳返回 412 加混淆脚本，脚本执行后写 cookie 再自行重载，全程实测需 30–45 秒。判定「抓到了」用的是正向依据——**必须渲染出实质正文**，而不是「挑战特征消失」（挑战失败时页面会被清空，特征同样消失，那会把空壳误判成成功）。
 
-能力边界与实测结论见 [references/engine-notes.md](references/engine-notes.md)。先跑一次 `uv run scripts/fetch.py --check-env` 了解当前部署环境的能力上限。
+能力边界与实测结论见 [references/engine-notes.md](references/engine-notes.md)。先跑一次 `uv run skills/web-fetch/scripts/fetch.py --check-env` 了解当前部署环境的能力上限。
 
 ## 工作流程
 
@@ -73,8 +79,8 @@ metadata:
 两个通道，**默认先 sitemap，不可用再回落 search**。两者输出同构 `{"results":[...],"errors":[...]}`。
 
 ```bash
-uv run scripts/sitemap.py --site iea.org --match /reports/ --since 2025-01-01
-uv run scripts/search.py --query "world energy outlook" --site iea.org --max-results 10
+uv run skills/web-fetch/scripts/sitemap.py --site iea.org --match /reports/ --since 2025-01-01
+uv run skills/web-fetch/scripts/search.py --query "world energy outlook" --site iea.org --max-results 10
 ```
 
 `sitemap.py` 从 `robots.txt` 声明的 sitemap（回落 `/sitemap.xml`）枚举站点条目，`--match` 按 URL 正则过滤、`--since` 按 `<lastmod>` 筛时间，结果按 `lastmod` 降序（最新在前）。它固定走 `http` 层，一个请求拿到，且能拿到搜索引擎根本没索引的内容——**枚举某类内容、取最新一期、筛时间段一律走这条**。
@@ -86,7 +92,7 @@ uv run scripts/search.py --query "world energy outlook" --site iea.org --max-res
 ### Step 2：抓取
 
 ```bash
-uv run scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
+uv run skills/web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
 ```
 
 自动识别 HTML 正文与 PDF（按 Content-Type 与 `%PDF-` 魔数判定，不看 URL 后缀——政府站常把 PDF 标成 `application/octet-stream`），分别走正文提取与 `pypdf` 文本抽取。输出每条含 `engine_used`（`http`/`browser`）、`type`（`html`/`pdf`）、`degraded`（是否必须靠浏览器渲染）。PDF 结果可能带 `low_confidence`（疑似加密/扫描件）。需要浏览器的 URL 会收拢到同一个浏览器实例下并发处理，不是每个 URL 起一个。
@@ -104,7 +110,7 @@ uv run scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
 ### 原始响应体（`--raw`）
 
 ```bash
-uv run scripts/fetch.py --urls '["https://.../api?q=..."]' --raw
+uv run skills/web-fetch/scripts/fetch.py --urls '["https://.../api?q=..."]' --raw
 ```
 
 跳过正文清洗与截断，返回解码后的原始响应体（`raw` 字段，附 `status`/`content_type`），供调用方自行 `json.loads` 或正则提取链接——清洗会抹掉 `href`，截断会破坏 JSON。适用于 JSON 接口与需要提链接的列表页，不支持 PDF（二进制）。
@@ -119,7 +125,7 @@ uv run scripts/fetch.py --urls '["https://.../api?q=..."]' --raw
 
 - 列表页/索引页状态码非常规（如 404）但内容仍可能有用：不要固定抓该页面本身，改用 `sitemap.py` 或 `search.py` 拿更精确的条目 URL（`iea.org/reports` 是典型案例，见 references）
 - 关键词检索报 `blocked` 而 `--check-env` 显示引擎齐全：多半是 360 对当前出口 IP 的拦截。此时改走 `sitemap.py`（走 http 层，不依赖搜索引擎）
-- 两个发现通道都失效（`sitemap.py` 报 `no_sitemap` 且 `search.py` 报 `blocked`）：不要就此断言「找不到」。改抓入口页 `uv run scripts/fetch.py --urls '["https://www.<域名>/"]' --links`，从 `attachments[].text` 或 `links[].text` 的锚文本定位目标（`engine=auto` 会自动升级到 browser 越过反爬）。CNPC 实测：首页附件锚文本直接标出「集团公司2025年社会责任报告」，`links` 里也有通往对应栏目页的入口，两条路都走得通
+- 两个发现通道都失效（`sitemap.py` 报 `no_sitemap` 且 `search.py` 报 `blocked`）：不要就此断言「找不到」。改抓入口页 `uv run skills/web-fetch/scripts/fetch.py --urls '["https://www.<域名>/"]' --links`，从 `attachments[].text` 或 `links[].text` 的锚文本定位目标（`engine=auto` 会自动升级到 browser 越过反爬）。CNPC 实测：首页附件锚文本直接标出「集团公司2025年社会责任报告」，`links` 里也有通往对应栏目页的入口，两条路都走得通
 - PDF 加密且无法解密、或抽出文本长度接近 0（疑似扫描件）：如实告知用户，不强行分析空文本
 - 单个响应体超过 30MB：直接跳过下载并报错，不做全量拉取
 - 两层引擎全部命中拦截：如实告知用户当前部署环境的能力边界，不要无限重试
@@ -127,13 +133,13 @@ uv run scripts/fetch.py --urls '["https://.../api?q=..."]' --raw
 
 ## 被其他技能调用
 
-其他技能通过相对路径调用本技能的 CLI（不做代码级 import，保持松耦合）：
+其他技能统一用 `skills/web-fetch/` 前缀调用本技能的 CLI（不做代码级 import，保持松耦合）：
 
 ```bash
-uv run ../web-fetch/scripts/sitemap.py --site "..." --match "..." --since YYYY-MM-DD
-uv run ../web-fetch/scripts/search.py --query "..." --site "..."
-uv run ../web-fetch/scripts/fetch.py --urls '[...]'
-uv run ../web-fetch/scripts/fetch.py --urls '[...]' --raw   # 调用方自己解析 JSON 接口/列表页
+uv run skills/web-fetch/scripts/sitemap.py --site "..." --match "..." --since YYYY-MM-DD
+uv run skills/web-fetch/scripts/search.py --query "..." --site "..."
+uv run skills/web-fetch/scripts/fetch.py --urls '[...]'
+uv run skills/web-fetch/scripts/fetch.py --urls '[...]' --raw   # 调用方自己解析 JSON 接口/列表页
 ```
 
 部署时需与调用方技能同级放在 `skills/` 目录下。
