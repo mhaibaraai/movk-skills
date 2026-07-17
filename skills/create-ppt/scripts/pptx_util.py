@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -90,6 +91,32 @@ def set_text(shape, text: str) -> None:
         extra._p.getparent().remove(extra._p)
 
 
+PARTNAME_TMPL_RE = re.compile(r"^(.*?)(\d+)(\.[^.]+)$")
+# 图片可以多页共用（模板自己就这么干），其余部件不行：tags 存的是 WPS 每形状私有的
+# 智能图形元数据（KSO_WM_*），chart 各自挂着独立子部件。同一源页被排布复用时若共享
+# 这些部件，PowerPoint 会判成「内容有问题」，修复时把相关形状整个删掉。
+SHAREABLE = ("/image", "/video", "/audio", "/media")
+
+
+def _dup_part(package, src_part, depth: int = 0):
+    """把部件连同其子关系复制成一份独立的新部件——克隆页各用各的，不共享。"""
+    from pptx.opc.package import Part
+
+    match = PARTNAME_TMPL_RE.match(str(src_part.partname))
+    if not match or depth > 4:  # partname 不带序号或层级过深，退回共享
+        return src_part
+    tmpl = f"{match.group(1)}%d{match.group(3)}"
+    new = Part(package.next_partname(tmpl), src_part.content_type, package, src_part.blob)
+    for rel in src_part.rels.values():
+        if rel.is_external:
+            new.relate_to(rel.target_ref, rel.reltype, is_external=True)
+        elif any(tag in rel.reltype for tag in SHAREABLE):
+            new.relate_to(rel.target_part, rel.reltype)
+        else:
+            new.relate_to(_dup_part(package, rel.target_part, depth + 1), rel.reltype)
+    return new
+
+
 def clone_slide(prs, src_index: int):
     """把 prs 内第 src_index 页深拷贝为一张新页（同 package，图片/主题自动复用）。
 
@@ -111,11 +138,14 @@ def clone_slide(prs, src_index: int):
                     continue
                 if old_rid not in rid_map:
                     rel = src.part.rels[old_rid]
-                    rid_map[old_rid] = (
-                        new.part.relate_to(rel.target_ref, rel.reltype, is_external=True)
-                        if rel.is_external
-                        else new.part.relate_to(rel.target_part, rel.reltype)
-                    )
+                    if rel.is_external:
+                        new_rid = new.part.relate_to(rel.target_ref, rel.reltype, is_external=True)
+                    elif any(tag in rel.reltype for tag in SHAREABLE):
+                        new_rid = new.part.relate_to(rel.target_part, rel.reltype)
+                    else:
+                        target = _dup_part(new.part.package, rel.target_part)
+                        new_rid = new.part.relate_to(target, rel.reltype)
+                    rid_map[old_rid] = new_rid
                 node.set(attr, rid_map[old_rid])
         new.shapes._spTree.append(copied)
     return new
