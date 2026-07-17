@@ -10,14 +10,14 @@
     "label": "项目立项 / 申报评审",
     "source": "assets/project-proposal.pptx",
     "index": "templates/index/project-proposal.json",
-    "aliases": ["项目申报", "项目立项", "立项", "课题答辩", "项目汇报", "申报评审"],
+    "aliases": ["项目立项汇报", "项目申报", "项目立项", "立项", "课题答辩", "项目汇报", "申报评审"],
     "sections": ["项目背景与立项依据", "现状分析与问题诊断", "建设目标与总体思路", "建设内容与总体方案", "实施计划与人员安排", "项目经费与效益"]
   },
   "年终安全工作汇报模版": {
     "label": "年终总结 / 工作汇报",
     "source": "assets/annual-safety-report.pptx",
     "index": "templates/index/annual-safety-report.json",
-    "aliases": ["年终总结", "年度总结", "工作汇报", "安全汇报", "工作总结", "年终汇报"],
+    "aliases": ["年终安全工作汇报", "年终总结", "年度总结", "工作汇报", "安全汇报", "工作总结", "年终汇报"],
     "sections": ["年度工作总览", "安全制度建设", "典型问题分析", "不足与风险", "下年度计划"]
   },
   "重大事件专项汇报": {
