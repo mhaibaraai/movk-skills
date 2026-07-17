@@ -1,22 +1,31 @@
 #!/usr/bin/env python3
 # /// script
-# dependencies = ["python-pptx>=1.0"]
+# dependencies = ["python-pptx>=1.0", "defusedxml>=0.7"]
 # ///
-"""成品自检：残留占位与文本溢出。渲染后跑一遍，有问题就改大纲文案再重渲。
+"""成品自检：OOXML 合法性、残留占位与文本溢出。渲染后跑一遍，有问题就修好再重渲。
 
 用法：
     uv run scripts/check_pptx.py --outline outline.json 输出.pptx
 
 溢出判据取自模板索引里每个槽位的 cap（几何容量与模板原文案长度的较大值），
 不重新猜几何——单靠几何会把 LOGO、目录这类模板自带的设计文字误报成溢出。
-不依赖任何渲染器，任何环境都能跑。
+合法性检查覆盖 PowerPoint 会判「内容有问题」的几类结构错误——文本没问题但打不开
+的成品同样是废片，不能只查文案。不依赖任何渲染器，任何环境都能跑。
 """
 from __future__ import annotations
 
 import argparse
+import collections
 import json
+import posixpath
+import re
 import sys
+import zipfile
 from pathlib import Path
+
+# 待检 pptx 可能来自用户上传，stdlib 解析器扛不住实体炸弹
+from defusedxml import ElementTree as ET
+from defusedxml.common import DefusedXmlException
 
 from pptx import Presentation
 
@@ -25,12 +34,67 @@ from pptx_util import iter_text_shapes, load_index  # noqa: E402
 
 PLACEHOLDER_HINTS = ("单击此处", "单击添加", "此处添加", "本模板内", "请添加", "请自行替换", "XXXX", "{")
 TOLERANCE = 1.15  # 允许超 15%：cap 是估算值，卡太死会报一堆假警
+SLIDE_RE = re.compile(r"ppt/slides/slide\d+\.xml$")
+CNVPR_ID_RE = re.compile(r"<p:cNvPr[^>]*\bid=\"(\d+)\"")
+RID_USE_RE = re.compile(r"r:(?:id|embed|link)=\"(rId\d+)\"")
+RID_DECL_RE = re.compile(r"Id=\"(rId\d+)\"")
+TARGET_RE = re.compile(r"Target=\"([^\"]+)\"(?:\s+TargetMode=\"(External)\")?")
+# 图片可多页共用，模板自己就这么干；tags/chart 这类每形状私有的部件被共享就是损坏
+SHAREABLE_PREFIX = ("ppt/media/",)
+
+
+def check_package(path: Path) -> list[str]:
+    """OOXML 结构合法性：XML 可解析、页内 shape id 唯一、rId 不悬空、target 不缺失、
+    每形状私有的部件（tags/chart）不跨页共享。这几类正是 PowerPoint 报「内容有问题」、
+    修复时直接删掉相关形状的成因。"""
+    issues: list[str] = []
+    with zipfile.ZipFile(path) as z:
+        names = set(z.namelist())
+        for name in sorted(names):
+            if name.endswith((".xml", ".rels")):
+                try:
+                    ET.fromstring(z.read(name))
+                except DefusedXmlException as exc:
+                    issues.append(f"  [XML 不安全] {name}：{exc}")
+                except ET.ParseError as exc:
+                    issues.append(f"  [XML 损坏] {name}：{exc}")
+
+        for name in sorted(n for n in names if SLIDE_RE.match(n)):
+            data = z.read(name).decode("utf-8", "ignore")
+            dup = {i: c for i, c in collections.Counter(CNVPR_ID_RE.findall(data)).items() if c > 1}
+            if dup:
+                issues.append(f"  [重复 shape id] {name}：{dup}")
+            rels_name = f"ppt/slides/_rels/{name.split('/')[-1]}.rels"
+            declared = (
+                set(RID_DECL_RE.findall(z.read(rels_name).decode("utf-8", "ignore")))
+                if rels_name in names
+                else set()
+            )
+            if missing := set(RID_USE_RE.findall(data)) - declared:
+                issues.append(f"  [悬空 rId] {name}：{sorted(missing)}")
+
+        refs: collections.Counter = collections.Counter()
+        for name in sorted(n for n in names if n.endswith(".rels")):
+            base = posixpath.dirname(posixpath.dirname(name))
+            for target, external in TARGET_RE.findall(z.read(name).decode("utf-8", "ignore")):
+                if external or target.startswith("http"):
+                    continue
+                full = posixpath.normpath(posixpath.join(base, target))
+                if full not in names:
+                    issues.append(f"  [target 缺失] {name} -> {target}")
+                refs[full] += 1
+
+        for part, count in sorted(refs.items()):
+            if count > 1 and part.startswith("ppt/") and not part.startswith(SHAREABLE_PREFIX):
+                if re.search(r"/(tags|charts|embeddings|diagrams)/", part):
+                    issues.append(f"  [部件被 {count} 处共享] {part} — 该部件每形状私有，共享会被判损坏")
+    return issues
 
 
 def check(outline: dict, path: Path) -> int:
     index = {s["i"]: s for s in load_index(outline["template"])["slides"]}
     prs = Presentation(str(path))
-    issues: list[str] = []
+    issues: list[str] = check_package(path)
 
     for n, (page, slide) in enumerate(zip(outline["pages"], prs.slides), 1):
         caps = {
@@ -49,7 +113,7 @@ def check(outline: dict, path: Path) -> int:
                 issues.append(f"  [文本溢出] 第 {n} 页：{len(text)} 字 / 上限 {cap} 字 — {text[:24]}")
 
     print(f"{path.name}：{len(prs.slides)} 页")
-    print("\n".join(issues) if issues else "  通过：无残留占位、无文本溢出")
+    print("\n".join(issues) if issues else "  通过：结构合法、无残留占位、无文本溢出")
     return len(issues)
 
 
