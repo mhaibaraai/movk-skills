@@ -57,10 +57,18 @@ def main() -> None:
         card = NOISE_HEAD + mo.preview(outline) + NOISE_TAIL
         rebuilt = mo.from_preview(card)
         assert rebuilt == outline, f"{key}: round-trip 与原大纲不等"
-        print(f"round-trip ok: {key}（{len(outline['pages'])} 页）")
+
+        # 平台经 answer 变量传递会把全角空格归一化成半角——归一化后的卡片必须照样无损重建
+        flat = mo.from_preview(card.replace("　", " "))
+        assert flat == outline, f"{key}: 半角空格卡片 round-trip 与原大纲不等"
+        print(f"round-trip ok: {key}（{len(outline['pages'])} 页，全角/半角分隔符均可）")
 
     outline = build_filled("通用模板", pages=16)
     card = mo.preview(outline)
+
+    # 归一化带进的前导空格必须被 strip 掉，否则平白多占一个 cap 字符
+    padded = card.replace("　`要点`　", " `要点`  ").replace("　模板：", "  模板： ")
+    assert mo.from_preview(padded) == outline, "前导空格未被 strip"
 
     # 头行页数与实际页数不符 → 硬报错
     expect_exit(card.replace("共 16 页", "共 15 页", 1), "实际解析到")
@@ -73,6 +81,16 @@ def main() -> None:
 
     # 卡片头行缺失 → 硬报错
     expect_exit("随便一段文本\n---\n**第 1 页**　`封面`\n# 标题", "找不到卡片头行")
+
+    # 手写伪卡片（头行合法但正文是章节大纲，无页头无分隔线）→ 指明不是 --preview 原样输出
+    fake = (
+        "**示例化工 2025 年度安全生产工作汇报**　模板：年终安全工作汇报模版　共 4 页\n\n"
+        "### **1. 全年安全生产总体情况**\n- 安全生产责任制落实\n- 事故与隐患数据对比\n\n"
+        "### **2. 重点工作与成效**\n1. **责任体系**\n2. **隐患排查治理**\n\n"
+        "### **3. 存在的主要问题**\n1. 承包商管理薄弱\n\n"
+        "### **4. 2026 年工作计划**\n1. 重点装置自动化改造\n"
+    )
+    expect_exit(fake, "不是 --preview 的原样输出")
 
     # 要点条数超出模板最大容量 → 硬报错
     lines = card.splitlines()

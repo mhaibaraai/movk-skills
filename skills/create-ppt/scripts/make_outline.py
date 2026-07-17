@@ -195,8 +195,12 @@ def preview(outline: dict) -> str:
 
 
 LABEL_KIND = {v: k for k, v in KIND_LABEL.items()}
-CARD_HEAD_RE = re.compile(r"^\*\*(.+)\*\*　模板：(.+)　共 (\d+) 页$")
-CARD_PAGE_RE = re.compile(r"^\*\*第 \d+ 页\*\*　`([^`]+)`(?:　(.*))?$")
+# 分隔位写成 [　 ]+：preview 出的是全角空格，但卡片经平台变量传递会被归一化成半角，
+# 两种都要认——只认全角会让每一次跨节点重建都失败。捕获组一律 strip，避免归一化
+# 带进的前导空格混进标题（" 总体情况" 会平白多占一个 cap 字符）。
+SEP = r"[　 ]+"
+CARD_HEAD_RE = re.compile(rf"^\*\*(.+?)\*\*{SEP}模板：(.+?){SEP}共 (\d+) 页$")
+CARD_PAGE_RE = re.compile(rf"^\*\*第 \d+ 页\*\*{SEP}`([^`]+)`(?:{SEP}(.*))?$")
 CARD_SECTION_RE = re.compile(r"^### \d+ · (.+)$")
 CARD_ITEM_RE = re.compile(r"^- \*\*(.+?)\*\*(?: — (.*))?$")
 
@@ -206,31 +210,32 @@ def parse_page(block: list[str]) -> dict | None:
     head = CARD_PAGE_RE.match(block[0])
     if not head:
         return None
-    kind = LABEL_KIND.get(head.group(1))
+    label = head.group(1).strip()
+    kind = LABEL_KIND.get(label)
     if kind is None:
-        raise SystemExit(f"--from-preview: 未知页型标签 `{head.group(1)}`")
-    page = {"kind": kind, "title": head.group(2) or "", "subtitle": "", "items": []}
+        raise SystemExit(f"--from-preview: 未知页型标签 `{label}`")
+    page = {"kind": kind, "title": (head.group(2) or "").strip(), "subtitle": "", "items": []}
     for line in block[1:]:
         if kind == "section":
             if m := CARD_SECTION_RE.match(line):
-                page["title"] = m.group(1)
+                page["title"] = m.group(1).strip()
         elif kind in ("cover", "closing"):
             if line.startswith("# "):
-                page["title"] = line[2:]
+                page["title"] = line[2:].strip()
             elif line.startswith("- "):
-                page["items"].append({"body": line[2:]})
+                page["items"].append({"body": line[2:].strip()})
             elif not page["subtitle"]:
-                page["subtitle"] = line
+                page["subtitle"] = line.strip()
         elif kind == "toc":
             if line.startswith("- "):
-                page["items"].append({"head": line[2:]})
+                page["items"].append({"head": line[2:].strip()})
         else:
             if m := CARD_ITEM_RE.match(line):
-                page["items"].append({"head": m.group(1), "body": m.group(2) or ""})
+                page["items"].append({"head": m.group(1).strip(), "body": (m.group(2) or "").strip()})
             elif line.startswith("- "):
-                page["items"].append({"head": "", "body": line[2:]})
+                page["items"].append({"head": "", "body": line[2:].strip()})
             elif len(line) > 2 and line.startswith("*") and line.endswith("*"):
-                page["subtitle"] = line[1:-1]
+                page["subtitle"] = line[1:-1].strip()
     if kind == "section" and not page["title"]:
         raise SystemExit("--from-preview: 章节页缺少「### 序号 · 标题」行")
     return page
@@ -243,8 +248,12 @@ def parse_preview(text: str) -> dict:
         if head := CARD_HEAD_RE.match(line):
             break
     else:
-        raise SystemExit("--from-preview: 找不到卡片头行（**标题**　模板：X　共 N 页）")
-    title, template, total = head.group(1), head.group(2), int(head.group(3))
+        raise SystemExit(
+            "--from-preview: 找不到卡片头行（**标题**　模板：X　共 N 页）。"
+            "卡片必须是 --preview 的原样输出，不能手写或补写头行；"
+            "没有真卡片时请重跑 make_outline.py 生成骨架、填充 outline.json 后用 --preview 产出"
+        )
+    title, template, total = head.group(1).strip(), head.group(2).strip(), int(head.group(3))
     pages: list[dict] = []
     block: list[str] = []
     for line in lines[start + 1 :] + ["---"]:
@@ -258,8 +267,18 @@ def parse_preview(text: str) -> dict:
             continue
         if line:
             block.append(line)
+    if not pages:
+        raise SystemExit(
+            "--from-preview: 正文没有任何「**第 N 页**　`页型`」页头——"
+            "这不是 --preview 的原样输出（疑似手写或改写的大纲）。"
+            "卡片不能手写或修补：请重跑 make_outline.py 生成骨架、"
+            "填充 outline.json 后用 --preview 产出卡片再重试"
+        )
     if len(pages) != total:
-        raise SystemExit(f"--from-preview: 头行声明共 {total} 页，实际解析到 {len(pages)} 页")
+        raise SystemExit(
+            f"--from-preview: 头行声明共 {total} 页，实际解析到 {len(pages)} 页。"
+            "卡片可能被截断或改写：请回到 --preview 的原样输出重试，不要手工修补"
+        )
     return {"template": template, "title": title, "pages": pages}
 
 
