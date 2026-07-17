@@ -62,20 +62,21 @@ AI对话[主对话A / 主对话B]  两份配置完全一致（仅所处分支不
      · g_source 非空 → 视为直接文本/大纲，跳过意图澄清，直接出大纲预览
      · 否则 → 先澄清并复述创作意图 → 用户认可后再出大纲
      · 首轮出大纲：make_outline 骨架落盘 outline.json + 按 writing-guide 填充写盘 + --preview 分页卡片，回复只含卡片
-     · 用户要改 → --patch 就地改 outline.json（结构性改动才重跑 make_outline）+ --preview，本轮只回「卡片 + 变更摘要」，轮次不限
-     · 用户明确要生成（生成吧/就这样/可以了）→ 重跑 --preview，本轮回复＝最终分页卡片，最末单独一行输出 [[READY]]
+     · 用户要改 → 开轮先从历史卡片 --from-preview 重建 outline.json（沙箱每轮全新），--patch 就地改（结构性改动才重跑 make_outline）+ --preview，本轮只回「卡片 + 变更摘要」，轮次不限
+     · 用户明确要生成（生成吧/就这样/可以了）→ 重建后重跑 --preview，本轮回复＝最终分页卡片，最末单独一行输出 [[READY]]
   │（每份主对话各接一套就绪门 + 渲染，互不合流）
 条件[就绪?A / 就绪?B]  {{ 主对话A.answer }} / {{ 主对话B.answer }} 包含 [[READY]]?
   ├ 是 → AI对话[渲染A / 渲染B]  Skill: create-ppt + download-link-publisher（两份同构）
   │        {{ 主对话A.answer }} / {{ 主对话B.answer }} 原文写入 preview.md → make_outline --from-preview 重建 outline.json
   │        → build_pptx → check_pptx → 发布 → 链接写进 answer（可选：变量赋值 g_done="yes"）
-  └ 否 → 结束（等用户下一条消息，重跑进主对话）
+  └ 否 → 指定回复[等待A / 等待B]（自定义一句引导语，返回内容=开）→ 本轮结束，等用户下一条消息重跑
 ```
 
 要点：
 
 - **无循环**：迭代由用户发消息驱动，次数不限——彻底绕开「跳不出 / ≤9 / 停等」。
 - **渲染确定化**：主对话平时不渲染；只有它吐出 `[[READY]]`，条件才放行到独立渲染节点，渲染只调一次，不误渲/重渲。
+- **ELSE 必须以「返回内容=开」的指定回复收尾**：平台没有「结束」节点、条件分支不能悬空；若路径末节点返回内容=关，前端等不到终端回复、会话挂起不结束（实测）。指定回复内容是字面回复文本，写「结束当前会话」之类指令没有控制语义——只写一句简短引导即可。
 - **两道门在对话里自然完成**：意图卡、大纲卡片都由主对话写进回复，用户直接聊天修改，比循环里「指定回复 + 判定 + 条件」省一大串节点。
 - **卡片即数据，经 `--from-preview` 交渲染**：最终大纲以分页卡片形式落在生成轮主对话的 `answer` 里，渲染节点把 `answer` 原文写入 preview.md，跑 `make_outline.py --from-preview` **脚本化重建** outline.json——`src`/`caps` 由确定性重排还原、文本从卡片回填，全程无 LLM 改写；`[[READY]]` 与引导语被解析器自动忽略，重建自带 round-trip 自检。「重建」与「渲染」同在渲染节点完成，**不需要参数抽取节点**，也不需要 `g_outline` 全局变量，对话里任何轮次都没有 json 块。
 - **直接文本/大纲**：靠 `g_source` 是否为空在主对话**内部**分流，不再单设 direct/topic 两条外部支路。
@@ -94,33 +95,37 @@ AI对话[主对话A / 主对话B]  两份配置完全一致（仅所处分支不
 
 **AI 对话[主对话A / 主对话B]** — 全流程核心，**两份配置完全一致**（分支不合流才复制，改一处须同步另一处）。模型 `energy-deepseek-v3`（能编排 skill 又能写作）；**Skill 挂 create-ppt**（做 make_outline，不挂 download-link-publisher）；**历史聊天记录＝工作流、10 轮**；返回内容＝开；开启思考＝关。
 
+⚠️ 系统角色里的 `{{ 变量 }}` 引用也会被平台按本轮值插值（实测无上传轮 `{{ 开始.document }}` 被替换成 `[]`，指令条件沦为乱码）——指令文本一律用文字指代提示词载荷字段（如「上传素材」段），变量引用只出现在提示词里。
+
 系统角色：
 
 ```text
 你是企业 PPT 生成智能体，内置 5 套设计模板，用 create-ppt 技能工作。与用户多轮对话，按两道确认门推进，绝不跳步直奔生成。
 
-【模板解析】“初始模板”是起始单选的默认值。若对话历史中你已就换模板取得用户明确确认（如用户回复「切换到 X」），则以最近一次确认的模板为当前模板，忽略“初始模板”字面值；否则用初始模板。当前模板必须写入大纲 json 的 template 字段，并在意图卡/大纲卡中如实显示。切换确认后不要再重复门①的初始复述、也不要再次抛出同一切换提示。若素材/主题场景与当前模板明显不符，提示一行「您选了 X，但更像 Y，是否切换？回复『切换到 Y』即可，无需重开」。
+【模板解析】“初始模板”是起始单选的默认值。若对话历史中你已就换模板取得用户明确确认（如用户回复「切换到 X」），则以最近一次确认的模板为当前模板，忽略“初始模板”字面值；否则用初始模板。初始模板为空时，先让用户在 5 套里选定，或按主题推断并在卡片里明示请其确认——不得留空调用 --template。当前模板必须写入大纲 json 的 template 字段，并在意图卡/大纲卡中如实显示。切换确认后不要再重复门①的初始复述、也不要再次抛出同一切换提示。若素材/主题场景与当前模板明显不符，提示一行「您选了 X，但更像 Y，是否切换？回复『切换到 Y』即可，无需重开」。
 
 【门① 意图】
-- {{ 开始.document }} 非空 → 视为直接文本/大纲，跳过意图澄清，直接进入门②。开头点明「已根据你上传/粘贴的素材直接生成大纲预览，如需先调整制作意图或页数请告知」。
+- 提示词中「上传素材」段非空，或「用户消息」本身是成段文稿/已有大纲 → 直接文本路径，跳过意图澄清，直接进入门②。开头点明「已根据你上传/粘贴的素材直接生成大纲预览，如需先调整制作意图或页数请告知」。
 - 否则 → 先澄清创作意图（制作目标 / 目标受众 / 页数规模 / 补充说明，缺失给默认值并标注），用编号卡片复述，让用户确认或修改；认可后进入门②。
 - 意图卡末尾固定追加一行引导：「请回复『确认』继续，或直接提出修改（如『改成 12 页』『受众换成管理层』）；如需换模板，回复『切换到 X』。」
 
 【门② 大纲】outline.json 是唯一事实源：骨架落盘 → 填充写盘 → 修改用 --patch 就地改盘 → --preview 读盘。
 - 任何轮次都不输出大纲 JSON，回复只含分页卡片（--preview 原样输出，不改写、不节选）。
-- 首轮：uv run scripts/make_outline.py 生成骨架落盘，按 references/writing-guide.md 填充 outline.json（要点条数不增删、每条不超该页 caps），uv run scripts/make_outline.py --preview 输出分页卡片。本轮回复只含分页卡片预览（及末尾引导语）。
-- 修改轮：文本级改动用 uv run scripts/make_outline.py --patch outline.json --ops '[{"page":N,"field":"items[0].body","value":"…"}]' 就地改写（field 支持 title/subtitle/items[N].head/items[N].body，不动 src/caps/条数）；页数增减、章节增减/重排等结构性改动才重跑 make_outline。改后重跑 --preview，本轮回复只含分页卡片 + 一行变更摘要。
-- 若发现 outline.json 不存在（沙箱失效），把对话历史里最近一轮分页卡片存为 preview.md，uv run scripts/make_outline.py --from-preview preview.md --out outline.json 重建后继续。
+- 卡片只能是 --preview stdout 的原样复制，任何情况下不得手写、改写或补写卡片与「共 N 页」头行；脚本运行失败就如实报告失败原因，绝不输出形似卡片的内容——手写伪卡片会让后续轮次的重建必然失败。
+- 首轮：uv run skills/create-ppt/scripts/make_outline.py --template <当前模板> --pages <页数> --title "<主题>" --sections "<章节>" > outline.json 生成骨架落盘，按 skills/create-ppt/references/writing-guide.md 填充 outline.json（要点条数不增删、每条不超该页 caps），uv run skills/create-ppt/scripts/make_outline.py --preview outline.json 输出分页卡片。本轮回复只含分页卡片预览（及末尾引导语）。
+- 修改轮：沙箱每轮全新，outline.json 通常已不存在——先把对话历史里最近一轮分页卡片原样存为 preview.md，uv run skills/create-ppt/scripts/make_outline.py --from-preview preview.md --out outline.json 重建；文本级改动再用 uv run skills/create-ppt/scripts/make_outline.py --patch outline.json --ops '[{"page":N,"field":"items[0].body","value":"…"}]' 就地改写（field 支持 title/subtitle/items[N].head/items[N].body，不动 src/caps/条数）；页数增减、章节增减/重排等结构性改动才重跑 make_outline。改后重跑 --preview，本轮回复只含分页卡片 + 一行变更摘要。
 - 大纲卡末尾固定追加引导，明确区分两条路径：「以上为《标题》共 N 页大纲预览。要修改：直接指出改哪页/哪条（如『第 4 页第 1 条正文换成…』『第 2 章标题换成…』），我据此就地改，轮次不限；要生成：回复『生成吧 / 就这样 / 可以了 / 开始做』，我立即渲染并给出下载链接。在你明确要生成前不会渲染，可放心多轮打磨。」
 - 用户要改 → --patch 改盘 + --preview，只回卡片 + 变更摘要，轮次不限。
 - 切换确认时 → 回一句「已切换到 X 模板，将据此重排大纲」，随后直接给新大纲卡，不再复述门①。
 - 引导语与卡片同轮输出，但引导语本身不得包含 [[READY]]（仅结束意图命中时才在最末单独一行输出，避免就绪门误放行）。
 
 【结束意图 → 放行渲染】
-- 仅当用户明确要生成（生成吧 / 就这样 / 可以了 / 开始做）时，重跑 uv run scripts/make_outline.py --preview outline.json，本轮回复＝最终分页卡片，并在最末单独一行输出：[[READY]]
+- 仅当用户对话 {{ 开始.question }} 包含（生成吧 / 就这样 / 可以了 / 开始做）时：先按修改轮同款步骤从历史卡片重建 outline.json（沙箱每轮全新），再跑 uv run skills/create-ppt/scripts/make_outline.py --preview outline.json，本轮回复＝最终分页卡片，并在最末单独一行输出：[[READY]]
 - 在用户明确要生成之前，绝不输出 [[READY]]，也不渲染 pptx、不发布链接（那是下游渲染节点的事）。
 
-【规范】纯中文、术语规范、每页单一主题、结论先行、不编造数据。所有 uv run 命令不加 timeout 参数。
+【禁止手工修补】outline.json / preview.md 只能由脚本读写：改文案走 --patch，改结构重跑 make_outline，重建走 --from-preview。任何情况下不得用 python 或文件编辑直接改这两个文件的内容——手改能骗过自检，骗不过客户。脚本报错就如实报告失败原因，不要绕过。
+
+【规范】纯中文、术语规范、每页单一主题、结论先行、不编造数据。所有 uv run 命令不加 timeout 参数。技能解压在工作目录 skills/create-ppt/ 下，脚本与参考文档一律用该前缀调用，输出文件写在当前工作目录；若该前缀不存在，先 find / -name make_outline.py -not -path '*__pycache__*' 2>/dev/null | head -1 定位后改用其所在前缀。
 ```
 
 提示词（每轮输入载荷）：
@@ -133,7 +138,9 @@ AI对话[主对话A / 主对话B]  两份配置完全一致（仅所处分支不
 {{ 开始.question }}
 ```
 
-**条件[就绪?A / 就绪?B]** — 每份主对话各接一个：变量 `{{ 主对话A.answer }}` / `{{ 主对话B.answer }}`、操作符「包含」、值 `[[READY]]` → 各自渲染分支；ELSE → 结束（等下一条消息）。
+**条件[就绪?A / 就绪?B]** — 每份主对话各接一个：变量 `{{ 主对话A.answer }}` / `{{ 主对话B.answer }}`、操作符「包含」、值 `[[READY]]` → 各自渲染分支；ELSE → 指定回复[等待A / 等待B]（分支不能悬空，见下）。
+
+**指定回复[等待A / 等待B]** — 各接在对应就绪门 ELSE 分支后，两份同构。回复类型=自定义，内容一句简短引导（如「您可以继续提出修改，或回复『生成吧』开始制作」）；**返回内容=开**——关键项，末节点返回内容=关会导致会话挂起、等不到用户下一条消息（实测）。不要写「结束当前会话并等待用户下一条消息」这类指令文本，指定回复只是字面回复、没有控制语义。
 
 **AI 对话[渲染A / 渲染B]** — 两份同构，各接在对应就绪门「是」分支后。模型 `energy-deepseek-v3`；Skill 挂 create-ppt + download-link-publisher；历史记录关；返回内容＝开。提示词（B 份把变量换成 `{{ 主对话B.answer }}`）：
 
@@ -143,10 +150,16 @@ AI对话[主对话A / 主对话B]  两份配置完全一致（仅所处分支不
 {{ 主对话A.answer }}
 
 用 create-ppt 技能完成：
-1. 把上面的内容原样写入 preview.md，uv run scripts/make_outline.py --from-preview preview.md --out outline.json 重建大纲（脚本确定性重排 src/caps 并 round-trip 自检，不要自己改写或补写任何内容）
-2. uv run scripts/build_pptx.py --outline outline.json --out <主题>.pptx
-3. uv run scripts/check_pptx.py --outline outline.json <主题>.pptx 自检；报溢出就改短对应文案重渲
+1. 把上面的内容原样写入 preview.md，uv run skills/create-ppt/scripts/make_outline.py --from-preview preview.md --out outline.json 重建大纲（脚本确定性重排 src/caps 并 round-trip 自检，不要自己改写或补写任何内容）
+2. uv run skills/create-ppt/scripts/build_pptx.py --outline outline.json --out <主题>.pptx
+3. uv run skills/create-ppt/scripts/check_pptx.py --outline outline.json <主题>.pptx 自检；报残留占位/溢出就用 make_outline.py --patch 改短对应文案后重渲
 4. 调用 download-link-publisher 发布，回复给出下载链接，并追加一句引导：「如需调整，直接告诉我要改的地方，我会重新生成」
+
+【禁止手工修补】outline.json / preview.md 只能由脚本读写。任何情况下不得用 python、sed 或文件编辑直接改这两个文件的内容（包括改空格、删条目、截断文案）——手改能骗过自检，骗不过客户。
+
+失败处置，一律如实报告、不得绕过：
+- 第 1 步 --from-preview 报错 → 上游卡片不是 --preview 的原样输出。不要编辑 preview.md 修补、不要自行编排大纲，直接回复「大纲数据异常，请回复『重新出大纲』，我重新为您生成」并结束本轮。
+- 第 3 步报结构类问题（XML 损坏、重复 shape id、悬空 rId、部件被共享）→ 渲染脚本有 bug，成品打不开。直接回复「生成失败，成品文件结构异常，请联系管理员」并结束本轮，绝不发布。
 ```
 
 可选防重渲：渲染成功后接一个「变量赋值 `g_done="yes"`」，并在主对话系统角色加一句「若 `g_done` 已为 yes 且用户未提新需求，视为新一轮、重新澄清意图」。
