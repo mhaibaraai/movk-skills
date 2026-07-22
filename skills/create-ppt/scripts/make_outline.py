@@ -353,11 +353,15 @@ def warn_caps(pages: list[dict]) -> None:
                 )
 
 
-def rebuild(parsed: dict) -> dict:
+def rebuild(parsed: dict, index: dict | None = None) -> dict:
     """卡片 → outline：allocate 是 (模板, 页数, 标题, 章节) 的确定性函数，
-    从卡片解析出这四个参数重排即可还原 src/caps 骨架，再逐页回填文本。"""
-    key, _ = resolve_template(parsed["template"])
-    index = load_index(key)
+    从卡片解析出这四个参数重排即可还原 src/caps 骨架，再逐页回填文本。
+    index 显式传入时走自带模板（旁路 registry），template 仅作展示标签。"""
+    if index is None:
+        key, _ = resolve_template(parsed["template"])
+        index = load_index(key)
+    else:
+        key = parsed["template"]
     pages = parsed["pages"]
     sections = [p["title"] for p in pages if p["kind"] == "section"]
     if not sections:  # 模板无章节分隔页时，从内容页页眉按序去重兜底
@@ -376,10 +380,11 @@ def rebuild(parsed: dict) -> dict:
     return {"template": key, "title": parsed["title"], "pages": rebuilt}
 
 
-def from_preview(text: str) -> dict:
-    """从卡片文本重建 outline，并以「重建结果的预览可再解析回同一结构」做无损自检。"""
+def from_preview(text: str, index: dict | None = None) -> dict:
+    """从卡片文本重建 outline，并以「重建结果的预览可再解析回同一结构」做无损自检。
+    index 显式传入时走自带模板（旁路 registry）。"""
     parsed = parse_preview(text)
-    outline = rebuild(parsed)
+    outline = rebuild(parsed, index)
     if parse_preview(preview(outline)) != parsed:
         raise SystemExit("--from-preview: 重建结果的预览与输入卡片不一致，卡片可能被改坏")
     warn_caps(outline["pages"])
@@ -443,7 +448,11 @@ def main() -> None:
     parser.add_argument("--pages", type=int, default=14)
     parser.add_argument("--title", default="{标题}")
     parser.add_argument("--sections", default="")
+    parser.add_argument("--index", help="自带模板：显式索引 JSON 路径，旁路 registry")
+    parser.add_argument("--source", help="自带模板：源 pptx 路径（make_outline 不用，占位以对齐 build_pptx 命令行）")
     args = parser.parse_args()
+
+    ext_index = json.loads(Path(args.index).read_text(encoding="utf-8")) if args.index else None
 
     if args.preview:
         print(preview(json.loads(Path(args.preview).read_text(encoding="utf-8"))))
@@ -460,7 +469,7 @@ def main() -> None:
             if args.from_preview == "-"
             else Path(args.from_preview).read_text(encoding="utf-8")
         )
-        dump = json.dumps(from_preview(text), ensure_ascii=False, indent=2)
+        dump = json.dumps(from_preview(text, ext_index), ensure_ascii=False, indent=2)
         if args.out:
             Path(args.out).write_text(dump + "\n", encoding="utf-8")
         else:
@@ -481,15 +490,21 @@ def main() -> None:
         path.write_text(text + "\n", encoding="utf-8")
         print(text)
         return
-    if not args.template:
-        raise SystemExit(f"--template 必填。可选：{'、'.join(load_registry())}")
-
-    key, item = resolve_template(args.template)
-    sections = [s.strip() for s in args.sections.split(",") if s.strip()] or item["sections"]
+    if ext_index is not None:
+        key = args.template or ext_index.get("template") or "自带模板"
+        index, default_sections = ext_index, ext_index.get("sections") or []
+    else:
+        if not args.template:
+            raise SystemExit(f"--template 必填。可选：{'、'.join(load_registry())}")
+        key, item = resolve_template(args.template)
+        index, default_sections = load_index(key), item["sections"]
+    sections = [s.strip() for s in args.sections.split(",") if s.strip()] or default_sections
+    if not sections:
+        raise SystemExit("自带模板需用 --sections 指定章节（或在索引 JSON 里带 sections 字段）")
     outline = {
         "template": key,
         "title": args.title,
-        "pages": allocate(load_index(key), args.pages, args.title, sections),
+        "pages": allocate(index, args.pages, args.title, sections),
     }
     print(json.dumps(outline, ensure_ascii=False, indent=2))
 

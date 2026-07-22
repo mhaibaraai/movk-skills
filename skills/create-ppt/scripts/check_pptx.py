@@ -111,8 +111,13 @@ def check_package(path: Path) -> list[str]:
     return issues
 
 
-def check(outline: dict, path: Path) -> int:
-    index = {s["i"]: s for s in load_index(outline["template"])["slides"]}
+def check(outline: dict, path: Path, index_path: str | None = None) -> int:
+    slides = (
+        json.loads(Path(index_path).read_text(encoding="utf-8"))["slides"]
+        if index_path
+        else load_index(outline["template"])["slides"]
+    )
+    index = {s["i"]: s for s in slides}
     prs = Presentation(str(path))
     issues: list[str] = check_package(path)
     todo: collections.Counter = collections.Counter()
@@ -145,11 +150,12 @@ def check(outline: dict, path: Path) -> int:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--outline", required=True)
+    parser.add_argument("--index", help="自带模板：显式索引 JSON 路径，旁路 registry")
     parser.add_argument("pptx")
     args = parser.parse_args()
 
     outline = json.loads(Path(args.outline).read_text(encoding="utf-8"))
-    sys.exit(1 if check(outline, Path(args.pptx)) else 0)
+    sys.exit(1 if check(outline, Path(args.pptx), args.index) else 0)
 
 
 if __name__ == "__main__":

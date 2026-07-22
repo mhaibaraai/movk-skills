@@ -61,10 +61,16 @@ def slot_texts(page: dict, slots: list[dict], kind: str, section_no: int) -> dic
     return filled
 
 
-def render(outline: dict, out: Path) -> int:
-    key, _ = resolve_template(outline["template"])
-    index = {s["i"]: s for s in load_index(key)["slides"]}
-    prs = Presentation(str(source_path(key)))
+def render(outline: dict, out: Path, index_path: str | None = None, source: str | None = None) -> int:
+    if index_path:  # 自带模板：显式索引 + 源 pptx，旁路 registry
+        slides = json.loads(Path(index_path).read_text(encoding="utf-8"))["slides"]
+        src_pptx = Path(source)
+    else:
+        key, _ = resolve_template(outline["template"])
+        slides = load_index(key)["slides"]
+        src_pptx = source_path(key)
+    index = {s["i"]: s for s in slides}
+    prs = Presentation(str(src_pptx))
     original = len(prs.slides)
 
     section_no = 0
@@ -90,11 +96,15 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--outline", required=True)
     parser.add_argument("--out", default=None)
+    parser.add_argument("--index", help="自带模板：显式索引 JSON 路径，旁路 registry")
+    parser.add_argument("--source", help="自带模板：源 pptx 路径（与 --index 配套）")
     args = parser.parse_args()
 
+    if bool(args.index) != bool(args.source):
+        raise SystemExit("--index 与 --source 必须同时提供（自带模板）")
     outline = json.loads(Path(args.outline).read_text(encoding="utf-8"))
     out = Path(args.out or f"{outline.get('title', 'output')}.pptx")
-    pages = render(outline, out)
+    pages = render(outline, out, args.index, args.source)
     print(f"已生成 {out}（{pages} 页，模板：{outline['template']}）")
 
 

@@ -44,9 +44,21 @@
 
 ## 套用用户自带模板
 
+用户上传 .pptx 时不必改注册表，一条命令取回并索引成临时模板：
+
 ```bash
-uv run scripts/index_template.py 用户模板.pptx > templates/index/用户模板.json
+uv run skills/create-ppt/scripts/import_template.py "/api/file/xxx" --base "https://平台域名" --out-dir tpl --name 我的模板
 ```
 
-索引脚本用启发式推断页型与槽位角色（`kind` / `role` / `items` / `cap`），产物是草稿——
-新模板首次接入时应抽查几页，确认封面、目录、章节页没被误判，再往 `registry.json` 注册。
+来源可以是平台相对路径（配 `--base`）、完整 URL 或本地文件。产出 `tpl/index.json`（版式索引 +
+从章节页自动提取的默认 `sections`）与 `tpl/source.pptx`。之后所有命令加 `--index tpl/index.json`
+（`build_pptx` / `check_pptx` 另加 `--source tpl/source.pptx`）即可旁路注册表，用法与内置模板完全一致。
+
+索引用启发式推断页型与槽位角色（`kind` / `role` / `items` / `cap`），产物是**草稿**——
+先跑 `thumbnail.py` 出缩略图核对封面、目录、章节页有没有被误判，比逐条读 JSON 快得多。
+
+沙箱每轮全新、索引不跨轮存在：修改轮与渲染轮都要按同一来源重跑 `import_template.py`
+（索引是确定性的，重跑得到同一份，卡片重建才对得上）。
+
+`registry.json` 注册仍适用于要**长期内置**的模板：把 pptx 放进 `assets/`、索引放进 `templates/index/`，
+再加一项 source / index / aliases / sections。
