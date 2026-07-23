@@ -53,7 +53,8 @@ metadata:
 
 ## 脚本约定
 
-- 用 `uv run scripts/xxx.py` 调用，PEP 723 内联声明依赖，不写 `requirements.txt` 之外的安装步骤。
+- 用 `uv run skills/<技能名>/scripts/xxx.py` 调用，PEP 723 内联声明依赖，不写 `requirements.txt` 之外的安装步骤。
+- **沙箱 cwd 不是技能根目录**（实测为随机运行目录 `/tmp/*-skill-runtime-*`，技能解压在 `<cwd>/skills/<技能名>/` 下）：SKILL.md 里的脚本命令一律带 `skills/<技能名>/` 前缀，跨技能调用同理（如 `skills/web-fetch/scripts/fetch.py`，不用 `../web-fetch/`）；输出文件写在当前工作目录。运行约定里附 find 兜底定位（`find / -name <标志脚本>.py -not -path '*__pycache__*' 2>/dev/null | head -1`）。
 - **不要给 `uv run` 加 timeout 参数**，沙箱后端不支持 per-command timeout override，加了必定报错。
 - 脚本负责确定性工作（抓取、渲染、格式转换），模型负责判断与写作。边界要清晰。
 - 日志走 stderr，结果走 stdout，便于管道消费。

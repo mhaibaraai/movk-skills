@@ -1,0 +1,2123 @@
+{
+  "template": "年终安全工作汇报模版",
+  "source": "assets/annual-safety-report.pptx",
+  "slides": [
+    {
+      "i": 0,
+      "kind": "cover",
+      "slots": [
+        {
+          "sid": 10,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 4,
+          "role": "title",
+          "sample": "年终安全工作汇报",
+          "cap": 8
+        },
+        {
+          "sid": 6,
+          "role": "item_body",
+          "sample": "适用于年终总结、工作总结、工作汇报、工作计划等",
+          "cap": 23,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "subtitle",
+          "sample": "输入企业名称",
+          "cap": 6
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "汇报人：XXXX",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "日期：XXXX",
+          "cap": 7,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    },
+    {
+      "i": 1,
+      "kind": "toc",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "年度安全工作总体概况",
+          "cap": 10,
+          "idx": 0
+        },
+        {
+          "sid": 5,
+          "role": "decor",
+          "sample": "目 录"
+        },
+        {
+          "sid": 7,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "重点工作完成情况",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 14,
+          "role": "decor",
+          "sample": "CONTENTS"
+        },
+        {
+          "sid": 8,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "典型问题与事件分析",
+          "cap": 9,
+          "idx": 2
+        },
+        {
+          "sid": 9,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "当前存在的不足与风险",
+          "cap": 10,
+          "idx": 3
+        },
+        {
+          "sid": 2,
+          "role": "no",
+          "sample": "5"
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "下一年度安全工作计划",
+          "cap": 10,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 2,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 7,
+          "role": "title",
+          "sample": "年度安全工作总体概况",
+          "cap": 10
+        },
+        {
+          "sid": 8,
+          "role": "subtitle",
+          "sample": "年度工作总体概况 / 安全投入与资源配置概览 /",
+          "cap": 31
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "年度工作总体概况",
+          "cap": 8
+        },
+        {
+          "sid": 130,
+          "role": "item_head",
+          "sample": "1月",
+          "cap": 6,
+          "idx": 0
+        },
+        {
+          "sid": 131,
+          "role": "item_head",
+          "sample": "3月",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 132,
+          "role": "item_head",
+          "sample": "5月",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 179,
+          "role": "item_head",
+          "sample": "1月重点工作内容",
+          "cap": 8,
+          "idx": 3
+        },
+        {
+          "sid": 180,
+          "role": "item_head",
+          "sample": "3月重点工作内容",
+          "cap": 8,
+          "idx": 4
+        },
+        {
+          "sid": 181,
+          "role": "item_head",
+          "sample": "5月重点工作内容",
+          "cap": 8,
+          "idx": 5
+        },
+        {
+          "sid": 185,
+          "role": "item_head",
+          "sample": "上半年度重点工作",
+          "cap": 12,
+          "idx": 6
+        },
+        {
+          "sid": 155,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 10
+        },
+        {
+          "sid": 156,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 7
+        },
+        {
+          "sid": 159,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 8
+        },
+        {
+          "sid": 160,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 8
+        },
+        {
+          "sid": 163,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 9
+        },
+        {
+          "sid": 164,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 9
+        },
+        {
+          "sid": 157,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 16
+        },
+        {
+          "sid": 158,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 10
+        },
+        {
+          "sid": 161,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 11
+        },
+        {
+          "sid": 162,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 11
+        },
+        {
+          "sid": 165,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 12
+        },
+        {
+          "sid": 166,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 12
+        },
+        {
+          "sid": 134,
+          "role": "item_head",
+          "sample": "8月",
+          "cap": 6,
+          "idx": 13
+        },
+        {
+          "sid": 135,
+          "role": "item_head",
+          "sample": "10月",
+          "cap": 6,
+          "idx": 14
+        },
+        {
+          "sid": 136,
+          "role": "item_head",
+          "sample": "12月",
+          "cap": 6,
+          "idx": 15
+        },
+        {
+          "sid": 182,
+          "role": "item_head",
+          "sample": "8月重点工作内容",
+          "cap": 8,
+          "idx": 16
+        },
+        {
+          "sid": 183,
+          "role": "item_head",
+          "sample": "10月重点工作内容",
+          "cap": 9,
+          "idx": 17
+        },
+        {
+          "sid": 184,
+          "role": "item_head",
+          "sample": "12月重点工作内容",
+          "cap": 9,
+          "idx": 18
+        },
+        {
+          "sid": 189,
+          "role": "item_head",
+          "sample": "下半年度重点工作",
+          "cap": 12,
+          "idx": 19
+        },
+        {
+          "sid": 167,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 20
+        },
+        {
+          "sid": 168,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 20
+        },
+        {
+          "sid": 171,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 21
+        },
+        {
+          "sid": 172,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 21
+        },
+        {
+          "sid": 175,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 22
+        },
+        {
+          "sid": 176,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 22
+        },
+        {
+          "sid": 169,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 23
+        },
+        {
+          "sid": 170,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 23
+        },
+        {
+          "sid": 173,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 24
+        },
+        {
+          "sid": 174,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 24
+        },
+        {
+          "sid": 177,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 54,
+          "idx": 25
+        },
+        {
+          "sid": 178,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 25
+        }
+      ],
+      "items": 26
+    },
+    {
+      "i": 4,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "年度工作总体概况",
+          "cap": 8
+        },
+        {
+          "sid": 70,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 0
+        },
+        {
+          "sid": 71,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 72,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 73,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 75,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 6,
+          "idx": 4
+        },
+        {
+          "sid": 64,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 52,
+          "idx": 5
+        },
+        {
+          "sid": 66,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 52,
+          "idx": 6
+        },
+        {
+          "sid": 67,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 52,
+          "idx": 7
+        },
+        {
+          "sid": 68,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 52,
+          "idx": 8
+        },
+        {
+          "sid": 69,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 52,
+          "idx": 9
+        },
+        {
+          "sid": 62,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 10
+        },
+        {
+          "sid": 63,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 5
+        },
+        {
+          "sid": 46,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 11
+        },
+        {
+          "sid": 47,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 6
+        },
+        {
+          "sid": 50,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 12
+        },
+        {
+          "sid": 51,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 7
+        },
+        {
+          "sid": 54,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 13
+        },
+        {
+          "sid": 55,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 8
+        },
+        {
+          "sid": 58,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 14
+        },
+        {
+          "sid": 59,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 9
+        },
+        {
+          "sid": 61,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 10
+        },
+        {
+          "sid": 44,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 11
+        },
+        {
+          "sid": 49,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 12
+        },
+        {
+          "sid": 53,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 13
+        },
+        {
+          "sid": 57,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 14
+        },
+        {
+          "sid": 60,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 0
+        },
+        {
+          "sid": 43,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 1
+        },
+        {
+          "sid": 48,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 2
+        },
+        {
+          "sid": 52,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 3
+        },
+        {
+          "sid": 56,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 56,
+          "idx": 4
+        }
+      ],
+      "items": 15
+    },
+    {
+      "i": 5,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "安全投入与资源配置概览",
+          "cap": 11
+        },
+        {
+          "sid": 49,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 7,
+          "idx": 0
+        },
+        {
+          "sid": 48,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 37,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 47,
+          "idx": 1
+        },
+        {
+          "sid": 18,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 14,
+          "idx": 1
+        },
+        {
+          "sid": 20,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 51,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 7,
+          "idx": 3
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 47,
+          "idx": 2
+        },
+        {
+          "sid": 50,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 43,
+          "role": "item_head",
+          "sample": "输入小标题",
+          "cap": 14,
+          "idx": 4
+        },
+        {
+          "sid": 34,
+          "role": "item_body",
+          "sample": "本模板内所有图片及字体仅供参考，请根据您的实际情",
+          "cap": 47,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 6,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "关键数据总览",
+          "cap": 6,
+          "idx": 0
+        },
+        {
+          "sid": 13,
+          "role": "title",
+          "sample": "+55670",
+          "cap": 6
+        },
+        {
+          "sid": 5,
+          "role": "item_head",
+          "sample": "+77670",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 19,
+          "role": "item_head",
+          "sample": "+23670",
+          "cap": 6,
+          "idx": 2
+        },
+        {
+          "sid": 24,
+          "role": "item_head",
+          "sample": "+75670",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 4
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "我们对原始数据进行了清洗和整理，去除了缺失值和异",
+          "cap": 54,
+          "idx": 4
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 5
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "我们对原始数据进行了清洗和整理，去除了缺失值和异",
+          "cap": 54,
+          "idx": 5
+        },
+        {
+          "sid": 17,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 6
+        },
+        {
+          "sid": 18,
+          "role": "item_body",
+          "sample": "我们对原始数据进行了清洗和整理，去除了缺失值和异",
+          "cap": 54,
+          "idx": 6
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "输入小标题:",
+          "cap": 6,
+          "idx": 7
+        },
+        {
+          "sid": 23,
+          "role": "item_body",
+          "sample": "我们对原始数据进行了清洗和整理，去除了缺失值和异",
+          "cap": 54,
+          "idx": 7
+        },
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "销售\n占比",
+          "cap": 8,
+          "idx": 8
+        }
+      ],
+      "items": 9
+    },
+    {
+      "i": 7,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 7,
+          "role": "title",
+          "sample": "重点工作完成情况",
+          "cap": 8
+        },
+        {
+          "sid": 2,
+          "role": "subtitle",
+          "sample": "安全风险排查与专项整治行动 / 安全制度建设与体",
+          "cap": 34
+        }
+      ]
+    },
+    {
+      "i": 8,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "安全风险排查与专项整治行动",
+          "cap": 13
+        },
+        {
+          "sid": 20,
+          "role": "decor",
+          "sample": "12"
+        },
+        {
+          "sid": 21,
+          "role": "decor",
+          "sample": "34"
+        },
+        {
+          "sid": 22,
+          "role": "decor",
+          "sample": "56"
+        },
+        {
+          "sid": 36,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 37,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 60,
+          "idx": 0
+        },
+        {
+          "sid": 39,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 1
+        },
+        {
+          "sid": 40,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 60,
+          "idx": 1
+        },
+        {
+          "sid": 42,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 2
+        },
+        {
+          "sid": 43,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 60,
+          "idx": 2
+        },
+        {
+          "sid": 26,
+          "role": "item_head",
+          "sample": "添加内容标题",
+          "cap": 6,
+          "idx": 3
+        },
+        {
+          "sid": 27,
+          "role": "item_head",
+          "sample": "添加内容标题",
+          "cap": 6,
+          "idx": 4
+        },
+        {
+          "sid": 28,
+          "role": "item_head",
+          "sample": "添加内容标题",
+          "cap": 6,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 9,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "安全制度建设与体系完善",
+          "cap": 11
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 41,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 1
+        },
+        {
+          "sid": 42,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或通过复制文本后在此选择粘贴，",
+          "cap": 48,
+          "idx": 1
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 48,
+          "idx": 0
+        },
+        {
+          "sid": 48,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 2
+        },
+        {
+          "sid": 55,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或通过复制文本后在此选择粘贴，",
+          "cap": 48,
+          "idx": 2
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 3
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 48,
+          "idx": 3
+        },
+        {
+          "sid": 54,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 4
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或通过复制文本后在此选择粘贴，",
+          "cap": 48,
+          "idx": 4
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 5
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 48,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 10,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "安全培训与应急演练开展情况",
+          "cap": 13
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 22,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，并选择",
+          "cap": 80,
+          "idx": 0
+        }
+      ],
+      "items": 1
+    },
+    {
+      "i": 11,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 7,
+          "role": "title",
+          "sample": "典型问题与事件分析",
+          "cap": 9
+        },
+        {
+          "sid": 2,
+          "role": "subtitle",
+          "sample": "年度安全事件回顾 / 重大隐患发现与整改闭环 /",
+          "cap": 34
+        }
+      ]
+    },
+    {
+      "i": 12,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "年度安全事件回顾",
+          "cap": 8
+        },
+        {
+          "sid": 10,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 8,
+          "idx": 0
+        },
+        {
+          "sid": 21,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 30,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 34,
+          "role": "no",
+          "sample": "05"
+        },
+        {
+          "sid": 35,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 8,
+          "idx": 2
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "单击此处输入你的文本，文字是您思想的提炼",
+          "cap": 48,
+          "idx": 0
+        },
+        {
+          "sid": 26,
+          "role": "item_body",
+          "sample": "可酌情增减文字，以便观者准确地理解您传达的思想",
+          "cap": 48,
+          "idx": 1
+        },
+        {
+          "sid": 33,
+          "role": "item_body",
+          "sample": "单击此处输入你的文本，文字是您思想的提炼",
+          "cap": 48,
+          "idx": 2
+        },
+        {
+          "sid": 12,
+          "role": "item_body",
+          "sample": "单击此处输入你的文本，文字是您思想的提炼",
+          "cap": 48,
+          "idx": 3
+        },
+        {
+          "sid": 38,
+          "role": "item_body",
+          "sample": "可酌情增减文字，以便观者准确地理解您传达的思想",
+          "cap": 48,
+          "idx": 4
+        },
+        {
+          "sid": 42,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 13,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 8,
+          "idx": 3
+        },
+        {
+          "sid": 45,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 40,
+          "role": "item_head",
+          "sample": "添加项标题",
+          "cap": 8,
+          "idx": 4
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 13,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 39,
+          "role": "title",
+          "sample": "重大隐患发现与整改闭环",
+          "cap": 11
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 3,
+          "role": "item_head",
+          "sample": "隐患",
+          "cap": 12,
+          "idx": 1
+        },
+        {
+          "sid": 4,
+          "role": "item_head",
+          "sample": "整改",
+          "cap": 12,
+          "idx": 2
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 3
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 4
+        },
+        {
+          "sid": 8,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 4
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 3
+        }
+      ],
+      "items": 5
+    },
+    {
+      "i": 14,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 3,
+          "role": "title",
+          "sample": "问题根因剖析",
+          "cap": 6
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "单击此处添加您的文本具体内容，简明扼要地阐述您的",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 15,
+          "role": "item_body",
+          "sample": "单击此处添加您的文本具体内容，简明扼要地阐述您的",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "单击此处添加您的文本具体内容，简明扼要地阐述您的",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 11,
+          "role": "item_head",
+          "sample": "问题根因\n剖析",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "击此处添加您的文本具体内容，简明扼要地阐述您的观",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 14,
+          "role": "item_body",
+          "sample": "单击此处添加您的文本具体内容，简明扼要地阐述您的",
+          "cap": 80,
+          "idx": 4
+        },
+        {
+          "sid": 2,
+          "role": "item_body",
+          "sample": "单击此处添加您的文本具体内容，简明扼要地阐述您的",
+          "cap": 80,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 15,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 10,
+          "role": "title",
+          "sample": "经验总结",
+          "cap": 4
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "单击此处添加正文，文字是您思想的提炼，请言简意赅",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 19,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 3,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 82,
+          "role": "item_head",
+          "sample": "经验总结",
+          "cap": 14,
+          "idx": 0
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "单击此处输入你的正文，文字是您思想的提炼，为了最",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 16,
+          "role": "item_body",
+          "sample": "单击此处添加正文，文字是您思想的提炼，请言简意赅",
+          "cap": 80,
+          "idx": 3
+        },
+        {
+          "sid": 5,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 7,
+          "role": "no",
+          "sample": "04"
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 16,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 7,
+          "role": "title",
+          "sample": "存在的不足与风险",
+          "cap": 8
+        },
+        {
+          "sid": 2,
+          "role": "subtitle",
+          "sample": "管理层面短板 / 技术/设备层面薄弱环节 / 人",
+          "cap": 32
+        }
+      ]
+    },
+    {
+      "i": 17,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "管理层面短板",
+          "cap": 6
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 1
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 0
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 1
+        },
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 2
+        },
+        {
+          "sid": 8,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 3
+        },
+        {
+          "sid": 5,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 2
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 18,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "技术/设备层面薄弱环节",
+          "cap": 11,
+          "idx": 0
+        },
+        {
+          "sid": 59,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 13,
+          "idx": 1
+        },
+        {
+          "sid": 62,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 13,
+          "idx": 2
+        },
+        {
+          "sid": 58,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 1
+        },
+        {
+          "sid": 61,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 60,
+          "role": "item_head",
+          "sample": "技术/设备层面薄弱环节",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 65,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 4
+        },
+        {
+          "sid": 66,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 5
+        },
+        {
+          "sid": 63,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 13,
+          "idx": 4
+        },
+        {
+          "sid": 64,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 13,
+          "idx": 5
+        }
+      ],
+      "items": 6
+    },
+    {
+      "i": 19,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "人员意识与执行层面",
+          "cap": 9
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 8,
+          "role": "no",
+          "sample": "1"
+        },
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "2"
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 1
+        },
+        {
+          "sid": 13,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 1
+        },
+        {
+          "sid": 12,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 2
+        },
+        {
+          "sid": 7,
+          "role": "no",
+          "sample": "3"
+        },
+        {
+          "sid": 5,
+          "role": "no",
+          "sample": "4"
+        },
+        {
+          "sid": 4,
+          "role": "item_head",
+          "sample": "添加标题内容",
+          "cap": 9,
+          "idx": 3
+        },
+        {
+          "sid": 11,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 2
+        },
+        {
+          "sid": 3,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 45,
+          "idx": 3
+        }
+      ],
+      "items": 4
+    },
+    {
+      "i": 20,
+      "kind": "section",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "5"
+        },
+        {
+          "sid": 7,
+          "role": "title",
+          "sample": "下一年度安全工作计划",
+          "cap": 10
+        },
+        {
+          "sid": 2,
+          "role": "subtitle",
+          "sample": "下一年度总体目标 / 重点任务与专项行动部署 /",
+          "cap": 34
+        }
+      ]
+    },
+    {
+      "i": 21,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "title",
+          "sample": "下一年度总体目标",
+          "cap": 8
+        },
+        {
+          "sid": 16,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 10,
+          "idx": 0
+        },
+        {
+          "sid": 23,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 10,
+          "idx": 1
+        },
+        {
+          "sid": 10,
+          "role": "item_head",
+          "sample": "单击此处输入你的正文",
+          "cap": 14,
+          "idx": 2
+        },
+        {
+          "sid": 22,
+          "role": "item_head",
+          "sample": "单击此处输入你的正文",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 4,
+          "role": "item_head",
+          "sample": "下一年度总体目标",
+          "cap": 14,
+          "idx": 4
+        },
+        {
+          "sid": 14,
+          "role": "item_head",
+          "sample": "单击此处输入你的正文",
+          "cap": 14,
+          "idx": 5
+        },
+        {
+          "sid": 15,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 10,
+          "idx": 6
+        },
+        {
+          "sid": 7,
+          "role": "item_head",
+          "sample": "单击此处输入你的正文",
+          "cap": 14,
+          "idx": 7
+        },
+        {
+          "sid": 8,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 10,
+          "idx": 8
+        }
+      ],
+      "items": 9
+    },
+    {
+      "i": 22,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 16,
+          "role": "title",
+          "sample": "重点任务与专项行动部署",
+          "cap": 11
+        },
+        {
+          "sid": 5,
+          "role": "no",
+          "sample": "01"
+        },
+        {
+          "sid": 35,
+          "role": "item_head",
+          "sample": "添加标题：",
+          "cap": 10,
+          "idx": 0
+        },
+        {
+          "sid": 6,
+          "role": "no",
+          "sample": "02"
+        },
+        {
+          "sid": 34,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 0
+        },
+        {
+          "sid": 45,
+          "role": "item_head",
+          "sample": "Idea 01",
+          "cap": 7,
+          "idx": 1
+        },
+        {
+          "sid": 36,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 2
+        },
+        {
+          "sid": 37,
+          "role": "item_head",
+          "sample": "添加标题：",
+          "cap": 10,
+          "idx": 2
+        },
+        {
+          "sid": 42,
+          "role": "item_head",
+          "sample": "重点任务与专项行动部署",
+          "cap": 14,
+          "idx": 3
+        },
+        {
+          "sid": 47,
+          "role": "item_head",
+          "sample": "Idea 02",
+          "cap": 7,
+          "idx": 4
+        },
+        {
+          "sid": 7,
+          "role": "no",
+          "sample": "03"
+        },
+        {
+          "sid": 39,
+          "role": "item_head",
+          "sample": "添加标题：",
+          "cap": 10,
+          "idx": 5
+        },
+        {
+          "sid": 8,
+          "role": "no",
+          "sample": "04"
+        },
+        {
+          "sid": 38,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 5
+        },
+        {
+          "sid": 49,
+          "role": "item_head",
+          "sample": "Idea 03",
+          "cap": 7,
+          "idx": 6
+        },
+        {
+          "sid": 41,
+          "role": "item_head",
+          "sample": "添加标题：",
+          "cap": 10,
+          "idx": 7
+        },
+        {
+          "sid": 40,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 7
+        },
+        {
+          "sid": 51,
+          "role": "item_head",
+          "sample": "Idea 04",
+          "cap": 7,
+          "idx": 8
+        }
+      ],
+      "items": 9
+    },
+    {
+      "i": 23,
+      "kind": "content",
+      "slots": [
+        {
+          "sid": 6,
+          "role": "item_head",
+          "sample": "时间节点与责任分工",
+          "cap": 9,
+          "idx": 0
+        },
+        {
+          "sid": 56,
+          "role": "item_body",
+          "sample": "第一季度重点工作（1月—3月）",
+          "cap": 15,
+          "idx": 2
+        },
+        {
+          "sid": 35,
+          "role": "item_head",
+          "sample": "Q1",
+          "cap": 6,
+          "idx": 1
+        },
+        {
+          "sid": 43,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 6
+        },
+        {
+          "sid": 59,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 2
+        },
+        {
+          "sid": 57,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 3
+        },
+        {
+          "sid": 58,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 4
+        },
+        {
+          "sid": 36,
+          "role": "item_head",
+          "sample": "Q2",
+          "cap": 6,
+          "idx": 5
+        },
+        {
+          "sid": 61,
+          "role": "item_body",
+          "sample": "第二季度重点工作（4月—6月）",
+          "cap": 15,
+          "idx": 5
+        },
+        {
+          "sid": 65,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 6
+        },
+        {
+          "sid": 62,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 7
+        },
+        {
+          "sid": 64,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 8
+        },
+        {
+          "sid": 42,
+          "role": "item_head",
+          "sample": "时间节点",
+          "cap": 6,
+          "idx": 9
+        },
+        {
+          "sid": 60,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 11
+        },
+        {
+          "sid": 67,
+          "role": "item_body",
+          "sample": "第三季度重点工作（7月—9月）",
+          "cap": 15,
+          "idx": 10
+        },
+        {
+          "sid": 39,
+          "role": "item_head",
+          "sample": "Q3",
+          "cap": 6,
+          "idx": 10
+        },
+        {
+          "sid": 66,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 15
+        },
+        {
+          "sid": 70,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 11
+        },
+        {
+          "sid": 68,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 12
+        },
+        {
+          "sid": 69,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 13
+        },
+        {
+          "sid": 41,
+          "role": "item_head",
+          "sample": "Q4",
+          "cap": 6,
+          "idx": 14
+        },
+        {
+          "sid": 72,
+          "role": "item_body",
+          "sample": "第四季度重点工作（10月—12月）",
+          "cap": 17,
+          "idx": 14
+        },
+        {
+          "sid": 75,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 15
+        },
+        {
+          "sid": 73,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 16
+        },
+        {
+          "sid": 74,
+          "role": "item_head",
+          "sample": "添加标题",
+          "cap": 5,
+          "idx": 17
+        },
+        {
+          "sid": 71,
+          "role": "item_body",
+          "sample": "您的内容打在这里，或者通过复制您的文本后，在此框",
+          "cap": 80,
+          "idx": 16
+        }
+      ],
+      "items": 18
+    },
+    {
+      "i": 24,
+      "kind": "closing",
+      "slots": [
+        {
+          "sid": 10,
+          "role": "decor",
+          "sample": "LOGO"
+        },
+        {
+          "sid": 4,
+          "role": "title",
+          "sample": "年终安全工作汇报",
+          "cap": 8
+        },
+        {
+          "sid": 6,
+          "role": "item_body",
+          "sample": "适用于年终总结、工作总结、工作汇报、工作计划等",
+          "cap": 23,
+          "idx": 0
+        },
+        {
+          "sid": 9,
+          "role": "subtitle",
+          "sample": "输入企业名称",
+          "cap": 6
+        },
+        {
+          "sid": 7,
+          "role": "item_body",
+          "sample": "汇报人：XXXX",
+          "cap": 8,
+          "idx": 1
+        },
+        {
+          "sid": 8,
+          "role": "item_body",
+          "sample": "日期：XXXX",
+          "cap": 7,
+          "idx": 2
+        }
+      ],
+      "items": 3
+    }
+  ]
+}
