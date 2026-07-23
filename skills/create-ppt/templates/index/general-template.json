@@ -3391,14 +3391,20 @@
       "items": 5
     },
     {
-      "i": 94,
+      "i": 95,
       "kind": "closing",
       "slots": [
         {
-          "sid": 379,
+          "sid": 3,
           "role": "title",
-          "sample": "参考图标",
-          "cap": 18
+          "sample": "Thank you for \nwatching.",
+          "cap": 24
+        },
+        {
+          "sid": 4,
+          "role": "subtitle",
+          "sample": "xxxx\nxxx.xxx.xxx.xxx.xxx",
+          "cap": 34
         }
       ]
     }
