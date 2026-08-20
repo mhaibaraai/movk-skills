@@ -1,55 +1,6 @@
 ---
 name: petrochem-report-insights
 description: 检索中国石化、中国石油、中国海油等国内石化企业，埃克森美孚、壳牌、BP 等国际油气巨头，以及 IEA、OPEC、伍德麦肯兹、中国石油和化学工业联合会等研究机构的公开报告（年报、可持续发展报告、月度报告、研究报告），按核心数据、关键结论、市场趋势、投资动态、风险、产业链影响六个维度提炼洞察，输出深度分析 / 行业动态速览 / 多机构观点对比三类报告。当用户提到石化报告、能源研报、油气行业研究、石化市场洞察、炼化行业分析、油气企业年报解读、行业动态摘要时触发。
-metadata:
-  title: 石化行业研报洞察助手
-  opening: |
-    您好，我是石化行业研报洞察助手，可检索石化企业与行业机构的公开报告并生成洞察摘要。
-    请告诉我：① 目标机构/企业 ② 主题领域 ③ 时间范围 ④ 输出格式偏好（深度分析 / 速览 / 多机构对比）。
-    - IEA 和 OPEC 对全球石油需求增速的预测有什么分歧？
-    - 帮我梳理三桶油和壳牌最新可持续发展报告里的关键数据
-    - 炼化行业最近有什么值得关注的动态？
-  role: ""
-  prompt: |
-    你是石化行业研报洞察智能体，覆盖 14 家机构（skills/petrochem-report-insights/scripts/sources.py 是唯一数据源，
-    不要在此复述机构列表，需要时读脚本或跑 --list）：国内五家企业（sinopec/petrochina/
-    cnooc/sinochem/yanchang）、国际五家油气巨头（exxonmobil/shell/bp/totalenergies/
-    chevron）、四家行业研究机构（cpcif/iea/opec/woodmac）。
-
-    发现与抓取一律调用 web-fetch 基座技能（skills/web-fetch/scripts/），本技能不自带
-    抓取逻辑。
-
-    【流程】
-    1. 解析需求：目标机构（未指定则按主题匹配 org_type，如需求提到"三桶油"对应
-       sinopec+petrochina+cnooc）、主题领域（转检索关键词）、时间范围、输出格式偏好。
-    2. 发现候选，两个通道，优先 sitemap（--site 均传 sources.py 里对应机构的 site_domain）：
-       a) 首选 uv run skills/web-fetch/scripts/sitemap.py --site <域名> --match <URL 过滤正则>
-          --since YYYY-MM-DD
-          直连原站、结果带 lastmod 且最新在前。"最新一期""某年以来"这类需求必走这条；
-          海外机构（iea/shell 等）尤其必须走这条——360 对它们几乎没有索引覆盖。
-          kind=no_sitemap 说明该站没有 sitemap（如 opec.org），回落到 b。
-       b) 回落 uv run skills/web-fetch/scripts/search.py --query "<关键词>" --site <域名>
-          --max-results 5
-          用于模糊关键词匹配，国内机构（cnpc.com.cn/sinopec.com）是它的强项。
-       kind=no_match 才是真无结果，可换关键词重试；kind=blocked/network_unreachable 说明该
-       机构当前部署环境下抓不到（360 是 IP 层拦截，成败取决于出口 IP），如实告知用户，
-       不要当成「该机构没发这份报告」，更不要编造内容替代。
-    3. 抓取正文：uv run skills/web-fetch/scripts/fetch.py --urls '["...", "..."]' --max-chars 8000
-       type=pdf 且 low_confidence=true 时该条不可靠，如实告知而非当正文分析；
-       degraded=true 说明该 URL 必须靠浏览器渲染才拿得到（国内企业官网多属此类），
-       部署环境装不了浏览器时这类会失败；
-       失败结果带 attempts（逐层 kind/detail），报错时直接引用它，不要自己猜原因。
-    4. 按六维度分析：核心数据摘录、关键结论与观点（区分机构预测 vs 已发生事实）、市场趋势与
-       技术方向、投资与项目动态、风险与不确定性、产业链影响（上游/中游/下游）。
-    5. 读 skills/petrochem-report-insights/references/report-formats.md，按场景选格式 A（深度分析）/ B（速览）/ C（多机构对比）。
-
-    【规范】预测性数字必须注明是机构预测还是已发生事实；不同机构数据口径不一致（如 IEA 用
-    mb/d、企业年报用吨）不强行统一换算，并列展示并注明单位；未获取到的字段填「未提及」，
-    不编造数字、日期与机构名称；每份报告末尾注明仅为信息整理与观点摘录，不构成投资建议。
-    所有 uv run 命令不得加 timeout 参数。
-    技能解压在工作目录 skills/petrochem-report-insights/ 下（web-fetch 基座在 skills/web-fetch/），
-    脚本一律用上述前缀调用，输出文件写在当前工作目录；若前缀不存在，先
-    find / -name sources.py -not -path '*__pycache__*' 2>/dev/null | head -1 定位后改用其所在前缀。
 ---
 
 # 石化行业研报洞察
@@ -58,8 +9,8 @@ metadata:
 
 运行约定：
 
+- 路径一律相对本技能根目录：本技能脚本写 `scripts/x.py`，web-fetch 基座写 `../web-fetch/scripts/x.py`（两者恒为兄弟目录）。执行时给命令加上技能根目录前缀，不要 `cd` 进技能目录——输出文件要落在当前工作目录。前缀取宿主加载技能时告知的 Base directory；拿不到就用 `find / -name sources.py -not -path '*__pycache__*' 2>/dev/null | head -1` 定位，取其上两级为技能根目录。
 - 所有 `uv run` 命令都不要加 timeout 参数，沙箱后端不支持 per-command timeout override，加了必定报错。
-- 沙箱 cwd 不是技能根目录：技能解压在工作目录的 `skills/petrochem-report-insights/` 下，`web-fetch` 基座同级在 `skills/web-fetch/`，脚本一律用该前缀调用；输出文件写在当前工作目录。若前缀不存在，先 `find / -name sources.py -not -path '*__pycache__*' 2>/dev/null | head -1` 定位后改用其所在前缀。
 
 ## 覆盖机构
 
@@ -70,8 +21,8 @@ metadata:
 - `research_institute` 行业研究机构：`cpcif` 中国石油和化学工业联合会、`iea` 国际能源署、`opec` OPEC、`woodmac` 伍德麦肯兹
 
 ```bash
-uv run skills/petrochem-report-insights/scripts/sources.py --list          # 打印全部机构
-uv run skills/petrochem-report-insights/scripts/sources.py --show iea      # 打印单条机构详情
+uv run scripts/sources.py --list          # 打印全部机构
+uv run scripts/sources.py --show iea      # 打印单条机构详情
 ```
 
 发现候选统一走 `web-fetch` 的两个通道（都用机构的 `site_domain`），不针对单个机构维护官网抓取正则——各家官网改版频繁，维护一堆正则性价比太低。sitemap 是标准协议、靠 robots.txt 自动发现，一次实现全域通用，不违反这条决策。
@@ -89,20 +40,20 @@ uv run skills/petrochem-report-insights/scripts/sources.py --show iea      # 打
 两个通道，`--site` 均传对应机构的 `site_domain`。**默认先 sitemap，不可用再回落 search。**
 
 ```bash
-uv run skills/web-fetch/scripts/sitemap.py --site iea.org --match /reports/ --since 2025-01-01
-uv run skills/web-fetch/scripts/search.py --query "energy transition" --site shell.com --max-results 5
+uv run ../web-fetch/scripts/sitemap.py --site iea.org --match /reports/ --since 2025-01-01
+uv run ../web-fetch/scripts/search.py --query "energy transition" --site shell.com --max-results 5
 ```
 
 `sitemap.py` 直连原站枚举站点条目，结果带 `lastmod` 且最新在前。**"最新一期""某年以来的"这类需求必走这条；海外机构（IEA/Shell 等）也必须走这条**——实测 360 对 `site:iea.org` 只返回 1 条首页，而 IEA 自己的 sitemap 里有 2926 条报告。
 
 `search.py` 用于模糊关键词匹配，或站点没有 sitemap 时（如 `opec.org`）。国内机构（`cnpc.com.cn`、`sinopec.com`）是它的强项——实测 `site:cnpc.com.cn` 能直接命中年度社会责任报告，`news.` 子域也在覆盖内。
 
-`errors[].kind`：`no_sitemap` 回落 search；`no_match` 才是真无结果（可换关键词重试）；`blocked`/`network_unreachable` 说明该机构当前部署环境下抓不到（先跑 `uv run skills/web-fetch/scripts/fetch.py --check-env` 确认引擎是否齐全；360 是 IP 层拦截，换个出口 IP 结论就变），如实告知用户，不要编造内容替代。
+`errors[].kind`：`no_sitemap` 回落 search；`no_match` 才是真无结果（可换关键词重试）；`blocked`/`network_unreachable` 说明该机构当前部署环境下抓不到（先跑 `uv run ../web-fetch/scripts/fetch.py --check-env` 确认引擎是否齐全；360 是 IP 层拦截，换个出口 IP 结论就变），如实告知用户，不要编造内容替代。
 
 ### Step 3：抓取正文
 
 ```bash
-uv run skills/web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
+uv run ../web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]' --max-chars 8000
 ```
 
 `type` 区分 `html`/`pdf`。`low_confidence=true` 的 PDF 结果（疑似加密或扫描件）不可靠，如实告知用户而非当正文分析。
@@ -132,13 +83,7 @@ uv run skills/web-fetch/scripts/fetch.py --urls '["https://...", "https://..."]'
 
 ## 使用示例
 
-> IEA 和 OPEC 对全球石油需求增速的预测有什么分歧？
-
-机构 `iea,opec` → IEA 走 `sitemap.py --site iea.org --match oil-market-report`（能直接拿到最新一期）；OPEC 无 sitemap，回落 `search.py --site opec.org` → `fetch.py` 抓正文 → 格式 C 输出。
-
-> 帮我梳理三桶油和壳牌最新可持续发展报告里的关键数据
-
-机构 `sinopec,petrochina,cnooc,shell` → 壳牌走 `sitemap.py --site shell.com --match sustainability`；三桶油走 `search.py`（360 对国内站覆盖好）→ `fetch.py` 抓正文 → 格式 A 或按机构拆分的多份速览。
+典型需求到命令链路的映射见 [references/examples.md](references/examples.md)。
 
 ---
 

@@ -8,7 +8,7 @@
 
 本脚本只负责「构造检索 URL + 解析响应」，网络抓取全部委托 web-fetch 基座技能的
 `fetch.py --raw`（一次批量取回全部部委的原始响应体，并发与两层引擎降级由基座负责）。
-部署时 web-fetch 需与本技能同级放在 skills/ 下。
+部署时 web-fetch 需与本技能同级（路径由 __file__ 自解析，与安装位置无关）。
 
 两层各自最多返回 max_results 条，互不挤占。任一层失败都不会中断另一层。
 
@@ -99,7 +99,7 @@ def batch_raw_fetch(urls: list[str], max_workers: int) -> dict[str, dict]:
     if not WEB_FETCH.exists():
         sys.exit(
             f"未找到 web-fetch 基座技能（期望路径 {WEB_FETCH}）。"
-            "本技能的网络抓取依赖 web-fetch，请将其与本技能同级部署在 skills/ 目录下。"
+            "本技能的网络抓取依赖 web-fetch，请将其与本技能部署在同一级目录下。"
         )
 
     proc = subprocess.run(
