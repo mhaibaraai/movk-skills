@@ -1,0 +1,34 @@
+{
+  "name": "movk-skills",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agent Skills 库与业务 MCP 服务",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@nuxt/kit": "^4.5.2",
+    "@nuxtjs/mcp-toolkit": "^0.19.0",
+    "nuxt": "^4.5.2",
+    "yaml": "^2.9.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.17.0",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.10"
+  }
+}

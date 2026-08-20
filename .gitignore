@@ -1,4 +1,28 @@
+# Dependencies
+node_modules
+
+# Logs
+*.log*
+
+# Temp directories
+.temp
+.tmp
+.cache
+
+# Nuxt
+.nuxt
+.output
+.data
+.vercel
+.vercel_build_output
+
+# Env
+.env
+
+# Python
 __pycache__/
 *.pyc
+.pytest_cache/
+
+# OSX
 .DS_Store
-dist/

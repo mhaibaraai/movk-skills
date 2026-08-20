@@ -1,0 +1,11 @@
+ignoreWorkspaceRootCheck: true
+minimumReleaseAge: 0
+
+allowBuilds:
+  esbuild: false
+  unrs-resolver: false
+
+overrides:
+  # Nitro 2.13 用 h3 1.x；不锁的话 @nuxtjs/mcp-toolkit 的 peer(>=1.15.11) 会被解析到
+  # devframe 带进来的 h3 2.0-rc，导致 H3Event 类型两份互不兼容
+  h3: 1.15.11
