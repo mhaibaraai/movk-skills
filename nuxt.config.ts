@@ -7,11 +7,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   runtimeConfig: {
-    // 由 NUXT_MCP_DEMO_TOKEN 注入，见 .env.example
     mcpDemoToken: ''
   },
 
-  // MCP 工具/提示词的 handler 拿不到 H3 event，只能靠 Nitro 异步上下文的 useEvent()
   experimental: {
     asyncContext: true
   },
