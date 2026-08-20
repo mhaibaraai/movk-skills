@@ -1,8 +1,41 @@
-# movk-skills
+# AGENTS.md
 
-Claude Code 技能仓库。每个技能是 `skills/<name>/` 下的一个目录，同时要能被外部智能体平台读取配置。
+movk-skills 既是 Claude Code 技能仓库，也是这些技能的 MCP 服务。仓库根目录是一个最小 Nuxt 4 应用：`skills/` 存放技能源码，构建期被扫描后通过 MCP 与 Agent Skills 两条通道对外。
 
-## 目录约定
+## 常用命令
+
+```bash
+pnpm install       # 安装依赖（postinstall 自动 nuxt prepare）
+pnpm dev           # 开发服务器 http://localhost:3000
+pnpm build         # 生产构建
+pnpm preview       # 预览生产构建
+pnpm lint          # ESLint 检查
+pnpm lint:fix      # ESLint 自动修复
+pnpm typecheck     # nuxt typecheck（vue-tsc）
+```
+
+## 项目结构
+
+```text
+movk-skills/
+├── modules/skills.ts                构建期扫描 skills/，登记清单、serverAssets 与预渲染路由
+├── shared/skills.ts                 SkillEntry 类型，app 与 server 共用
+├── server/
+│   ├── utils/skills.ts              清单读取、文件读取与白名单校验的唯一实现
+│   ├── routes/.well-known/skills/   Agent Skills 分发端点
+│   └── mcp/
+│       ├── index.ts                 默认 handler，把每个技能的 SKILL.md 注册成资源
+│       ├── tools/                   → /mcp
+│       ├── prompts/                 → /mcp
+│       └── handlers/<业务名>/        → /mcp/<业务名>
+├── app/app.vue                      落地页，兼作部署自检
+├── skills/                          技能源码
+└── docs/                            撰写技能时的查阅资料，不参与分发
+```
+
+关键约定：**技能内容的读取只走 `server/utils/skills.ts`**。路由、工具、资源、提示词都调它，不要各自读盘或重新拼路径。文件是否可对外分发由构建期生成的白名单决定，`modules/skills.ts` 的 `EXCLUDED_SEGMENTS` 同时控制白名单与 server bundle 的打包范围，改一处即可。
+
+## 技能目录约定
 
 ```text
 skills/<skill-name>/
@@ -11,10 +44,14 @@ skills/<skill-name>/
 ├── references/         按需加载的长文档（模板、schema、写作规范）
 ├── templates/          可复用的数据模板
 ├── assets/             静态资源
-└── examples/           输入输出样例
+└── tests/              开发用，不对外分发
 ```
 
 `SKILL.md` 是入口，正文写给模型看，控制在 100 行内。模板、schema、格式规范这类只在某一步用得上的长内容放进 `references/`，在正文对应步骤里用相对链接指向它，让模型需要时再读——不要一直占着上下文。
+
+目录名必须与 frontmatter 的 `name` 完全一致，且符合 Agent Skills 命名规范（仅小写字母、数字、连字符，不以连字符开头或结尾，不含连续连字符，长度 ≤64）。不合规的技能在构建期被跳过并输出警告。
+
+**大体积二进制资源不要入库。** 技能文件会整个打进 server bundle，几十 MB 的模板文件会直接压垮 serverless 部署。需要分发大文件时走外部存储，在 SKILL.md 里给外链。
 
 ## SKILL.md frontmatter
 
@@ -45,7 +82,7 @@ metadata:
 
 **新增技能后必须补齐 `description` 与 `metadata` 下的 title、opening、role、prompt 五项。**
 
-- `description` — 一句话讲清覆盖场景、核心能力、产出物，结尾列触发关键词。这是 Claude Code 判断是否加载技能的唯一依据，关键词写全，宁多勿少。
+- `description` — 一句话讲清覆盖场景、核心能力、产出物，结尾列触发关键词。这是 Claude Code 判断是否加载技能、也是 `list-skills` 工具唯一返回给模型的判据，关键词写全，宁多勿少。
 - `metadata.title` — 面向用户的中文助手名，如「政策法规解读助手」。
 - `metadata.opening` — 开场白。首行自我介绍，次行用 ①②③ 列出需要用户提供的要素，末尾用 `-` 列出 2-3 条预置示例问句供用户点击。
 - `metadata.role` — 系统角色（人设与语气）。无特殊人设要求时置为空字符串 `""`，不要与 prompt 重复。
@@ -60,9 +97,32 @@ metadata:
 - 日志走 stderr，结果走 stdout，便于管道消费。
 - 抓取外部内容时始终校验 TLS 证书，不要为了绕过证书错误而关闭校验。
 
-## 打包分发
+## HTTP 分发
 
-`scripts/pack-skill.sh <skill-name>` 把单个技能打成 `dist/<skill-name>.zip`，zip 内顶层目录即技能名，解压后可直接放进 `skills/`。缓存与系统文件（`__pycache__/`、`*.pyc`、`.DS_Store`）不会进包。
+技能不再打 zip 分发，改由服务直接提供：
+
+| 端点 | 说明 |
+| --- | --- |
+| `GET /.well-known/skills/index.json` | 全部技能的清单（name、description、files） |
+| `GET /.well-known/skills/<技能名>/<文件路径>` | 单个技能文件的原文 |
+
+这两条路由在构建期全部预渲染成静态文件，部署到静态托管上直接命中 CDN，不占用 serverless 函数。客户端一条 `npx skills add https://<部署域名>` 即可安装。
+
+MCP 通道由 `/mcp` 提供 `list-skills`、`get-skill`、`read-skill-file` 三个工具与 `use-skill` 提示词，不支持 Agent Skills 规范的客户端也能借此用上技能。
+
+## 新开一个业务 MCP
+
+1. 复制 `server/mcp/handlers/demo/` 改名，如 `server/mcp/handlers/hn-petro/`。路由自动变成 `/mcp/hn-petro`，目录内 `tools/` 下的工具自动归属该 handler，不会出现在 `/mcp`（由 `defaultHandlerStrategy: 'orphans'` 保证）。
+2. 在 `index.ts` 里改 `description` / `instructions`，把 token 换成该业务自己的 runtimeConfig 字段，同步补 `.env.example`。
+3. 往 `tools/` 里加工具。工具用 `defineMcpTool` + zod `inputSchema`，只读工具标注 `readOnlyHint: true`，错误一律 `throw createError(...)`，toolkit 会转成 MCP 合规的错误结果。
+
+**鉴权中间件不要抛 401。** 抛了会让 MCP 客户端进入 OAuth discovery，去找并不存在的授权端点。正确做法是中间件只往 `event.context` 写身份，工具用 `enabled` 守卫控制可见性——未授权时工具直接不出现在列表里。`server/mcp/handlers/demo/` 就是这个模式的样板。
+
+MCP 工具与提示词的 handler 拿不到 H3 event，只能用 Nitro 的 `useEvent()`，这依赖 `nuxt.config.ts` 里的 `experimental.asyncContext`，不要关掉。
+
+## 依赖注意事项
+
+`pnpm-workspace.yaml` 里锁了 `overrides: h3: 1.15.11`。Nitro 2.13 用的是 h3 1.x，而 `@nuxtjs/mcp-toolkit` 的 peer 范围是 `>=1.15.11`——不锁的话会被解析到别处带进来的 h3 2.0-rc，导致 `H3Event` 出现两份互不兼容的类型，typecheck 直接崩。
 
 ## 文档风格
 
