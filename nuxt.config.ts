@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+
 export default defineNuxtConfig({
   modules: [
     '@nuxtjs/mcp-toolkit',
@@ -8,7 +10,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   runtimeConfig: {
-    mcpDemoToken: ''
+    mcpDemoToken: '',
+    mcpContractReviewToken: ''
   },
 
   experimental: {
@@ -18,7 +21,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-06-30',
 
   nitro: {
-    sourceMap: false
+    sourceMap: false,
+    serverAssets: [{
+      baseName: 'contract-review',
+      dir: fileURLToPath(new URL('./server/mcp/handlers/contract-review/data', import.meta.url))
+    }]
   },
 
   telemetry: false,

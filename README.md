@@ -7,7 +7,7 @@ Agent Skills 库与业务 MCP 服务。同一份技能通过两条通道对外�
 | 路径 | 说明 |
 | --- | --- |
 | `/mcp` | 技能库 MCP 端点，公开。工具 `list-skills` / `get-skill` / `read-skill-file`，提示词 `use-skill`，每个技能的 SKILL.md 另注册为一条资源 |
-| `/mcp/<业务名>` | 业务 MCP 端点，各自鉴权。当前只有示例端点 `/mcp/demo` |
+| `/mcp/<业务名>` | 业务 MCP 端点，各自鉴权。当前有示例端点 `/mcp/demo` 与合同审查参考数据端点 `/mcp/contract-review` |
 | `/.well-known/skills/index.json` | Agent Skills 发现清单 |
 | `/.well-known/skills/<技能名>/<文件路径>` | 技能文件原文 |
 
@@ -53,6 +53,8 @@ npx skills add https://skills.mhaibaraai.cn
 | [web-fetch](skills/web-fetch/SKILL.md) | 通用网页抓取与检索基座。两层引擎（http / browser）按需自动降级抓取 HTML/PDF 正文，sitemap 枚举与 360 搜索零 API Key 发现候选 URL。供不提供内置 WebSearch/WebFetch 的部署环境使用，也可被其他技能作为抓取底座调用。 |
 | [policy-interpretation](skills/policy-interpretation/SKILL.md) | 政策法规解读助手。检索国务院政策文件库与发改委、工信部、应急管理部等八个部委的官网列表页，抓取政策原文（含 PDF 附件），从政策层级、核心条款、适用范围、时间节点、处罚条款、企业影响六个维度解读，输出深度解读 / 要点速览 / 多政策对比三类报告。零 API Key，依赖 web-fetch 基座。 |
 | [petrochem-report-insights](skills/petrochem-report-insights/SKILL.md) | 石化行业研报洞察助手。检索中石化、中石油、中海油、埃克森美孚、壳牌、IEA、OPEC 等 14 家企业/机构的公开报告，从核心数据、关键结论、市场趋势、投资动态、风险、产业链影响六维度分析，输出深度分析 / 动态速览 / 多机构对比三类报告。依赖 web-fetch 基座。 |
+| [file-extract](skills/file-extract/SKILL.md) | 通用文件解包与抽取基座。给 URL 或本地路径，返回压缩包内全部材料的结构化文本：zip 递归解压（修复中文文件名乱码）、PDF / docx 抽文本、图片与扫描件 PDF 走本地 OCR（rapidocr，零 API Key）。单文件失败不影响其余材料。 |
+| [contract-review](skills/contract-review/SKILL.md) | 合同辅助审查。解析「合同 + 签约依据」压缩包，逐条对照公司标准合同模板，输出覆盖基础文本问题、条款缺失、依据一致性、风险提示的 Markdown 审查报告。依赖 file-extract 基座与 `/mcp/contract-review` 参考数据端点。 |
 
 ## 开发
 
