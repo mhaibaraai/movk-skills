@@ -65,6 +65,7 @@ pnpm build         # 生产构建
 pnpm preview       # 预览生产构建
 pnpm lint          # ESLint 检查
 pnpm typecheck     # 类型检查
+pnpm pack:skills   # 打包技能 zip 到 dist/skills/（仅离线上传场景需要）
 ```
 
 新增或修改技能、新开业务 MCP 前先读 [AGENTS.md](AGENTS.md)。
