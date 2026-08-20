@@ -29,8 +29,7 @@ movk-skills/
 │       ├── prompts/                 → /mcp
 │       └── handlers/<业务名>/        → /mcp/<业务名>
 ├── app/app.vue                      落地页，兼作部署自检
-├── skills/                          技能源码
-└── docs/                            撰写技能时的查阅资料，不参与分发
+└── skills/                          技能源码
 ```
 
 关键约定：**技能内容的读取只走 `server/utils/skills.ts`**。路由、工具、资源、提示词都调它，不要各自读盘或重新拼路径。文件是否可对外分发由构建期生成的白名单决定，`modules/skills.ts` 的 `EXCLUDED_SEGMENTS` 同时控制白名单与 server bundle 的打包范围，改一处即可。
@@ -55,43 +54,22 @@ skills/<skill-name>/
 
 ## SKILL.md frontmatter
 
-顶层只允许这几个键：`name`、`description`、`metadata`、`argument-hint`、`compatibility`、`context`、`disable-model-invocation`、`license`、`user-invocable`。其余一律放进 `metadata`，否则 IDE 会报「不支持的属性」——`title`、`opening`、`role`、`prompt`、`run_as` 都不是顶层合法键。
+只允许 `name` 与 `description` 两个键，对齐官方 Agent Skills 规范（superpowers、skill-creator 等官方技能都只有这两个）。不要加 `title`、`opening`、`role`、`prompt` 这类平台专有字段——公司智能体平台已不是交付目标，加了只会让同一套工作流在一个文件里写两遍。
 
 ```yaml
 ---
 name: policy-interpretation
-description: 面向……当用户提到 A、B、C 时触发。
-metadata:
-  title: 政策法规解读助手
-  opening: |
-    您好，我是……
-    请告诉我：① … ② … ③ …
-    - 示例问句一
-    - 示例问句二
-  role: ""
-  prompt: |
-    你是……智能体，覆盖……
-
-    【流程】
-    1. …
-    【规范】…
+description: 面向发改委、工信部、应急管理部……自动检索政策原文并解读，提炼政策层级、核心条款、适用范围、时间节点与处罚责任，输出深度解读 / 要点速览 / 多政策对比三类报告。当用户提到政策解读、法规分析、合规管理、政策影响分析时触发。
 ---
 ```
 
-### 字段写法
-
-**新增技能后必须补齐 `description` 与 `metadata` 下的 title、opening、role、prompt 五项。**
-
-- `description` — 一句话讲清覆盖场景、核心能力、产出物，结尾列触发关键词。这是 Claude Code 判断是否加载技能、也是 `list-skills` 工具唯一返回给模型的判据，关键词写全，宁多勿少。
-- `metadata.title` — 面向用户的中文助手名，如「政策法规解读助手」。
-- `metadata.opening` — 开场白。首行自我介绍，次行用 ①②③ 列出需要用户提供的要素，末尾用 `-` 列出 2-3 条预置示例问句供用户点击。
-- `metadata.role` — 系统角色（人设与语气）。无特殊人设要求时置为空字符串 `""`，不要与 prompt 重复。
-- `metadata.prompt` — 完整任务指令，可脱离 SKILL.md 正文独立投喂给模型。结构固定为一段身份声明 + `【流程】`编号步骤 + `【规范】`约束条款。流程步骤里写明要调用的脚本命令；规范里写明不得编造哪些内容、缺失字段如何标注。
+`description` 一句话讲清覆盖场景、核心能力、产出物，结尾列触发关键词。它有两个消费方：宿主据此判断是否加载该技能，`list-skills` 工具据此让模型挑技能——两边都只看得到这一个字段，关键词写全，宁多勿少。
 
 ## 脚本约定
 
-- 用 `uv run skills/<技能名>/scripts/xxx.py` 调用，PEP 723 内联声明依赖，不写 `requirements.txt` 之外的安装步骤。
-- **沙箱 cwd 不是技能根目录**（实测为随机运行目录 `/tmp/*-skill-runtime-*`，技能解压在 `<cwd>/skills/<技能名>/` 下）：SKILL.md 里的脚本命令一律带 `skills/<技能名>/` 前缀，跨技能调用同理（如 `skills/web-fetch/scripts/fetch.py`，不用 `../web-fetch/`）；输出文件写在当前工作目录。运行约定里附 find 兜底定位（`find / -name <标志脚本>.py -not -path '*__pycache__*' 2>/dev/null | head -1`）。
+- 用 `uv run` 调用，PEP 723 内联声明依赖，不写 `requirements.txt` 之外的安装步骤。
+- **路径一律相对技能根目录**：本技能脚本写 `scripts/x.py`，跨技能写 `../web-fetch/scripts/x.py`（技能之间恒为兄弟目录）。不要写死 `skills/<技能名>/` 前缀——`npx skills add` 会把技能装进 `~/.claude/skills/<技能名>/`，此时 cwd 是项目目录、根本不含 `skills/` 目录，写死的前缀全部失效。前缀由宿主解析（Claude Code 加载技能时会告知 Base directory）。
+- 每个技能的「运行约定」一节要写明前缀取法与 find 兜底（`find / -name <标志脚本>.py -not -path '*__pycache__*' 2>/dev/null | head -1`，取其上两级为技能根目录），并强调不要 `cd` 进技能目录——输出文件要落在当前工作目录。
 - **不要给 `uv run` 加 timeout 参数**，沙箱后端不支持 per-command timeout override，加了必定报错。
 - 脚本负责确定性工作（抓取、渲染、格式转换），模型负责判断与写作。边界要清晰。
 - 日志走 stderr，结果走 stdout，便于管道消费。
@@ -112,11 +90,47 @@ MCP 通道由 `/mcp` 提供 `list-skills`、`get-skill`、`read-skill-file` 三�
 
 ## 新开一个业务 MCP
 
-1. 复制 `server/mcp/handlers/demo/` 改名，如 `server/mcp/handlers/hn-petro/`。路由自动变成 `/mcp/hn-petro`，目录内 `tools/` 下的工具自动归属该 handler，不会出现在 `/mcp`（由 `defaultHandlerStrategy: 'orphans'` 保证）。
-2. 在 `index.ts` 里改 `description` / `instructions`，把 token 换成该业务自己的 runtimeConfig 字段，同步补 `.env.example`。
-3. 往 `tools/` 里加工具。工具用 `defineMcpTool` + zod `inputSchema`，只读工具标注 `readOnlyHint: true`，错误一律 `throw createError(...)`，toolkit 会转成 MCP 合规的错误结果。
+复制 `server/mcp/handlers/demo/` 改名，如 `server/mcp/handlers/hn-petro/`。路由自动变成 `/mcp/hn-petro`，目录内 `tools/` 下的工具自动归属该 handler，不会出现在 `/mcp`（由 `defaultHandlerStrategy: 'orphans'` 保证）。
 
-**鉴权中间件不要抛 401。** 抛了会让 MCP 客户端进入 OAuth discovery，去找并不存在的授权端点。正确做法是中间件只往 `event.context` 写身份，工具用 `enabled` 守卫控制可见性——未授权时工具直接不出现在列表里。`server/mcp/handlers/demo/` 就是这个模式的样板。
+工具用 `defineMcpTool` + zod `inputSchema`，只读工具标注 `readOnlyHint: true`，错误一律 `throw createError(...)`，toolkit 会转成 MCP 合规的错误结果。
+
+### 公开端点（无需 token）
+
+不写 `middleware`，工具也不写 `enabled` 守卫，就这么简单。`/mcp` 默认 handler 就是这个形态。
+
+```ts
+// server/mcp/handlers/<业务名>/index.ts
+export default defineMcpHandler({
+  description: '...',
+  instructions: '...'
+})
+```
+
+### 鉴权端点
+
+中间件只往 `event.context` 写身份，工具用 `enabled` 守卫控制可见性——未授权时工具直接不出现在列表里。token 用该业务自己的 runtimeConfig 字段，同步补 `.env.example`。
+
+```ts
+// server/mcp/handlers/<业务名>/index.ts
+export default defineMcpHandler({
+  description: '...',
+  middleware: (event) => {
+    const expected = useRuntimeConfig(event).xxxToken
+    const token = getHeader(event, 'authorization')?.replace(/^Bearer\s+/i, '')
+    if (expected && token === expected) {
+      event.context.xxxAuthed = true
+    }
+  }
+})
+
+// server/mcp/handlers/<业务名>/tools/foo.ts
+export default defineMcpTool({
+  enabled: event => event.context.xxxAuthed === true,
+  // ...
+})
+```
+
+**鉴权中间件不要抛 401。** 抛了会让 MCP 客户端进入 OAuth discovery，去找并不存在的授权端点。`server/mcp/handlers/demo/` 是这个模式的现成样板。
 
 MCP 工具与提示词的 handler 拿不到 H3 event，只能用 Nitro 的 `useEvent()`，这依赖 `nuxt.config.ts` 里的 `experimental.asyncContext`，不要关掉。
 
