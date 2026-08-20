@@ -12,6 +12,7 @@ pnpm preview       # 预览生产构建
 pnpm lint          # ESLint 检查
 pnpm lint:fix      # ESLint 自动修复
 pnpm typecheck     # nuxt typecheck（vue-tsc）
+pnpm pack:skills   # 打包技能 zip 到 dist/skills/，可跟技能名只打指定几个
 ```
 
 ## 项目结构
@@ -29,10 +30,12 @@ movk-skills/
 │       ├── prompts/                 → /mcp
 │       └── handlers/<业务名>/        → /mcp/<业务名>
 ├── app/app.vue                      落地页，兼作部署自检
+├── scripts/skill-files.mjs          分发白名单与技能文件清单，构建期与打包脚本共用
+├── scripts/pack-skills.mjs          把技能打成 dist/skills/<技能名>.zip
 └── skills/                          技能源码
 ```
 
-关键约定：**技能内容的读取只走 `server/utils/skills.ts`**。路由、工具、资源、提示词都调它，不要各自读盘或重新拼路径。文件是否可对外分发由构建期生成的白名单决定，`modules/skills.ts` 的 `EXCLUDED_SEGMENTS` 同时控制白名单与 server bundle 的打包范围，改一处即可。
+关键约定：**技能内容的读取只走 `server/utils/skills.ts`**。路由、工具、资源、提示词都调它，不要各自读盘或重新拼路径。文件是否可对外分发由构建期生成的白名单决定，`scripts/skill-files.mjs` 的 `EXCLUDED_SEGMENTS` 同时控制白名单、server bundle 与 zip 的打包范围，改一处即可。
 
 ## 技能目录约定
 
@@ -87,6 +90,8 @@ description: 面向发改委、工信部、应急管理部……自动检索政�
 这两条路由在构建期全部预渲染成静态文件，部署到静态托管上直接命中 CDN，不占用 serverless 函数。客户端一条 `npx skills add https://skills.mhaibaraai.cn` 即可安装。
 
 MCP 通道由 `/mcp` 提供 `list-skills`、`get-skill`、`read-skill-file` 三个工具与 `use-skill` 提示词，不支持 Agent Skills 规范的客户端也能借此用上技能。
+
+只有需要离线上传（如公司智能体平台）时才打 zip：`pnpm pack:skills` 产出 `dist/skills/<技能名>.zip`，打包范围与预渲染白名单同源，都由 `scripts/skill-files.mjs` 决定。产物不入库。
 
 ## 新开一个业务 MCP
 

@@ -4,12 +4,10 @@ import { join } from 'node:path'
 import { defineNuxtModule, logger } from '@nuxt/kit'
 import { parse as parseYaml } from 'yaml'
 import type { SkillEntry } from '../shared/skills'
+import { EXCLUDED_SEGMENTS, listSkillFiles } from '../scripts/skill-files.mjs'
 
 const SKILL_NAME_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
 const MAX_NAME_LENGTH = 64
-
-/** 仅供开发、不对外分发的目录，扫描时整段跳过 */
-const EXCLUDED_SEGMENTS = new Set(['tests', '__pycache__', 'node_modules'])
 
 const log = logger.withTag('skills')
 
@@ -45,7 +43,7 @@ export default defineNuxtModule({
       nitroConfig.serverAssets.push({
         baseName: 'skills',
         dir: skillsDir,
-        // 与 isDistributable 共用同一份黑名单，不分发的文件也不进 server bundle
+        // 与 scripts/skill-files.mjs 共用同一份黑名单，不分发的文件也不进 server bundle
         ignore: [...EXCLUDED_SEGMENTS].flatMap(seg => [`**/${seg}`, `**/${seg}/**`])
       })
 
@@ -87,25 +85,6 @@ function validateSkillName(name: string, dirName: string): boolean {
   return true
 }
 
-function isDistributable(relPath: string): boolean {
-  return !relPath.split('/').some(seg => seg.startsWith('.') || EXCLUDED_SEGMENTS.has(seg))
-}
-
-async function listFilesRecursively(dir: string, base: string = ''): Promise<string[]> {
-  const files: string[] = []
-  const entries = await readdir(dir, { withFileTypes: true })
-  for (const entry of entries) {
-    const relPath = base ? `${base}/${entry.name}` : entry.name
-    if (!isDistributable(relPath)) continue
-    if (entry.isDirectory()) {
-      files.push(...await listFilesRecursively(join(dir, entry.name), relPath))
-    } else {
-      files.push(relPath)
-    }
-  }
-  return files
-}
-
 async function scanSkills(skillsDir: string): Promise<SkillEntry[]> {
   const catalog: SkillEntry[] = []
   const entries = await readdir(skillsDir, { withFileTypes: true })
@@ -126,7 +105,7 @@ async function scanSkills(skillsDir: string): Promise<SkillEntry[]> {
     const name = frontmatter.name || entry.name
     if (!validateSkillName(name, entry.name)) continue
 
-    const files = await listFilesRecursively(skillDir)
+    const files = await listSkillFiles(skillDir)
     catalog.push({
       name,
       description: frontmatter.description,

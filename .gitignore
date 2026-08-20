@@ -10,6 +10,9 @@ node_modules
 .cache
 .plans
 
+# Build output
+dist
+
 # Nuxt
 .nuxt
 .output
