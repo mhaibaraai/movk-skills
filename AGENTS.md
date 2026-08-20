@@ -84,7 +84,7 @@ description: 面向发改委、工信部、应急管理部……自动检索政�
 | `GET /.well-known/skills/index.json` | 全部技能的清单（name、description、files） |
 | `GET /.well-known/skills/<技能名>/<文件路径>` | 单个技能文件的原文 |
 
-这两条路由在构建期全部预渲染成静态文件，部署到静态托管上直接命中 CDN，不占用 serverless 函数。客户端一条 `npx skills add https://<部署域名>` 即可安装。
+这两条路由在构建期全部预渲染成静态文件，部署到静态托管上直接命中 CDN，不占用 serverless 函数。客户端一条 `npx skills add https://skills.mhaibaraai.cn` 即可安装。
 
 MCP 通道由 `/mcp` 提供 `list-skills`、`get-skill`、`read-skill-file` 三个工具与 `use-skill` 提示词，不支持 Agent Skills 规范的客户端也能借此用上技能。
 

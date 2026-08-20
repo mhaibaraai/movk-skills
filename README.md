@@ -16,7 +16,7 @@ Agent Skills 库与业务 MCP 服务。同一份技能通过两条通道对外�
 作为 Agent Skills 安装（Claude Code、Cursor 等）：
 
 ```bash
-npx skills add https://<部署域名>
+npx skills add https://skills.mhaibaraai.cn
 ```
 
 作为 MCP Server 接入，写进 `.mcp.json`：
@@ -26,7 +26,7 @@ npx skills add https://<部署域名>
   "mcpServers": {
     "movk-skills": {
       "type": "http",
-      "url": "https://<部署域名>/mcp"
+      "url": "https://skills.mhaibaraai.cn/mcp"
     }
   }
 }
@@ -39,7 +39,7 @@ npx skills add https://<部署域名>
   "mcpServers": {
     "movk-demo": {
       "type": "http",
-      "url": "https://<部署域名>/mcp/demo",
+      "url": "https://skills.mhaibaraai.cn/mcp/demo",
       "headers": { "Authorization": "Bearer <token>" }
     }
   }

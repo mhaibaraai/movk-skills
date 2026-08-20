@@ -1,7 +1,8 @@
 export default defineNuxtConfig({
   modules: [
     '@nuxtjs/mcp-toolkit',
-    '@nuxt/eslint'
+    '@nuxt/eslint',
+    '@vercel/analytics'
   ],
 
   devtools: { enabled: true },
