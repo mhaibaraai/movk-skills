@@ -312,10 +312,12 @@ def _remote_resolve(targets: list[dict], client, args, results: list[dict],
             pending.append(_pending(entry, item, results))
             continue
 
-        # 扫描件 PDF 平台能直接解析成正文；图片只能上传后交给下游的视觉模型
+        name = item["path"].rsplit("/", 1)[-1]
+
+        # 扫描件 PDF 先试平台的文档解析，成了就直接拿到正文，省掉下游那一步
         if item["ext"] == "pdf":
             try:
-                text = client.parse(item["path"].rsplit("/", 1)[-1], item["data"])[:args.max_chars]
+                text = client.parse(name, item["data"])[:args.max_chars]
                 results.append({
                     "path": item["path"], "ext": item["ext"], "kind": "document",
                     "ocr": True, "chars": len(text), "truncated": False, "text": text
@@ -323,16 +325,17 @@ def _remote_resolve(targets: list[dict], client, args, results: list[dict],
                 log(f"平台解析 {item['path']}：{len(text)} 字")
                 continue
             except platform_api.PlatformError as exc:
-                entry["detail"] = f"{exc.kind}: {exc.detail}"
-                pending.append(_pending(entry, item, results))
-                continue
+                # 解析这条路不通就回落到上传：至少让调用方拿到一个可访问的地址，
+                # 而不是连线索都没有
+                log(f"平台解析 {item['path']} 失败，改为上传: {exc.detail[:80]}")
+                entry["detail"] = f"平台解析失败（{exc.kind}）"
 
         try:
-            entry["url"] = client.upload(item["path"].rsplit("/", 1)[-1], item["data"], image=True)
+            entry["url"] = client.upload(name, item["data"], image=item["kind"] == "image")
             entry["uploaded"] = True
-            entry["detail"] = "已上传，待下游视觉模型识别"
+            entry["detail"] = "、".join(filter(None, [entry["detail"], "已上传，待下游识别"]))
         except platform_api.PlatformError as exc:
-            entry["detail"] = f"{exc.kind}: {exc.detail}"
+            entry["detail"] = "、".join(filter(None, [entry["detail"], f"{exc.kind}: {exc.detail}"]))
         pending.append(_pending(entry, item, results))
     return pending
 

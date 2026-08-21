@@ -28,8 +28,9 @@ import uuid
 
 DEFAULT_TIMEOUT = 180
 
-# 上传响应里 URL / ID 可能落在的键名，按优先级
-URL_KEYS = ("url", "file", "src", "path")
+# 上传响应里 URL / ID 可能落在的键名，按优先级。
+# 实测：/api/file 返回 data.url，/api/image 直接把路径放在 data 上，所以 data 也要认。
+URL_KEYS = ("url", "file", "src", "path", "data")
 ID_KEYS = ("id", "file_id", "image_id")
 
 # 解析响应里正文可能落在的键名
@@ -107,9 +108,16 @@ class Platform:
             raise PlatformError("remote_failed", f"{endpoint} 超时（{self.timeout}s）") from exc
 
         try:
-            return json.loads(raw.decode("utf-8"))
+            payload = json.loads(raw.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise PlatformError("remote_failed", f"{endpoint} 返回不是合法 JSON") from exc
+
+        # 平台把业务错误也包在 HTTP 200 里（{"code": 500, "message": ...}），
+        # 只看状态码会把它当成「响应里没找到想要的字段」，诊断信息就丢了
+        if isinstance(payload, dict) and payload.get("code") not in (None, 200):
+            message = str(payload.get("message", ""))[:200]
+            raise PlatformError("remote_failed", f"{endpoint} 返回 code {payload['code']}: {message}")
+        return payload
 
 
 def _multipart(name: str, data: bytes, fields: dict) -> tuple[bytes, str]:
@@ -141,9 +149,14 @@ def _walk(node: object):
             yield from _walk(item)
 
 
+def _looks_like_path(value: object) -> bool:
+    """只认绝对 URL 与以 / 开头的路径，别把 data 里的说明文字当成地址。"""
+    return isinstance(value, str) and (value.startswith("http") or value.startswith("/"))
+
+
 def _find_url(payload: object, base: str, prefix: str) -> str:
     for key, value in _walk(payload):
-        if key in URL_KEYS and isinstance(value, str) and value:
+        if key in URL_KEYS and _looks_like_path(value):
             return value if value.startswith("http") else f"{base}/{value.lstrip('/')}"
     for key, value in _walk(payload):
         if key in ID_KEYS and isinstance(value, str) and len(value) >= 16:
