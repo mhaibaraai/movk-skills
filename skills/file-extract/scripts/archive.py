@@ -83,6 +83,21 @@ def is_zip(data: bytes) -> bool:
     return data[:2] == b"PK"
 
 
+# docx / xlsx / pptx 本身就是 zip，直接按压缩包展开会把 word/document.xml 这些内部零件
+# 当成材料吐出来。OOXML 容器都带 [Content_Types].xml，据此把它们挡在解包之外。
+OOXML_MARKER = "[Content_Types].xml"
+
+
+def is_ooxml(data: bytes) -> bool:
+    if not is_zip(data):
+        return False
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            return OOXML_MARKER in archive.namelist()
+    except zipfile.BadZipFile:
+        return False
+
+
 def unpack(
     data: bytes,
     name: str = "",
@@ -92,8 +107,8 @@ def unpack(
     depth: int = 0,
     prefix: str = "",
 ) -> tuple[list[dict], list[dict], list[dict]]:
-    """解包一份字节。不是压缩包时按单文件处理，是压缩包时递归展开。"""
-    if not is_zip(data):
+    """解包一份字节。不是压缩包（或本身就是 Office 文档）时按单文件处理，是压缩包时递归展开。"""
+    if not is_zip(data) or is_ooxml(data):
         return _single_file(data, prefix or name)
 
     files: list[dict] = []

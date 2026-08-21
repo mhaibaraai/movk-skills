@@ -1,21 +1,29 @@
 #!/usr/bin/env python3
 # /// script
-# dependencies = ["pypdf>=4.0", "python-docx>=1.1"]
+# dependencies = []
 # ///
 """
 把一份压缩包（或单个文件）变成结构化的文本材料：下载 → 解压 → 分派抽取 → 图片 OCR → JSON。
 
+脚本零第三方依赖（pdf 用 vendor/ 下的 pypdf wheel），直接 python3 调用即可，不需要 uv。
+
 CLI:
-  uv run scripts/extract.py --url https://<平台域名>/api/file/<id>
-  uv run scripts/extract.py --path ./合同包.zip --ocr off
-  uv run scripts/extract.py --path ./合同包.zip --out-dir ./材料
-  uv run scripts/extract.py --check-env
+  python3 scripts/extract.py --url https://<平台域名>/api/file/<id>
+  python3 scripts/extract.py --path ./合同包.zip --ocr off
+  python3 scripts/extract.py --path ./合同包.zip --out-dir ./材料
+  python3 scripts/extract.py --path ./合同包.zip --platform-base https://<平台域名> --platform-token <token>
+  python3 scripts/extract.py --check-env
 
 输出 JSON:
   {source: {kind, value, bytes, archive},
    files: [{path, ext, kind, chars, truncated, ocr, text, pages?, pages_read?}],
    skipped: [{path, reason}],
+   pending_ocr: [{path, ext, url, uploaded, detail}],
    errors: [{path, kind, detail}]}
+
+pending_ocr 是「本地识别不了、脚本内也没能解决」的图片与扫描件。给了平台参数时
+脚本会把它们传回平台换成公开 URL（uploaded=true），由下游节点交给视觉模型识别；
+连上传都没做成的条目 uploaded=false，必须如实告诉用户，不能当成不存在。
 
 errors[].kind:
   download_failed   URL 取不到（网络、超时、状态码非 200）
@@ -44,6 +52,7 @@ import urllib.request
 from pathlib import Path
 
 import archive
+import platform_api
 import readers
 
 DEFAULT_MAX_BYTES = 50 * 1024 * 1024
@@ -104,7 +113,7 @@ def load_source(args) -> tuple[bytes, dict]:
         name = path.name
         source = {"kind": "path", "value": str(path)}
     source["bytes"] = len(data)
-    source["archive"] = archive.is_zip(data)
+    source["archive"] = archive.is_zip(data) and not archive.is_ooxml(data)
     return data, {"source": source, "name": name}
 
 
@@ -164,18 +173,20 @@ def _unavailable_detail(stdout: str) -> str:
 
 
 def check_env(scripts_dir: Path) -> int:
-    status: dict[str, object] = {}
-    for module, key in (("pypdf", "pypdf"), ("docx", "python_docx")):
-        try:
-            __import__(module)
-            status[key] = True
-        except Exception as exc:
-            status[key] = False
-            status[f"{key}_detail"] = f"{type(exc).__name__}: {exc}"
+    """探测三条链路。docx 走标准库恒可用，所以只报 pdf 与 OCR。"""
+    status: dict[str, object] = {"docx": True}
+    try:
+        readers.load_pypdf()
+        status["pypdf"] = True
+    except readers.ExtractError as exc:
+        status["pypdf"] = False
+        status["pypdf_detail"] = exc.detail
 
+    # 本地 OCR 链要装约 150MB 依赖，只有能联网的机器装得上；沙箱离线时这里必然为不可用，
+    # 图片改走平台（--platform-base/--platform-token），这是设计好的降级而不是故障。
     uv = shutil.which("uv")
     if uv:
-        log("探测 OCR 链路（首次会安装约 150MB 依赖）")
+        log("探测本地 OCR 链路（首次会安装约 150MB 依赖）")
         process = subprocess.run(
             [uv, "run", "--quiet", str(scripts_dir / "ocr.py"), "--check-env"],
             capture_output=True, text=True, timeout=OCR_TIMEOUT
@@ -185,10 +196,10 @@ def check_env(scripts_dir: Path) -> int:
         except json.JSONDecodeError:
             status["ocr"] = {"error": process.stderr.strip()[-500:]}
     else:
-        status["ocr"] = {"error": "找不到 uv"}
+        status["ocr"] = {"error": "找不到 uv，本地 OCR 不可用；图片请走平台解析"}
 
     print(json.dumps(status, ensure_ascii=False, indent=2))
-    return 0 if status.get("pypdf") and status.get("python_docx") else 1
+    return 0 if status.get("pypdf") else 1
 
 
 def build(args) -> dict:
@@ -203,6 +214,10 @@ def build(args) -> dict:
     files.sort(key=lambda item: item["path"])
     log(f"解出 {len(files)} 个可处理文件，跳过 {len(skipped)} 个")
 
+    client = None
+    if args.platform_base and args.platform_token:
+        client = platform_api.Platform(args.platform_base, args.platform_token)
+
     results: list[dict] = []
     ocr_targets: list[dict] = []
 
@@ -210,6 +225,14 @@ def build(args) -> dict:
         if item["kind"] == "image":
             ocr_targets.append(item)
             continue
+        if args.parse_remote == "force" and client:
+            try:
+                text = client.parse(item["path"].rsplit("/", 1)[-1], item["data"])[:args.max_chars]
+                results.append({"path": item["path"], "ext": item["ext"], "kind": "document",
+                                "ocr": True, "chars": len(text), "truncated": False, "text": text})
+                continue
+            except platform_api.PlatformError as exc:
+                log(f"平台解析 {item['path']} 失败，回落本地解析: {exc.detail}")
         try:
             extracted = readers.read(item["kind"], item["ext"], item["data"], args.max_chars)
         except readers.ExtractError as exc:
@@ -219,11 +242,10 @@ def build(args) -> dict:
         low_text = extracted.pop("low_text", False)
         entry = {"path": item["path"], "ext": item["ext"], "kind": "document", "ocr": False}
         entry.update(extracted)
-        if low_text and args.ocr != "off":
+        if low_text:
+            # 疑似扫描件一律进待识别队列，由「本地 OCR → 平台解析」两级依次消化。
+            # --ocr off 只关掉本地那一级，不代表这份材料就此当作读不到。
             ocr_targets.append({**item, "_fallback": entry})
-        elif low_text:
-            errors.append({"path": item["path"], "kind": "empty_text",
-                           "detail": "PDF 抽出文本接近空，疑似扫描件；--ocr off 未启用 OCR"})
         else:
             results.append(entry)
 
@@ -233,45 +255,98 @@ def build(args) -> dict:
                 ocr_targets.append(item)
                 results = [r for r in results if r["path"] != item["path"]]
 
+    pending: list[dict] = []
     if ocr_targets:
-        if args.ocr == "off":
-            for item in ocr_targets:
-                errors.append({"path": item["path"], "kind": "ocr_unavailable",
-                               "detail": "OCR 已关闭（--ocr off），该文件未识别"})
+        remaining = ocr_targets
+        if args.ocr != "off" and shutil.which("uv"):
+            remaining = _local_ocr(ocr_targets, args, results, errors)
+        elif args.ocr == "off":
+            log("--ocr off：图片与扫描件不做本地识别")
         else:
-            outcome = run_ocr(ocr_targets, SCRIPTS_DIR)
-            for item in ocr_targets:
-                got = outcome.get(item["path"], {"kind": "ocr_failed", "detail": "OCR 未返回该文件的结果"})
-                if "kind" in got:
-                    errors.append(_failure(item, got["kind"], got.get("detail", ""), results))
-                    continue
-                text = got.get("text", "")[:args.max_chars]
-                if not text.strip():
-                    errors.append(_failure(item, "empty_text",
-                                           "OCR 未识别出文字，可能是无文字内容的图片", results))
-                    continue
-                results.append({
-                    "path": item["path"], "ext": item["ext"],
-                    "kind": item["kind"], "ocr": True,
-                    "chars": len(text), "truncated": False, "text": text
-                })
+            log("找不到 uv，跳过本地 OCR")
+        pending = _remote_resolve(remaining, client, args, results, errors)
 
     if args.out_dir:
         _dump(files, Path(args.out_dir))
 
     results.sort(key=lambda item: item["path"])
     errors.sort(key=lambda item: item["path"])
-    return {"source": meta["source"], "files": results, "skipped": skipped, "errors": errors}
+    pending.sort(key=lambda item: item["path"])
+    return {"source": meta["source"], "files": results, "skipped": skipped,
+            "pending_ocr": pending, "errors": errors}
 
 
-def _failure(item: dict, kind: str, detail: str, results: list[dict]) -> dict:
-    """记录单文件失败。无文本层 PDF 走 OCR 兜底又失败时，把文本层那点残留结果放回去，
-    并在 detail 里说明已回退——别让调用方以为这份材料完全没有内容。"""
+def _local_ocr(targets: list[dict], args, results: list[dict], errors: list[dict]) -> list[dict]:
+    """本地 OCR。识别成功的进 files，失败的原样退回，交给平台那条路继续处理。"""
+    outcome = run_ocr(targets, SCRIPTS_DIR)
+    remaining: list[dict] = []
+    for item in targets:
+        got = outcome.get(item["path"])
+        text = (got or {}).get("text", "")[:args.max_chars] if got and "kind" not in got else ""
+        if not text.strip():
+            remaining.append(item)
+            continue
+        results.append({
+            "path": item["path"], "ext": item["ext"],
+            "kind": item["kind"], "ocr": True,
+            "chars": len(text), "truncated": False, "text": text
+        })
+    return remaining
+
+
+def _remote_resolve(targets: list[dict], client, args, results: list[dict],
+                    errors: list[dict]) -> list[dict]:
+    """本地识别不了的材料交给平台：扫描件整份送去解析，图片上传换成公开 URL。
+
+    没给平台参数、或平台调用失败时，条目留在 pending_ocr 里如实报出——
+    宁可让调用方看到「这份材料我没读到」，也不能悄悄当它不存在。
+    """
+    pending: list[dict] = []
+    for item in targets:
+        entry = {"path": item["path"], "ext": item["ext"], "url": "",
+                 "uploaded": False, "detail": ""}
+
+        if not client:
+            entry["detail"] = "未配置平台参数（--platform-base / --platform-token），未做远端识别"
+            pending.append(_pending(entry, item, results))
+            continue
+
+        # 扫描件 PDF 平台能直接解析成正文；图片只能上传后交给下游的视觉模型
+        if item["ext"] == "pdf":
+            try:
+                text = client.parse(item["path"].rsplit("/", 1)[-1], item["data"])[:args.max_chars]
+                results.append({
+                    "path": item["path"], "ext": item["ext"], "kind": "document",
+                    "ocr": True, "chars": len(text), "truncated": False, "text": text
+                })
+                log(f"平台解析 {item['path']}：{len(text)} 字")
+                continue
+            except platform_api.PlatformError as exc:
+                entry["detail"] = f"{exc.kind}: {exc.detail}"
+                pending.append(_pending(entry, item, results))
+                continue
+
+        try:
+            entry["url"] = client.upload(item["path"].rsplit("/", 1)[-1], item["data"], image=True)
+            entry["uploaded"] = True
+            entry["detail"] = "已上传，待下游视觉模型识别"
+        except platform_api.PlatformError as exc:
+            entry["detail"] = f"{exc.kind}: {exc.detail}"
+        pending.append(_pending(entry, item, results))
+    return pending
+
+
+def _pending(entry: dict, item: dict, results: list[dict]) -> dict:
+    """无文本层 PDF 走到这一步说明识别没成，把文本层那点残留放回 files，别让材料整份消失。
+
+    残留是空的就不要放——files 里出现 0 字的条目，看起来像「读到了但没内容」，
+    比不出现更误导人。
+    """
     fallback = item.get("_fallback")
-    if fallback:
+    if fallback and fallback.get("chars"):
         results.append(fallback)
-        detail = f"{detail}；已回退到文本层抽取结果"
-    return {"path": item["path"], "kind": kind, "detail": detail}
+        entry["detail"] = f"{entry['detail']}；已回退到文本层抽取结果"
+    return entry
 
 
 def _dump(files: list[dict], out_dir: Path) -> None:
@@ -295,6 +370,10 @@ def main() -> None:
     parser.add_argument("--max-total-bytes", type=int, default=archive.MAX_TOTAL_BYTES,
                         help="解压后累计字节上限")
     parser.add_argument("--out-dir", help="把解出的原始文件写到该目录")
+    parser.add_argument("--platform-base", help="平台域名，用于把本地识别不了的材料交给平台")
+    parser.add_argument("--platform-token", help="平台 Bearer token，只用于请求头，不写进输出")
+    parser.add_argument("--parse-remote", choices=["auto", "off", "force"], default="auto",
+                        help="auto=只有本地处理不了的材料才走平台；force=文档也交平台解析；off=完全不走平台")
     parser.add_argument("--check-env", action="store_true", help="探测依赖可用性后退出")
     args = parser.parse_args()
 
@@ -302,6 +381,10 @@ def main() -> None:
         sys.exit(check_env(SCRIPTS_DIR))
     if bool(args.url) == bool(args.path):
         parser.error("--url 与 --path 二选一")
+    if bool(args.platform_base) != bool(args.platform_token):
+        parser.error("--platform-base 与 --platform-token 必须同时给出")
+    if args.parse_remote == "off":
+        args.platform_base = args.platform_token = None
 
     try:
         payload = build(args)
