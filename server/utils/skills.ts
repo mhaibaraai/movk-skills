@@ -36,19 +36,28 @@ export function getSkill(event: H3Event, name: string): SkillEntry {
 }
 
 /**
- * 读取技能目录内的单个文件。路径必须命中该技能 files 白名单，
+ * 读取技能目录内的单个文件，返回原始字节。路径必须命中该技能 files 白名单，
  * 白名单由构建期扫描生成，因此天然排除了越界路径与不分发的目录。
+ *
+ * 技能里存在 vendor/*.whl 这类二进制文件，按文本读会被 utf-8 解码破坏，
+ * 所以分发端点走这个原始字节版本，只有确定是文本的调用方才 toString。
  */
-export async function readSkillFile(event: H3Event, name: string, path: string): Promise<string> {
+export async function readSkillFileRaw(event: H3Event, name: string, path: string): Promise<Uint8Array> {
   const skill = getSkill(event, name)
   if (!skill.files.includes(path)) {
     throw createError({ statusCode: 404, message: `File "${path}" is not part of skill "${name}"` })
   }
 
-  const content = await useStorage('assets:skills').getItemRaw<string>(`${name}/${path}`)
+  const content = await useStorage('assets:skills').getItemRaw<Uint8Array>(`${name}/${path}`)
   if (content === null || content === undefined) {
     throw createError({ statusCode: 404, message: `File "${path}" not found in skill "${name}"` })
   }
 
-  return content.toString()
+  return content
+}
+
+/** 读取技能目录内的单个文本文件。二进制文件请走 readSkillFileRaw。 */
+export async function readSkillFile(event: H3Event, name: string, path: string): Promise<string> {
+  const content = await readSkillFileRaw(event, name, path)
+  return Buffer.from(content).toString('utf-8')
 }
