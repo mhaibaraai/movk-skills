@@ -74,7 +74,11 @@ python3 ../file-extract/scripts/styles.py --path ./材料/<合同正文文件> \
 
 ## 平台编排
 
-「文件上传（其他（全部））→ AI 对话（挂本技能与 file-extract）→ 文档输出（Word）」三个节点。全局变量、系统角色与提示词全文、各节点配置项见 [references/platform-setup.md](references/platform-setup.md)。
+「文件上传（类型选「其他（全部）」）→ AI 对话（挂本技能与 file-extract）→ 文档输出（Markdown 来源 = 该 AI 对话节点的 answer，格式 Word）」三个节点。
+
+平台无法把文件路径作结构化输出带出节点，跨节点只有 `answer` 文本这一条通道——所以要传给下游的东西（图片 URL、材料正文）都得写进回复里。
+
+材料里有扫描件或图片时，沙箱本地识别不了，它们会进 `pending_ocr`；要让平台的视觉模型把它们读出来，需要在编排里加一段（配置方式由部署方提供）。
 
 ## 质量要求
 
