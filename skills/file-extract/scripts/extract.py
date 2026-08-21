@@ -31,9 +31,10 @@ errors[].kind:
   bad_archive       不是有效压缩包 / 压缩包损坏
   unsupported_ext   扩展名不在支持范围（doc/xls/ppt 等），未处理
   parse_failed      单个文件抽取失败（损坏、加密等）
-  empty_text        抽出内容接近空（PDF 疑似扫描件且 OCR 未启用或未成功）
-  ocr_unavailable   OCR 被关闭，或 rapidocr / opencv 依赖不可用
-  ocr_failed        单张图片 OCR 执行失败
+  empty_text        抽出内容接近空
+
+识别不了的图片与扫描件不进 errors，进 pending_ocr——它们不是「读失败」，
+而是「还差一步才读得到」，两者混在一起会让调用方分不清该重传还是该补识别。
 
 skipped[].reason: system_noise / entry_limit / nesting_limit
 

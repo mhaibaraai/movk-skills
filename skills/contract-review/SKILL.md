@@ -66,21 +66,15 @@ python3 ../file-extract/scripts/styles.py --path ./材料/<合同正文文件> \
 
 ## Step 5：出报告
 
-审查维度与逐项检查清单见 [references/review-dimensions.md](references/review-dimensions.md)，报告结构（固定六节）与 Markdown 语法约束见 [references/report-format.md](references/report-format.md)。
+审查维度是五组共 36 个编号检查项，每项只能判「合格 / 存在问题 / 无法判定」三态之一，见 [references/review-dimensions.md](references/review-dimensions.md)；报告结构（固定七节）、结论用语规范与 Markdown 约束见 [references/report-format.md](references/report-format.md)。
+
+**材料缺失导致核不了的项，必须以「无法判定」进报告概览**，不能因为没证据就跳过——漏掉某项与该项合格是两回事。
 
 报告正文只输出 Markdown，不要包裹代码围栏——下游是平台「文档输出」节点，它吃的是纯 Markdown，围栏会被原样渲染进 Word。
 
 ## 平台编排
 
-```text
-文件上传（类型选「其他（全部）」）
-  → AI 对话（挂 contract-review 技能）解析材料，answer 末尾用独立围栏列出 pending_ocr 的图片 URL
-  → 循环（按图片数，上限 9）+ 视觉模型节点：逐张识别成文字
-  → AI 对话（审查）：合同正文 + 依据材料 + 识别出的文字 → Markdown 报告
-  → 文档输出（Markdown 来源 = 审查节点的 answer，输出格式 = Word）→ 下载链接
-```
-
-平台无法把文件路径作结构化输出带出节点，跨节点只有 `answer` 文本这一条通道——图片要先上传换成 URL 才能交给下游的视觉模型。`pending_ocr` 为空时中间两段可以省掉，技能与文档输出直接相连。
+「文件上传（其他（全部））→ AI 对话（挂本技能与 file-extract）→ 文档输出（Word）」三个节点。全局变量、系统角色与提示词全文、各节点配置项见 [references/platform-setup.md](references/platform-setup.md)。
 
 ## 质量要求
 
@@ -92,7 +86,7 @@ python3 ../file-extract/scripts/styles.py --path ./材料/<合同正文文件> \
 ## 特殊处理
 
 - **OCR 结果的错字**：`files[].ocr` 为 `true` 的材料由模型识别得来，印章、手写签名区域容易误识，引用金额、单位名称、日期前先与其他材料互证；只在一处出现且不合常理的数字，标为「疑似 OCR 误识，需人工核对」而不是当成合同问题
-- **待识别材料**：`pending_ocr` 里的每一条都要在报告「材料完整性说明」列出文件名；`uploaded` 为 `false` 的还要写明未能上传，提示用户单独提供该材料
+- **待识别材料**：`pending_ocr` 里的每一条都要在报告「材料完整性说明」列出文件名，并让依赖它的检查项判「无法判定」；`uploaded` 为 `false` 的还要写明未能上传，提示用户单独提供该材料
 - **合同正文没抽到**：这是唯一无法继续的情况（`errors` 里该文件报 `parse_failed` 或 `empty_text`），直接告知用户重传或改用可编辑格式，不要拿依据材料硬凑一份审查结论
 - **金额一致性**：合同大小写金额、分项之和与总价、与询比价/审批表里的中标价，三者要交叉核对——这是实测最容易出问题的地方
 - **本服务不做法规检索**：风险合规提示只能来自通用合同法律常识，不要虚构法条编号或企业红线制度条款
