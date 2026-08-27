@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Expected /.well-known/skills/<skill>/<file>' })
   }
 
-  const content = await readSkillFile(event, name, path)
+  const content = await readSkillFileRaw(event, name, path)
 
   setResponseHeader(event, 'content-type', skillFileMimeType(path))
   setResponseHeader(event, 'cache-control', 'public, max-age=3600')

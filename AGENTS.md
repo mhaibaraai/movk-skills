@@ -53,7 +53,9 @@ skills/<skill-name>/
 
 目录名必须与 frontmatter 的 `name` 完全一致，且符合 Agent Skills 命名规范（仅小写字母、数字、连字符，不以连字符开头或结尾，不含连续连字符，长度 ≤64）。不合规的技能在构建期被跳过并输出警告。
 
-**大体积二进制资源不要入库。** 技能文件会整个打进 server bundle，几十 MB 的模板文件会直接压垮 serverless 部署。需要分发大文件时走外部存储，在 SKILL.md 里给外链。
+**大体积二进制资源不要入库。** 技能文件会整个打进 server bundle，几十 MB 的模板文件会直接压垮 serverless 部署。需要分发大文件时走外部存储，在 SKILL.md 里给外链。几百 KB 级别的资产（合同模板 docx、纯 Python wheel）可以入库，它们是技能在离线环境下能自洽运行的前提。
+
+技能里出现二进制文件时，注意分发端点走 `readSkillFileRaw` 取原始字节——按文本读会被 utf-8 解码破坏。
 
 ## SKILL.md frontmatter
 
@@ -70,10 +72,13 @@ description: 面向发改委、工信部、应急管理部……自动检索政�
 
 ## 脚本约定
 
-- 用 `uv run` 调用，PEP 723 内联声明依赖，不写 `requirements.txt` 之外的安装步骤。
+- **优先零依赖**：目标环境（公司智能体平台沙箱）完全离线，`uv` 装不上任何包。能用标准库做的一律用标准库，直接 `python3 scripts/x.py` 调用。
+- 确实要第三方库时，选纯 Python 的并把 wheel 放进技能的 `vendor/`，运行时插进 `sys.path` 直接 zipimport（`skills/file-extract/scripts/readers.py` 的 `load_pypdf` 是现成样板）。带二进制扩展的库进不了这条路，只能做成可降级的可选链路。
+- 仍需 `uv run` 的可选链路（如本机 OCR）用 PEP 723 内联声明依赖，并给出装不上时的降级路径。
 - **路径一律相对技能根目录**：本技能脚本写 `scripts/x.py`，跨技能写 `../web-fetch/scripts/x.py`（技能之间恒为兄弟目录）。不要写死 `skills/<技能名>/` 前缀——`npx skills add` 会把技能装进 `~/.claude/skills/<技能名>/`，此时 cwd 是项目目录、根本不含 `skills/` 目录，写死的前缀全部失效。前缀由宿主解析（Claude Code 加载技能时会告知 Base directory）。
 - 每个技能的「运行约定」一节要写明前缀取法与 find 兜底（`find / -name <标志脚本>.py -not -path '*__pycache__*' 2>/dev/null | head -1`，取其上两级为技能根目录），并强调不要 `cd` 进技能目录——输出文件要落在当前工作目录。
 - **不要给 `uv run` 加 timeout 参数**，沙箱后端不支持 per-command timeout override，加了必定报错。
+- 大体积依赖不要塞进主链路：技能文件会整个打进 server bundle 与 zip，几十 MB 的 wheel 会直接压垮部署。
 - 脚本负责确定性工作（抓取、渲染、格式转换），模型负责判断与写作。边界要清晰。
 - 日志走 stderr，结果走 stdout，便于管道消费。
 - 抓取外部内容时始终校验 TLS 证书，不要为了绕过证书错误而关闭校验。

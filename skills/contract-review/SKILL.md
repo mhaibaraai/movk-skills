@@ -1,26 +1,31 @@
 ---
 name: contract-review
-description: 合同辅助审查。给一个「合同 + 签约依据」压缩包，解析出合同正文与全部依据材料（含扫描件、会议纪要截图），逐条对照公司标准合同模板，产出结构化 Markdown 审查报告——覆盖基础文本审查（金额、格式、标点、错别字）、条款缺失与模板差异、与签约依据的一致性、风险合规提示。当用户提到合同审查、合同审核、合同比对、条款缺失、合同风险、签约依据、合同模板校验、起草合同把关时触发。
+description: 合同辅助审查。给一个「合同 + 签约依据」压缩包，解析出合同正文与全部依据材料（含扫描件、会议纪要截图），逐条对照公司标准合同模板，产出结构化 Markdown 审查报告——覆盖基础文本审查（金额、标点、错别字）、排版格式核对（正文字体字号、行距、页边距、条款编号连续性）、条款缺失与模板差异、与签约依据的一致性、风险合规提示。当用户提到合同审查、合同审核、合同比对、条款缺失、合同风险、签约依据、合同模板校验、排版格式检查、字体字号核对、起草合同把关时触发。
 ---
 
 # 合同辅助审查
 
-审查一份已起草的合同：先把压缩包里的材料全部转成文本，再对照标准合同模板逐条找问题，最后出一份可直接转成 Word 的 Markdown 报告。解包与抽取全部交给 [file-extract](../file-extract/SKILL.md) 基座技能，本技能只负责审查维度、参考数据的取用与报告写作。
+审查一份已起草的合同：先把压缩包里的材料全部转成文本，再对照标准合同模板逐条找问题，最后出一份可直接转成 Word 的 Markdown 报告。解包、抽取与样式画像全部交给 [file-extract](../file-extract/SKILL.md) 基座技能，标准模板 docx 随本技能分发在 `references/templates/`，本技能只负责审查维度、模板取用与报告写作。
 
 运行约定：
 
 - 路径一律相对本技能根目录：本技能写 `references/x.md`，基座技能写 `../file-extract/scripts/x.py`（两者恒为兄弟目录）。执行时给命令加上技能根目录前缀，不要 `cd` 进技能目录。前缀取宿主加载技能时告知的 Base directory；拿不到就用 `find / -name extract.py -not -path '*__pycache__*' 2>/dev/null | head -1` 定位，取其上两级为 file-extract 的根目录。
-- 所有 `uv run` 命令都不要加 timeout 参数，沙箱后端不支持 per-command timeout override，加了必定报错。
+- 脚本零第三方依赖，直接用 `python3` 调用，不要用 `uv run`——正式环境的沙箱完全离线，装不了任何包。
 
 ## Step 1：取材料
 
 压缩包的完整 URL 由上游给出（平台上传产出的是相对路径，需拼上平台域名）。一次调用取全：
 
 ```bash
-uv run ../file-extract/scripts/extract.py --url <压缩包完整 URL>
+python3 ../file-extract/scripts/extract.py --url <压缩包完整 URL> --out-dir ./材料 \
+  --platform-base <平台域名> --platform-token <平台 token>
 ```
 
-输出的 `files` 是全部材料文本（图片与扫描件已 OCR 成文字），`errors` 是没读到的材料。**`errors` 必须原样带进报告最后一节**，不要把读不到的材料当成不存在。字段含义见 [file-extract 的 references/format.md](../file-extract/references/format.md)。
+`--out-dir` 必须给：Step 4 的排版核对要读合同正文的原始文件，不落盘就没得读。
+
+平台参数用于把扫描件与图片交回平台识别（沙箱本地没有 OCR 能力）；拿不到 token 时去掉这两个参数照常运行，图片会原样列进 `pending_ocr`。**token 只作为命令参数传入，绝不能出现在回复正文里。**
+
+输出分三处要读：`files` 是抽到正文的材料，`pending_ocr` 是待识别的图片与扫描件，`errors` 是没读到的材料。**`pending_ocr` 与 `errors` 必须原样带进报告最后一节**，不要把读不到的材料当成不存在。字段含义见 [file-extract 的 references/format.md](../file-extract/references/format.md)。
 
 ## Step 2：认出合同正文
 
@@ -30,38 +35,50 @@ uv run ../file-extract/scripts/extract.py --url <压缩包完整 URL>
 
 候选多于一份时结合正文开头判定（真正的合同有甲乙双方、合同编号、签订地点这类要素），并在报告里写明选了哪一份、其余归入了依据。
 
-## Step 3：取标准模板
+## Step 3：取标准模板正文
 
-从合同正文判定类型，调用 MCP 工具 `get-contract-template`（挂在同一 AI 对话节点的 `/mcp/contract-review` 端点）取该类型标准合同模板的**完整正文**：
+从合同正文判定类型，选中 `references/templates/<类型>.docx`（四类的对应关系与模板版本见 [references/templates/README.md](references/templates/README.md)），抽出模板全文：
 
-| contractType | 对应 |
-| --- | --- |
-| `procurement` | 采购（货物采购、设备采购） |
-| `construction` | 施工（小型建设工程等） |
-| `lease` | 租赁（房屋、场地） |
-| `technical-service` | 技术服务（信息化集成、运维等） |
+```bash
+python3 ../file-extract/scripts/extract.py --path references/templates/<类型>.docx --ocr off
+```
 
-四类都对不上时选最接近的一类，并在报告里说明该判定是近似的。
+四类都对不上时选最接近的一类，并在报告里说明该判定是近似的。报告要写明比对依据的是 README 表中的哪一版。
 
-返回的 `content` 是模板全文（Markdown），`title` 与 `sourceFile` 带模板版本，报告里要写明比对依据的是哪一版。
+模板抽不到正文时，如实写明「未取得标准模板，条款缺失项与模板差异未做比对」，**不要凭印象编造模板条款**——编出来的「缺失条款」会直接误导起草人。
 
-工具不可用或返回 404 时，如实写明「未取得标准模板，条款缺失项与模板差异未做比对」，**不要凭印象编造模板条款**——编出来的「缺失条款」会直接误导起草人。
+## Step 4：排版格式核对
 
-## Step 4：出报告
+纯文本里没有字体字号，排版问题只能从原始文件取。合同正文与模板各出一份样式画像并比对：
 
-审查维度与逐项检查清单见 [references/review-dimensions.md](references/review-dimensions.md)，报告结构（固定五节）与 Markdown 语法约束见 [references/report-format.md](references/report-format.md)。
+```bash
+python3 ../file-extract/scripts/styles.py --path ./材料/<合同正文文件> \
+  --template references/templates/<类型>.docx
+```
+
+输出的字段含义见 [file-extract 的 SKILL.md](../file-extract/SKILL.md)。三条硬规矩：
+
+- `not_comparable` 必须原样写进报告。合同是 PDF 时首行缩进、对齐、右/下边距天然取不到——不写出来，用户会把「没报问题」读成「排版没问题」。
+- 只报 `diffs` 里 `match` 为 `false` 的项，`note`（容差与口径）一并带上；带 `note` 的按「提示关注」分级，不要拔高。
+- `headings` 是按字号推断的，措辞用「疑似标题」，不要断言层级错误。
+
+脚本跑不起来或合同正文没落盘时，写明「排版格式未核对」及原因，不要凭正文文本猜测字体字号。
+
+## Step 5：出报告
+
+审查维度是五组共 36 个编号检查项，每项只能判「合格 / 存在问题 / 无法判定」三态之一，见 [references/review-dimensions.md](references/review-dimensions.md)；报告结构（固定七节）、结论用语规范与 Markdown 约束见 [references/report-format.md](references/report-format.md)。
+
+**材料缺失导致核不了的项，必须以「无法判定」进报告概览**，不能因为没证据就跳过——漏掉某项与该项合格是两回事。
 
 报告正文只输出 Markdown，不要包裹代码围栏——下游是平台「文档输出」节点，它吃的是纯 Markdown，围栏会被原样渲染进 Word。
 
 ## 平台编排
 
-```text
-文件上传（类型选「其他（全部）」）
-  → AI 对话（挂 contract-review 技能 + /mcp/contract-review）产出 Markdown 报告
-  → 文档输出（Markdown 来源 = 该 AI 对话节点的 answer，输出格式 = Word）→ 下载链接
-```
+「文件上传（类型选「其他（全部）」）→ AI 对话（挂本技能与 file-extract）→ 文档输出（Markdown 来源 = 该 AI 对话节点的 answer，格式 Word）」三个节点。
 
-技能与 MCP 必须挂在**同一个** AI 对话节点：平台无法把文件路径作结构化输出带出节点，产物只能经该节点的 `answer` 往下走。
+平台无法把文件路径作结构化输出带出节点，跨节点只有 `answer` 文本这一条通道——所以要传给下游的东西（图片 URL、材料正文）都得写进回复里。
+
+材料里有扫描件或图片时，沙箱本地识别不了，它们会进 `pending_ocr`；要让平台的视觉模型把它们读出来，需要在编排里加一段（配置方式由部署方提供）。
 
 ## 质量要求
 
@@ -72,7 +89,8 @@ uv run ../file-extract/scripts/extract.py --url <压缩包完整 URL>
 
 ## 特殊处理
 
-- **OCR 结果的错字**：签约依据里的印章、手写签名区域容易误识，引用金额、单位名称、日期前先与其他材料互证；只在一处出现且不合常理的数字，标为「疑似 OCR 误识，需人工核对」而不是当成合同问题
+- **OCR 结果的错字**：`files[].ocr` 为 `true` 的材料由模型识别得来，印章、手写签名区域容易误识，引用金额、单位名称、日期前先与其他材料互证；只在一处出现且不合常理的数字，标为「疑似 OCR 误识，需人工核对」而不是当成合同问题
+- **待识别材料**：`pending_ocr` 里的每一条都要在报告「材料完整性说明」列出文件名，并让依赖它的检查项判「无法判定」；`uploaded` 为 `false` 的还要写明未能上传，提示用户单独提供该材料
 - **合同正文没抽到**：这是唯一无法继续的情况（`errors` 里该文件报 `parse_failed` 或 `empty_text`），直接告知用户重传或改用可编辑格式，不要拿依据材料硬凑一份审查结论
 - **金额一致性**：合同大小写金额、分项之和与总价、与询比价/审批表里的中标价，三者要交叉核对——这是实测最容易出问题的地方
 - **本服务不做法规检索**：风险合规提示只能来自通用合同法律常识，不要虚构法条编号或企业红线制度条款
